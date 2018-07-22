@@ -1,0 +1,8 @@
+languages:
+- name: go
+  production:
+    exclude:
+    - /implem/mock\.uc/.*
+  test:
+    include:
+    - /implem/mock\.uc/.*

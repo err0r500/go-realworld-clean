@@ -1,0 +1,7 @@
+#!/bin/sh
+
+echo "[pre-commit hook] Tests"
+go test ./...
+
+echo "[pre-commit hook] Linter"
+$GOPATH/bin/golangci-lint run -D errcheck
