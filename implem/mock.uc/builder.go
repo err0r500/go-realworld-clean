@@ -21,7 +21,7 @@ type MockedInteractor struct {
 type SimpleLogger struct{}
 
 func (SimpleLogger) Log(logs ...interface{}) {
-	log.Println(logs)
+	log.Println(logs...)
 }
 
 //NewMockedInteractor : the MockedInteractor constructor
