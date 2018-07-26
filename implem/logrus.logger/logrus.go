@@ -50,11 +50,11 @@ func (l LogrusLogger) Log(args ...interface{}) {
 		if ok {
 			l.newLog(castedError, args[1])
 		} else {
-			l.Logger.Info(args)
+			l.Logger.Info(args...)
 		}
 		return
 	}
-	l.Logger.Info(args)
+	l.Logger.Info(args...)
 }
 
 func (l LogrusLogger) newLog(err error, usecase interface{}) {
@@ -93,5 +93,5 @@ func (l LogrusLogger) newLog(err error, usecase interface{}) {
 type SimpleLogger struct{}
 
 func (l SimpleLogger) Log(args ...interface{}) {
-	log.Println(args)
+	log.Println(args...)
 }
