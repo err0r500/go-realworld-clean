@@ -48,13 +48,6 @@ func (rH RouterHandler) articlesFilteredGet(c *gin.Context) {
 func (rH RouterHandler) articlesFeedGet(c *gin.Context) {
 	log := rH.log(rH.MethodAndPath(c))
 
-	userName, err := rH.getUserName(c)
-	if err != nil {
-		log(err)
-		c.Status(http.StatusUnauthorized)
-		return
-	}
-
 	limit, err := strconv.Atoi(c.Query("limit"))
 	if err != nil {
 		limit = defaultLimit
@@ -65,7 +58,7 @@ func (rH RouterHandler) articlesFeedGet(c *gin.Context) {
 		offset = defaultOffset
 	}
 
-	articles, count, err := rH.ucHandler.ArticlesFeed(userName, limit, offset)
+	articles, count, err := rH.ucHandler.ArticlesFeed(rH.getUserName(c), limit, offset)
 	if err != nil {
 		log(err)
 		c.Status(http.StatusUnprocessableEntity)

@@ -20,14 +20,7 @@ func (rH RouterHandler) updateFavorite(c *gin.Context) {
 		return
 	}
 
-	userName, err := rH.getUserName(c)
-	if err != nil {
-		log(err)
-		c.Status(http.StatusUnauthorized)
-		return
-	}
-
-	article, err := rH.ucHandler.FavoritesUpdate(userName, c.Param("slug"), favorite)
+	article, err := rH.ucHandler.FavoritesUpdate(rH.getUserName(c), c.Param("slug"), favorite)
 	if err != nil {
 		log(err)
 		c.Status(http.StatusUnprocessableEntity)

@@ -28,20 +28,13 @@ type commentPostReq struct {
 func (rH RouterHandler) commentPost(c *gin.Context) {
 	log := rH.log(c.Request.URL.Path)
 
-	userName, err := rH.getUserName(c)
-	if err != nil {
-		log(err)
-		c.Status(http.StatusUnauthorized)
-		return
-	}
-
 	req := &commentPostReq{}
 	if err := c.BindJSON(req); err != nil {
 		c.Status(http.StatusBadRequest)
 		return
 	}
 
-	comment, err := rH.ucHandler.CommentsPost(userName, c.Param("slug"), req.Comment.Body)
+	comment, err := rH.ucHandler.CommentsPost(rH.getUserName(c), c.Param("slug"), req.Comment.Body)
 	if err != nil {
 		log(err)
 		c.Status(http.StatusUnprocessableEntity)
@@ -54,14 +47,7 @@ func (rH RouterHandler) commentPost(c *gin.Context) {
 func (rH RouterHandler) commentDelete(c *gin.Context) {
 	log := rH.log(c.Request.URL.Path)
 
-	userName, err := rH.getUserName(c)
-	if err != nil {
-		log(err)
-		c.Status(http.StatusUnauthorized)
-		return
-	}
-
-	if err := rH.ucHandler.CommentsDelete(userName, c.Param("slug"), c.Param("id")); err != nil {
+	if err := rH.ucHandler.CommentsDelete(rH.getUserName(c), c.Param("slug"), c.Param("id")); err != nil {
 		log(err)
 		c.Status(http.StatusUnprocessableEntity)
 		return

@@ -10,14 +10,7 @@ import (
 func (rH RouterHandler) profileFollowDelete(c *gin.Context) {
 	log := rH.log(c.Request.URL.Path)
 
-	userName, err := rH.getUserName(c)
-	if err != nil {
-		log(err)
-		c.Status(http.StatusUnauthorized)
-		return
-	}
-
-	user, err := rH.ucHandler.ProfileUpdateFollow(userName, c.Param("username"), false)
+	user, err := rH.ucHandler.ProfileUpdateFollow(rH.getUserName(c), c.Param("username"), false)
 	if err != nil {
 		log(err)
 		c.Status(http.StatusUnprocessableEntity)

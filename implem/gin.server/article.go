@@ -29,13 +29,6 @@ func articleFromReq(req *ArticleReq) domain.Article {
 func (rH RouterHandler) articlePost(c *gin.Context) {
 	log := rH.log(c.Request.URL.Path)
 
-	userName, err := rH.getUserName(c)
-	if err != nil {
-		log(err)
-		c.Status(http.StatusUnauthorized)
-		return
-	}
-
 	req := &ArticleReq{}
 	if err := c.BindJSON(req); err != nil {
 		log(err)
@@ -43,7 +36,7 @@ func (rH RouterHandler) articlePost(c *gin.Context) {
 		return
 	}
 
-	article, err := rH.ucHandler.ArticlePost(userName, articleFromReq(req))
+	article, err := rH.ucHandler.ArticlePost(rH.getUserName(c), articleFromReq(req))
 	if err != nil {
 		log(err)
 		c.Status(http.StatusUnprocessableEntity)
@@ -55,12 +48,6 @@ func (rH RouterHandler) articlePost(c *gin.Context) {
 
 func (rH RouterHandler) articlePut(c *gin.Context) {
 	log := rH.log(c.Request.URL.Path)
-	userName, err := rH.getUserName(c)
-	if err != nil {
-		log(err)
-		c.Status(http.StatusUnauthorized)
-		return
-	}
 
 	req := &ArticleReq{}
 	if err := c.BindJSON(req); err != nil {
@@ -68,7 +55,7 @@ func (rH RouterHandler) articlePut(c *gin.Context) {
 		c.Status(http.StatusBadRequest)
 		return
 	}
-	article, err := rH.ucHandler.ArticlePut(userName, c.Param("slug"), articleFromReq(req))
+	article, err := rH.ucHandler.ArticlePut(rH.getUserName(c), c.Param("slug"), articleFromReq(req))
 	if err != nil {
 		log(err)
 		c.Status(http.StatusUnprocessableEntity)
@@ -93,14 +80,7 @@ func (rH RouterHandler) articleGet(c *gin.Context) {
 func (rH RouterHandler) articleDelete(c *gin.Context) {
 	log := rH.log(c.Request.URL.Path)
 
-	userName, err := rH.getUserName(c)
-	if err != nil {
-		log(err)
-		c.Status(http.StatusUnauthorized)
-		return
-	}
-
-	if err := rH.ucHandler.ArticleDelete(userName, c.Param("slug")); err != nil {
+	if err := rH.ucHandler.ArticleDelete(rH.getUserName(c), c.Param("slug")); err != nil {
 		log(err)
 		c.Status(http.StatusUnprocessableEntity)
 		return

@@ -10,14 +10,7 @@ import (
 func (rH RouterHandler) userGet(c *gin.Context) {
 	log := rH.log(c.Request.URL.Path)
 
-	userName, err := rH.getUserName(c)
-	if err != nil {
-		log(err)
-		c.Status(http.StatusUnauthorized)
-		return
-	}
-
-	user, token, err := rH.ucHandler.UserGet(userName)
+	user, token, err := rH.ucHandler.UserGet(rH.getUserName(c))
 	if err != nil {
 		log(err)
 		c.Status(http.StatusUnprocessableEntity)

@@ -32,13 +32,6 @@ func (req userPutRequest) getEditableFields() map[uc.UpdatableProperty]*string {
 func (rH RouterHandler) userPatch(c *gin.Context) {
 	log := rH.log(c.Request.URL.Path)
 
-	userName, err := rH.getUserName(c)
-	if err != nil {
-		log(err)
-		c.Status(http.StatusUnauthorized)
-		return
-	}
-
 	req := &userPutRequest{}
 	if err := c.BindJSON(req); err != nil {
 		log(err)
@@ -46,7 +39,7 @@ func (rH RouterHandler) userPatch(c *gin.Context) {
 		return
 	}
 
-	user, token, err := rH.ucHandler.UserEdit(userName, req.getEditableFields())
+	user, token, err := rH.ucHandler.UserEdit(rH.getUserName(c), req.getEditableFields())
 	if err != nil {
 		log(err)
 		c.Status(http.StatusUnprocessableEntity)

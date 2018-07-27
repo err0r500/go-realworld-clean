@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"errors"
-
 	"github.com/err0r500/go-realworld-clean/uc"
 	"github.com/gin-gonic/gin"
 )
@@ -91,21 +89,17 @@ func (rH RouterHandler) jwtMiddleware() gin.HandlerFunc {
 			c.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
+		c.SetAccepted()
 		c.Set(userNameKey, userName)
 		c.Next()
 	}
 }
 
-// TODO remove error handling
-func (RouterHandler) getUserName(c *gin.Context) (string, error) {
-	userName, ok := c.Keys[userNameKey].(string)
-	if !ok {
-		return "", errors.New("userNameKey not in gin Context")
+func (RouterHandler) getUserName(c *gin.Context) string {
+	if userName, ok := c.Keys[userNameKey].(string); ok {
+		return userName
 	}
-	if userName == "" {
-		return "", errors.New("empty userNameKey in gin Context")
-	}
-	return userName, nil
+	return ""
 }
 
 // log is used to "partially apply" the title to the rH.logger.Log function
