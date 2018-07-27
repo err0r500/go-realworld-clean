@@ -74,21 +74,13 @@ func (rH RouterHandler) articlesRoutes(api *gin.RouterGroup) {
 
 	articles.PUT("/:slug", rH.jwtMiddleware(), rH.articlePut)
 	articles.DELETE("/:slug", rH.jwtMiddleware(), rH.articleDelete)
-	articles.POST("/:slug/favorite", rH.jwtMiddleware(), rH.articleFavoritePost)
-	articles.DELETE("/:slug/favorite", rH.jwtMiddleware(), rH.articleFavoriteDelete)
+	articles.POST("/:slug/favorite", rH.jwtMiddleware(), rH.updateFavorite)
+	articles.DELETE("/:slug/favorite", rH.jwtMiddleware(), rH.updateFavorite)
 
-	articles.GET("/:slug/comments", rH.articleCommentsGet)
-	articles.POST("/:slug/comments", rH.jwtMiddleware(), rH.articleCommentPost)
-	articles.DELETE("/:slug/comments/:id", rH.jwtMiddleware(), rH.articleCommentDelete)
+	articles.GET("/:slug/comments", rH.commentsGet)
+	articles.POST("/:slug/comments", rH.jwtMiddleware(), rH.commentPost)
+	articles.DELETE("/:slug/comments/:id", rH.jwtMiddleware(), rH.commentDelete)
 }
-
-// TODO : implement these routes
-func (RouterHandler) articleFavoritePost(c *gin.Context)   {}
-func (RouterHandler) articleFavoriteDelete(c *gin.Context) {}
-func (RouterHandler) articleCommentsGet(c *gin.Context)    {}
-func (RouterHandler) articleCommentPost(c *gin.Context)    {}
-func (RouterHandler) articleCommentDelete(c *gin.Context)  {}
-func (RouterHandler) tagsGet(c *gin.Context)               {}
 
 const userNameKey = "userNameKey"
 
@@ -104,6 +96,7 @@ func (rH RouterHandler) jwtMiddleware() gin.HandlerFunc {
 	}
 }
 
+// TODO remove error handling
 func (RouterHandler) getUserName(c *gin.Context) (string, error) {
 	userName, ok := c.Keys[userNameKey].(string)
 	if !ok {

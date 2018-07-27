@@ -68,7 +68,7 @@ var janeArticle = domain.Article{
 	FavoritesCount: 123,
 	Author:         jane,
 	Comments: []domain.Comment{
-		{ID: 1,
+		{ID: "1",
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
 			Body:      "commentBody",

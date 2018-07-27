@@ -35,4 +35,5 @@ clean:
 	if [ -f $(BINARY) ] ; then rm $(BINARY) ; fi
 
 mock:
-	$(GOPATH)/bin/mockgen -source=./uc/interactor.go -destination=./implem/mock.uc/interactor.go -package=uc
+	$(GOPATH)/bin/mockgen -source=./uc/interactor.go -destination=./implem/mock.uc/interactor.go -package=uc && \
+    $(GOPATH)/bin/mockgen -source=./uc/handler.go -destination=./implem/mock.uc/handler.go -package=uc

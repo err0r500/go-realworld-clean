@@ -19,7 +19,7 @@ type Article struct {
 }
 
 type Comment struct {
-	ID        int       `json:"id"`
+	ID        string    `json:"id"`
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
 	Body      string    `json:"body"`
