@@ -8,7 +8,7 @@ import (
 )
 
 func (rH RouterHandler) profileGet(c *gin.Context) {
-	log := rH.log(c.Request.URL.Path)
+	log := rH.log(rH.MethodAndPath(c))
 
 	profile, err := rH.ucHandler.ProfileGet(c.Param("username"))
 	if err != nil {

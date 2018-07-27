@@ -4,19 +4,8 @@ import (
 	"github.com/err0r500/go-realworld-clean/domain"
 )
 
-// NewHandler : the interactor constructor, use this in order to avoid null pointers at runtime
-//func NewHandler(Logger Logger, uRW UserRW, arw ArticleRW, validator UserValidator, handler AuthHandler) Handler {
-//	return interactor{
-//		Logger:        Logger,
-//		UserRW:        uRW,
-//		ArticleRW:     arw,
-//		UserValidator: validator,
-//		AuthHandler:   handler,
-//	}
-//}
-
 // interactor : the struct that will have as properties all the IMPLEMENTED interfaces
-// in order to provide them to its methods : the use cases
+// in order to provide them to its methods : the use cases and implement the Handler interface
 type interactor struct {
 	logger        Logger
 	userRW        UserRW

@@ -15,7 +15,7 @@ type userLoginPostBody struct {
 }
 
 func (rH RouterHandler) userLoginPost(c *gin.Context) {
-	log := rH.log(c.Request.URL.Path)
+	log := rH.log(rH.MethodAndPath(c))
 
 	body := &userLoginPostBody{}
 	if err := c.BindJSON(body); err != nil {

@@ -16,7 +16,7 @@ type userPostRequest struct {
 }
 
 func (rH RouterHandler) userPost(c *gin.Context) {
-	log := rH.log(c.Request.URL.Path)
+	log := rH.log(rH.MethodAndPath(c))
 
 	body := &userPostRequest{}
 	if err := c.BindJSON(body); err != nil {

@@ -1,5 +1,20 @@
 package server
 
-import "github.com/gin-gonic/gin"
+import (
+	"net/http"
 
-func (RouterHandler) tagsGet(c *gin.Context) {}
+	"github.com/gin-gonic/gin"
+)
+
+func (rH RouterHandler) tagsGet(c *gin.Context) {
+	log := rH.log(rH.MethodAndPath(c))
+
+	tags, err := rH.ucHandler.Tags()
+	if err != nil {
+		log(err)
+		c.Status(http.StatusUnprocessableEntity)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"tags": tags})
+}

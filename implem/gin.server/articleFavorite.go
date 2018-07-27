@@ -7,7 +7,7 @@ import (
 )
 
 func (rH RouterHandler) updateFavorite(c *gin.Context) {
-	log := rH.log(c.Request.URL.Path)
+	log := rH.log(rH.MethodAndPath(c))
 
 	favorite := true
 	switch c.Request.Method {

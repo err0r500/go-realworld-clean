@@ -30,7 +30,7 @@ func (req userPutRequest) getEditableFields() map[uc.UpdatableProperty]*string {
 }
 
 func (rH RouterHandler) userPatch(c *gin.Context) {
-	log := rH.log(c.Request.URL.Path)
+	log := rH.log(rH.MethodAndPath(c))
 
 	req := &userPutRequest{}
 	if err := c.BindJSON(req); err != nil {

@@ -8,7 +8,7 @@ import (
 )
 
 func (rH RouterHandler) userGet(c *gin.Context) {
-	log := rH.log(c.Request.URL.Path)
+	log := rH.log(rH.MethodAndPath(c))
 
 	user, token, err := rH.ucHandler.UserGet(rH.getUserName(c))
 	if err != nil {

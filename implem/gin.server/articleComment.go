@@ -7,7 +7,7 @@ import (
 )
 
 func (rH RouterHandler) commentsGet(c *gin.Context) {
-	log := rH.log(c.Request.URL.Path)
+	log := rH.log(rH.MethodAndPath(c))
 
 	comments, err := rH.ucHandler.CommentsGet(c.Param("slug"))
 	if err != nil {
@@ -26,7 +26,7 @@ type commentPostReq struct {
 }
 
 func (rH RouterHandler) commentPost(c *gin.Context) {
-	log := rH.log(c.Request.URL.Path)
+	log := rH.log(rH.MethodAndPath(c))
 
 	req := &commentPostReq{}
 	if err := c.BindJSON(req); err != nil {
@@ -45,7 +45,7 @@ func (rH RouterHandler) commentPost(c *gin.Context) {
 }
 
 func (rH RouterHandler) commentDelete(c *gin.Context) {
-	log := rH.log(c.Request.URL.Path)
+	log := rH.log(rH.MethodAndPath(c))
 
 	if err := rH.ucHandler.CommentsDelete(rH.getUserName(c), c.Param("slug"), c.Param("id")); err != nil {
 		log(err)

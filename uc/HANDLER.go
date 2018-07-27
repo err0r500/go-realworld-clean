@@ -13,6 +13,7 @@ type Handler interface {
 	ArticleLogic
 	CommentsLogic
 	FavoritesLogic
+	TagsLogic
 }
 
 type ProfileLogic interface {
@@ -47,6 +48,10 @@ type CommentsLogic interface {
 
 type FavoritesLogic interface {
 	FavoritesUpdate(username, slug string, favortie bool) (*domain.Article, error)
+}
+
+type TagsLogic interface {
+	Tags() ([]string, error)
 }
 
 type HandlerConstructor struct {

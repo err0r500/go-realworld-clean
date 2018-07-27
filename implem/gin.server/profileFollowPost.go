@@ -8,7 +8,7 @@ import (
 )
 
 func (rH RouterHandler) profileFollowPost(c *gin.Context) {
-	log := rH.log(c.Request.URL.Path)
+	log := rH.log(rH.MethodAndPath(c))
 
 	user, err := rH.ucHandler.ProfileUpdateFollow(rH.getUserName(c), c.Param("username"), true)
 	if err != nil {

@@ -27,7 +27,7 @@ func articleFromReq(req *ArticleReq) domain.Article {
 }
 
 func (rH RouterHandler) articlePost(c *gin.Context) {
-	log := rH.log(c.Request.URL.Path)
+	log := rH.log(rH.MethodAndPath(c))
 
 	req := &ArticleReq{}
 	if err := c.BindJSON(req); err != nil {
@@ -47,7 +47,7 @@ func (rH RouterHandler) articlePost(c *gin.Context) {
 }
 
 func (rH RouterHandler) articlePut(c *gin.Context) {
-	log := rH.log(c.Request.URL.Path)
+	log := rH.log(rH.MethodAndPath(c))
 
 	req := &ArticleReq{}
 	if err := c.BindJSON(req); err != nil {
@@ -66,7 +66,7 @@ func (rH RouterHandler) articlePut(c *gin.Context) {
 }
 
 func (rH RouterHandler) articleGet(c *gin.Context) {
-	log := rH.log(c.Request.URL.Path)
+	log := rH.log(rH.MethodAndPath(c))
 
 	article, err := rH.ucHandler.ArticleGet(c.Param("slug"))
 	if err != nil {
@@ -78,7 +78,7 @@ func (rH RouterHandler) articleGet(c *gin.Context) {
 }
 
 func (rH RouterHandler) articleDelete(c *gin.Context) {
-	log := rH.log(c.Request.URL.Path)
+	log := rH.log(rH.MethodAndPath(c))
 
 	if err := rH.ucHandler.ArticleDelete(rH.getUserName(c), c.Param("slug")); err != nil {
 		log(err)
