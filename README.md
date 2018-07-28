@@ -6,6 +6,16 @@
 [![codecov](https://codecov.io/gh/err0r500/go-realworld-clean/branch/master/graph/badge.svg)](https://codecov.io/gh/err0r500/go-realworld-clean)
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/err0r500/go-realworld-clean/blob/master/LICENSE)
+
+## Clean Architecture :
+Layers ( from the most abstract to the most concrete ) :
+- domain : abstract data structures
+- uc : "use cases", the pure business logic
+- implem : implementations of the interfaces used in the business logic (uc layer)
+- infra : setup/configuration of the implementation
+
+Golden rule : a layer never imports something from a layer below it
+
 ## Install and Hooks
 
 Make sure you installed [dep](https://github.com/golang/dep) and 

@@ -20,4 +20,10 @@ func New() uc.ArticleRW {
 func (rw) GetByAuthorsNameOrderedByMostRecentAsc(usernames []string) ([]domain.Article, error) {
 	return nil, nil
 }
+
 func (rw) GetRecentFiltered(filters uc.Filters) ([]domain.Article, error) { return nil, nil }
+
+func (rw) Create(domain.Article) (*domain.Article, error) { return nil, nil }
+func (rw) Save(domain.Article) (*domain.Article, error)   { return nil, nil }
+func (rw) GetBySlug(slug string) (*domain.Article, error) { return nil, nil }
+func (rw) Delete(slug string) error                       { return nil }

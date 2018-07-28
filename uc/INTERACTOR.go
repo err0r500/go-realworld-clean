@@ -7,11 +7,13 @@ import (
 // interactor : the struct that will have as properties all the IMPLEMENTED interfaces
 // in order to provide them to its methods : the use cases and implement the Handler interface
 type interactor struct {
-	logger        Logger
-	userRW        UserRW
-	articleRW     ArticleRW
-	userValidator UserValidator
-	authHandler   AuthHandler
+	logger           Logger
+	userRW           UserRW
+	articleRW        ArticleRW
+	userValidator    UserValidator
+	articleValidator ArticleValidator
+	authHandler      AuthHandler
+	slugger          Slugger
 }
 
 // Logger : only used to log stuff
@@ -32,10 +34,23 @@ type UserRW interface {
 }
 
 type ArticleRW interface {
+	Create(domain.Article) (*domain.Article, error)
+	Save(domain.Article) (*domain.Article, error)
+	GetBySlug(slug string) (*domain.Article, error)
 	GetByAuthorsNameOrderedByMostRecentAsc(usernames []string) ([]domain.Article, error)
 	GetRecentFiltered(filters Filters) ([]domain.Article, error)
+	Delete(slug string) error
+}
+
+type Slugger interface {
+	NewSlug(string) string
 }
 
 type UserValidator interface {
 	CheckUser(user domain.User) error
+}
+
+type ArticleValidator interface {
+	BeforeCreationCheck(article *domain.Article) error
+	BeforeUpdateCheck(article *domain.Article) error
 }

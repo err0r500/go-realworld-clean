@@ -194,6 +194,45 @@ func (m *MockArticleRW) EXPECT() *MockArticleRWMockRecorder {
 	return m.recorder
 }
 
+// Create mocks base method
+func (m *MockArticleRW) Create(arg0 domain.Article) (*domain.Article, error) {
+	ret := m.ctrl.Call(m, "Create", arg0)
+	ret0, _ := ret[0].(*domain.Article)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Create indicates an expected call of Create
+func (mr *MockArticleRWMockRecorder) Create(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockArticleRW)(nil).Create), arg0)
+}
+
+// Save mocks base method
+func (m *MockArticleRW) Save(arg0 domain.Article) (*domain.Article, error) {
+	ret := m.ctrl.Call(m, "Save", arg0)
+	ret0, _ := ret[0].(*domain.Article)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Save indicates an expected call of Save
+func (mr *MockArticleRWMockRecorder) Save(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Save", reflect.TypeOf((*MockArticleRW)(nil).Save), arg0)
+}
+
+// GetBySlug mocks base method
+func (m *MockArticleRW) GetBySlug(slug string) (*domain.Article, error) {
+	ret := m.ctrl.Call(m, "GetBySlug", slug)
+	ret0, _ := ret[0].(*domain.Article)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetBySlug indicates an expected call of GetBySlug
+func (mr *MockArticleRWMockRecorder) GetBySlug(slug interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBySlug", reflect.TypeOf((*MockArticleRW)(nil).GetBySlug), slug)
+}
+
 // GetByAuthorsNameOrderedByMostRecentAsc mocks base method
 func (m *MockArticleRW) GetByAuthorsNameOrderedByMostRecentAsc(usernames []string) ([]domain.Article, error) {
 	ret := m.ctrl.Call(m, "GetByAuthorsNameOrderedByMostRecentAsc", usernames)
@@ -218,6 +257,53 @@ func (m *MockArticleRW) GetRecentFiltered(filters uc.Filters) ([]domain.Article,
 // GetRecentFiltered indicates an expected call of GetRecentFiltered
 func (mr *MockArticleRWMockRecorder) GetRecentFiltered(filters interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRecentFiltered", reflect.TypeOf((*MockArticleRW)(nil).GetRecentFiltered), filters)
+}
+
+// Delete mocks base method
+func (m *MockArticleRW) Delete(slug string) error {
+	ret := m.ctrl.Call(m, "Delete", slug)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Delete indicates an expected call of Delete
+func (mr *MockArticleRWMockRecorder) Delete(slug interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockArticleRW)(nil).Delete), slug)
+}
+
+// MockSlugger is a mock of Slugger interface
+type MockSlugger struct {
+	ctrl     *gomock.Controller
+	recorder *MockSluggerMockRecorder
+}
+
+// MockSluggerMockRecorder is the mock recorder for MockSlugger
+type MockSluggerMockRecorder struct {
+	mock *MockSlugger
+}
+
+// NewMockSlugger creates a new mock instance
+func NewMockSlugger(ctrl *gomock.Controller) *MockSlugger {
+	mock := &MockSlugger{ctrl: ctrl}
+	mock.recorder = &MockSluggerMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use
+func (m *MockSlugger) EXPECT() *MockSluggerMockRecorder {
+	return m.recorder
+}
+
+// NewSlug mocks base method
+func (m *MockSlugger) NewSlug(arg0 string) string {
+	ret := m.ctrl.Call(m, "NewSlug", arg0)
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// NewSlug indicates an expected call of NewSlug
+func (mr *MockSluggerMockRecorder) NewSlug(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NewSlug", reflect.TypeOf((*MockSlugger)(nil).NewSlug), arg0)
 }
 
 // MockUserValidator is a mock of UserValidator interface
@@ -253,4 +339,51 @@ func (m *MockUserValidator) CheckUser(user domain.User) error {
 // CheckUser indicates an expected call of CheckUser
 func (mr *MockUserValidatorMockRecorder) CheckUser(user interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckUser", reflect.TypeOf((*MockUserValidator)(nil).CheckUser), user)
+}
+
+// MockArticleValidator is a mock of ArticleValidator interface
+type MockArticleValidator struct {
+	ctrl     *gomock.Controller
+	recorder *MockArticleValidatorMockRecorder
+}
+
+// MockArticleValidatorMockRecorder is the mock recorder for MockArticleValidator
+type MockArticleValidatorMockRecorder struct {
+	mock *MockArticleValidator
+}
+
+// NewMockArticleValidator creates a new mock instance
+func NewMockArticleValidator(ctrl *gomock.Controller) *MockArticleValidator {
+	mock := &MockArticleValidator{ctrl: ctrl}
+	mock.recorder = &MockArticleValidatorMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use
+func (m *MockArticleValidator) EXPECT() *MockArticleValidatorMockRecorder {
+	return m.recorder
+}
+
+// BeforeCreationCheck mocks base method
+func (m *MockArticleValidator) BeforeCreationCheck(article *domain.Article) error {
+	ret := m.ctrl.Call(m, "BeforeCreationCheck", article)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// BeforeCreationCheck indicates an expected call of BeforeCreationCheck
+func (mr *MockArticleValidatorMockRecorder) BeforeCreationCheck(article interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BeforeCreationCheck", reflect.TypeOf((*MockArticleValidator)(nil).BeforeCreationCheck), article)
+}
+
+// BeforeUpdateCheck mocks base method
+func (m *MockArticleValidator) BeforeUpdateCheck(article *domain.Article) error {
+	ret := m.ctrl.Call(m, "BeforeUpdateCheck", article)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// BeforeUpdateCheck indicates an expected call of BeforeUpdateCheck
+func (mr *MockArticleValidatorMockRecorder) BeforeUpdateCheck(article interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BeforeUpdateCheck", reflect.TypeOf((*MockArticleValidator)(nil).BeforeUpdateCheck), article)
 }

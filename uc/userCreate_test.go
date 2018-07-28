@@ -23,5 +23,4 @@ func TestUserCreate_happyCase(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, authToken, token)
 	assert.Equal(t, rick, *retUser)
-
 }
