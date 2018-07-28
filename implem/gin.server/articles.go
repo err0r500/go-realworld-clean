@@ -5,6 +5,7 @@ import (
 
 	"strconv"
 
+	"github.com/err0r500/go-realworld-clean/implem/json.formatter"
 	"github.com/err0r500/go-realworld-clean/uc"
 	"github.com/gin-gonic/gin"
 )
@@ -42,7 +43,7 @@ func (rH RouterHandler) articlesFilteredGet(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"articles": articles, "count": count})
+	c.JSON(http.StatusOK, gin.H{"articles": formatter.NewArticlesFromDomain(articles...), "articlesCount": count})
 }
 
 func (rH RouterHandler) articlesFeedGet(c *gin.Context) {
@@ -65,5 +66,5 @@ func (rH RouterHandler) articlesFeedGet(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"articles": articles, "count": count})
+	c.JSON(http.StatusOK, gin.H{"articles": formatter.NewArticlesFromDomain(articles...), "articlesCount": count})
 }

@@ -11,15 +11,14 @@ func (i interactor) ArticlePost(username string, article domain.Article) (*domai
 	if err != nil {
 		return nil, err
 	}
-	slug := i.slugger.NewSlug(article.Title)
 
-	_, err = i.getArticleAndCheckUser("", slug)
-	if err != errArticleNotFound {
+	slug := i.slugger.NewSlug(article.Title)
+	if _, err := i.getArticleAndCheckUser("", slug); err != errArticleNotFound {
 		return nil, errors.New("this title is already taken by another article")
 	}
 
 	article.Slug = slug
-	article.Author = *user
+	article.Author = domain.Profile{User: *user, Following: false}
 
 	if err := i.articleValidator.BeforeCreationCheck(&article); err != nil {
 		return nil, err

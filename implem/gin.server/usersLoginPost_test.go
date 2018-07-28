@@ -16,43 +16,6 @@ import (
 
 var userLoginPostPath = "/api/users/login"
 
-var expectedRespSchema = `{
-	"type": "object",
-  "additionalProperties": false,
-  "properties": {
-		"user": {
-			"type": "object",
-			"additionalProperties": false,
-			"properties": {
-				"email": {
-					"type": "string",
-					"format": "email"
-				},
-				"token": {
-					"type": "string",
- 					"minLength": 1
-				},
-				"username": {
-					"type": "string",
- 					"minLength": 1
-				},
-				"bio": {
-					"anyOf": [
-						{ "type": "string" },
-						{ "type": "null" }
-					]
-				},
-				"image": {
-					"anyOf": [
-						{ "type": "string" },
-						{ "type": "null" }
-					]
-				}
-			}
-		}
-	}
-}`
-
 func TestUserLoginPost_happyCase(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
@@ -82,6 +45,6 @@ func TestUserLoginPost_happyCase(t *testing.T) {
 		}`).
 		Expect(t).
 		Status(http.StatusOK).
-		JSONSchema(expectedRespSchema).
+		JSONSchema(testData.UserRespDefinition).
 		Done()
 }

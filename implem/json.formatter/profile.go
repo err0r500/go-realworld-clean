@@ -5,17 +5,25 @@ import (
 )
 
 type Profile struct {
-	Username  string  `json:"username"`
-	Bio       *string `json:"bio,omitempty"`
-	Picture   *string `json:"picture,omitempty"`
-	Following bool    `json:"following"`
+	Username  string `json:"username"`
+	Bio       string `json:"bio"`
+	Picture   string `json:"image"`
+	Following bool   `json:"following"`
 }
 
-func NewProfileFromDomain(user domain.User, following bool) Profile {
+func NewProfileFromDomain(user domain.Profile) Profile {
+	var bio, image string
+	if user.Bio != nil {
+		bio = *user.Bio
+	}
+	if user.ImageLink != nil {
+		image = *user.ImageLink
+	}
+
 	return Profile{
 		Username:  user.Name,
-		Bio:       user.Bio,
-		Picture:   user.ImageLink,
-		Following: following,
+		Bio:       bio,
+		Picture:   image,
+		Following: user.Following,
 	}
 }

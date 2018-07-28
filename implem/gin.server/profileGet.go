@@ -17,5 +17,5 @@ func (rH RouterHandler) profileGet(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"profile": formatter.NewProfileFromDomain(profile.User, profile.Following)})
+	c.JSON(http.StatusOK, gin.H{"profile": formatter.NewProfileFromDomain(*profile)})
 }

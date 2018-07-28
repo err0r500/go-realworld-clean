@@ -9,6 +9,7 @@ import (
 
 	"github.com/err0r500/go-realworld-clean/implem/gin.server"
 	"github.com/err0r500/go-realworld-clean/implem/mock.uc"
+	"github.com/err0r500/go-realworld-clean/testData"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
 	"gopkg.in/h2non/baloo.v3"
@@ -37,6 +38,7 @@ func TestTagsGet_happyCase(t *testing.T) {
 		Get(tagsPath).
 		Expect(t).
 		Status(http.StatusOK).
+		JSONSchema(testData.TagsResponse).
 		Done()
 }
 

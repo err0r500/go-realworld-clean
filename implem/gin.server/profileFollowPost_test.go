@@ -4,7 +4,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/err0r500/go-realworld-clean/domain"
 	"github.com/err0r500/go-realworld-clean/implem/gin.server"
 	"github.com/err0r500/go-realworld-clean/implem/jwt.authHandler"
 	"github.com/err0r500/go-realworld-clean/implem/mock.uc"
@@ -20,11 +19,11 @@ var profileFollowPostPath = "/api/profiles/" + testData.User("rick").Name + "/fo
 func TestProfileFollowPost_happyCase(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-
+	rick := testData.User("rick")
 	ucHandler := uc.NewMockHandler(mockCtrl)
 	ucHandler.EXPECT().
-		ProfileUpdateFollow(testData.User("jane").Name, testData.User("rick").Name, true).
-		Return(&domain.User{}, nil).
+		ProfileUpdateFollow(testData.User("jane").Name, rick.Name, true).
+		Return(&rick, nil).
 		Times(1)
 
 	jwtHandler := jwt.NewTokenHandler("mySalt")
@@ -41,5 +40,6 @@ func TestProfileFollowPost_happyCase(t *testing.T) {
 		AddHeader("Authorization", authToken).
 		Expect(t).
 		Status(200).
+		JSONSchema(testData.ProfileRespDefinition).
 		Done()
 }

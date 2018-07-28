@@ -14,7 +14,7 @@ type Article struct {
 	UpdatedAt      time.Time `json:"updatedAt"`
 	Favorited      bool      `json:"favorited"`
 	FavoritesCount int       `json:"favoritesCount"`
-	Author         User      `json:"author"`
+	Author         Profile   `json:"author"`
 	Comments       []Comment `json:"comments"`
 }
 
@@ -23,7 +23,7 @@ type Comment struct {
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
 	Body      string    `json:"body"`
-	Author    User      `json:"author"`
+	Author    Profile   `json:"author"`
 }
 
 type ArticleCollection []Article

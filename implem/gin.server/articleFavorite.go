@@ -3,6 +3,7 @@ package server
 import (
 	"net/http"
 
+	formatter "github.com/err0r500/go-realworld-clean/implem/json.formatter"
 	"github.com/gin-gonic/gin"
 )
 
@@ -27,5 +28,5 @@ func (rH RouterHandler) updateFavorite(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"article": article})
+	c.JSON(http.StatusOK, gin.H{"article": formatter.NewArticleFromDomain(*article)})
 }

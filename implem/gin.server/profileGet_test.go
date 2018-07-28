@@ -1,8 +1,6 @@
 package server_test
 
 import (
-	"io/ioutil"
-	"net/http"
 	"net/http/httptest"
 	"testing"
 
@@ -12,7 +10,6 @@ import (
 	"github.com/err0r500/go-realworld-clean/testData"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
-	"github.com/stretchr/testify/assert"
 	"gopkg.in/h2non/baloo.v3"
 )
 
@@ -35,16 +32,10 @@ func TestProfileGet_happyCase(t *testing.T) {
 	ts := httptest.NewServer(gE)
 	defer ts.Close()
 
-	rick := testData.User("rick")
 	baloo.New(ts.URL).
 		Get(profileGetPath).
 		Expect(t).
 		Status(200).
-		AssertFunc(func(response *http.Response, request *http.Request) error {
-			body, err := ioutil.ReadAll(response.Body)
-			assert.NoError(t, err)
-			assert.JSONEq(t, `{"profile":{"username":"`+rick.Name+`","bio":"`+*rick.Bio+`", "following": true}}`, string(body))
-			return nil
-		}).
+		JSONSchema(testData.ProfileRespDefinition).
 		Done()
 }

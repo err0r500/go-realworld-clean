@@ -42,5 +42,6 @@ func TestUserGet_happyCase(t *testing.T) {
 		AddHeader("Authorization", authToken).
 		Expect(t).
 		Status(http.StatusOK).
+		JSONSchema(testData.UserRespDefinition).
 		Done()
 }

@@ -45,6 +45,7 @@ func TestArticleCommentGet(t *testing.T) {
 			AddHeader("Authorization", authToken).
 			Expect(t).
 			Status(200).
+			JSONSchema(testData.CommentsMultipleResponse).
 			Done()
 	})
 }
@@ -87,6 +88,7 @@ func TestArticleCommentPost(t *testing.T) {
 			BodyString(validReq).
 			Expect(t).
 			Status(201).
+			JSONSchema(testData.CommentsSimgleResponse).
 			Done()
 	})
 

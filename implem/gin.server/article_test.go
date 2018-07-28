@@ -56,6 +56,7 @@ func TestRouterHandler_articlePost(t *testing.T) {
 			AddHeader("Authorization", authToken).
 			BodyString(reqBody).Expect(t).
 			Status(http.StatusCreated).
+			JSONSchema(testData.ArticleSingleRespDefinition).
 			Done()
 	})
 	t.Run("no auth", func(t *testing.T) {
@@ -114,6 +115,7 @@ func TestRouterHandler_articlePut(t *testing.T) {
 			BodyString(reqBody).
 			Expect(t).
 			Status(http.StatusOK).
+			JSONSchema(testData.ArticleSingleRespDefinition).
 			Done()
 	})
 
@@ -156,6 +158,7 @@ func TestRouterHandler_articleGet(t *testing.T) {
 		Get(artPath + "/" + expectedArticle.Slug).
 		Expect(t).
 		Status(http.StatusOK).
+		JSONSchema(testData.ArticleSingleRespDefinition).
 		Done()
 }
 

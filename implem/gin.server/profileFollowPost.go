@@ -3,6 +3,7 @@ package server
 import (
 	"net/http"
 
+	"github.com/err0r500/go-realworld-clean/domain"
 	"github.com/err0r500/go-realworld-clean/implem/json.formatter"
 	"github.com/gin-gonic/gin"
 )
@@ -17,5 +18,5 @@ func (rH RouterHandler) profileFollowPost(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, formatter.NewProfileFromDomain(*user, true))
+	c.JSON(http.StatusOK, gin.H{"profile": formatter.NewProfileFromDomain(domain.Profile{User: *user, Following: true})})
 }

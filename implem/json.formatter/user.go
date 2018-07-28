@@ -3,19 +3,26 @@ package formatter
 import "github.com/err0r500/go-realworld-clean/domain"
 
 type UserResp struct {
-	Email    string  `json:"email"`
-	Token    string  `json:"token"`
-	Username string  `json:"username"`
-	Bio      *string `json:"bio"`
-	Image    *string `json:"image"`
+	Email    string `json:"email"`
+	Token    string `json:"token"`
+	Username string `json:"username"`
+	Bio      string `json:"bio"`
+	Image    string `json:"image"`
 }
 
 func NewUserResp(user domain.User, token string) UserResp {
+	var bio, image string
+	if user.Bio != nil {
+		bio = *user.Bio
+	}
+	if user.ImageLink != nil {
+		image = *user.ImageLink
+	}
 	return UserResp{
 		Email:    user.Email,
 		Token:    token,
 		Username: user.Name,
-		Bio:      user.Bio,
-		Image:    user.ImageLink,
+		Bio:      bio,
+		Image:    image,
 	}
 }

@@ -91,6 +91,7 @@ func TestArticleFavoriteDelete(t *testing.T) {
 			AddHeader("Authorization", authToken).
 			Expect(t).
 			Status(200).
+			JSONSchema(testData.ArticleSingleRespDefinition).
 			Done()
 	})
 

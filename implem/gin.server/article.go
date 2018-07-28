@@ -43,7 +43,7 @@ func (rH RouterHandler) articlePost(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"article": formatter.NewArticleFromDomain(*article, true)})
+	c.JSON(http.StatusCreated, gin.H{"article": formatter.NewArticleFromDomain(*article)})
 }
 
 func (rH RouterHandler) articlePut(c *gin.Context) {
@@ -62,7 +62,7 @@ func (rH RouterHandler) articlePut(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"article": formatter.NewArticleFromDomain(*article, true)})
+	c.JSON(http.StatusOK, gin.H{"article": formatter.NewArticleFromDomain(*article)})
 }
 
 func (rH RouterHandler) articleGet(c *gin.Context) {
@@ -74,7 +74,7 @@ func (rH RouterHandler) articleGet(c *gin.Context) {
 		c.Status(http.StatusUnprocessableEntity)
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"article": formatter.NewArticleFromDomain(*article, true)})
+	c.JSON(http.StatusOK, gin.H{"article": formatter.NewArticleFromDomain(*article)})
 }
 
 func (rH RouterHandler) articleDelete(c *gin.Context) {

@@ -44,6 +44,7 @@ func TestUserPost_happyCase(t *testing.T) {
   			}
 		}`).
 		Expect(t).
+		JSONSchema(testData.UserRespDefinition).
 		Status(http.StatusCreated).
 		Done()
 }

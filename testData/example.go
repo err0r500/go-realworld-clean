@@ -66,13 +66,13 @@ var janeArticle = domain.Article{
 	UpdatedAt:      time.Now(),
 	Favorited:      true,
 	FavoritesCount: 123,
-	Author:         jane,
+	Author:         domain.Profile{User: jane, Following: false},
 	Comments: []domain.Comment{
 		{ID: "1",
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
 			Body:      "commentBody",
-			Author:    rick,
+			Author:    domain.Profile{User: rick, Following: false},
 		},
 	},
 }

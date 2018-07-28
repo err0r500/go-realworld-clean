@@ -3,6 +3,7 @@ package server
 import (
 	"net/http"
 
+	"github.com/err0r500/go-realworld-clean/implem/json.formatter"
 	"github.com/gin-gonic/gin"
 )
 
@@ -16,7 +17,7 @@ func (rH RouterHandler) commentsGet(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"comments": comments})
+	c.JSON(http.StatusOK, gin.H{"comments": formatter.NewCommentsFromDomain(comments...)})
 }
 
 type commentPostReq struct {
@@ -41,7 +42,7 @@ func (rH RouterHandler) commentPost(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"comment": comment})
+	c.JSON(http.StatusCreated, gin.H{"comment": formatter.NewCommentFromDomain(*comment)})
 }
 
 func (rH RouterHandler) commentDelete(c *gin.Context) {

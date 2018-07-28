@@ -42,5 +42,6 @@ func TestProfileFollowDelete_happyCase(t *testing.T) {
 		AddHeader("Authorization", authToken).
 		Expect(t).
 		Status(200).
+		JSONSchema(testData.ProfileRespDefinition).
 		Done()
 }

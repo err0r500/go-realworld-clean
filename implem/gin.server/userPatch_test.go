@@ -51,5 +51,6 @@ func TestUserPut_happyCase(t *testing.T) {
 		}`).
 		Expect(t).
 		Status(http.StatusOK).
+		JSONSchema(testData.UserRespDefinition).
 		Done()
 }
