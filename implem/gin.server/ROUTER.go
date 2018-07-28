@@ -6,6 +6,7 @@ import (
 
 	"github.com/err0r500/go-realworld-clean/uc"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/render"
 )
 
 type RouterHandler struct {
@@ -31,6 +32,8 @@ func NewRouterWithLogger(i uc.Handler, auth uc.AuthHandler, logger uc.Logger) Ro
 
 func (rH RouterHandler) SetRoutes(r *gin.Engine) {
 	api := r.Group("/api")
+	api.Use(rH.errorCatcher())
+
 	rH.profileRoutes(api)
 	rH.usersRoutes(api)
 	rH.articlesRoutes(api)
@@ -86,12 +89,28 @@ func (rH RouterHandler) jwtMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userName, err := rH.authHandler.GetUserName(c.GetHeader("Authorization"))
 		if err != nil {
-			c.AbortWithStatus(http.StatusUnauthorized)
+			c.Status(http.StatusUnauthorized)
+			c.Abort()
 			return
 		}
 		c.SetAccepted()
 		c.Set(userNameKey, userName)
 		c.Next()
+	}
+}
+
+func (rH RouterHandler) errorCatcher() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Next()
+		if c.Writer.Status() > 399 {
+			c.Render(
+				c.Writer.Status(),
+				render.Data{
+					ContentType: "application/json; charset=utf-8",
+					Data:        []byte(`{"errors": {"body": ["wooops, something went wrong !"]}}`),
+				},
+			)
+		}
 	}
 }
 
