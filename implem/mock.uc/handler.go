@@ -35,16 +35,17 @@ func (m *MockHandler) EXPECT() *MockHandlerMockRecorder {
 }
 
 // ProfileGet mocks base method
-func (m *MockHandler) ProfileGet(userName string) (*domain.Profile, error) {
-	ret := m.ctrl.Call(m, "ProfileGet", userName)
-	ret0, _ := ret[0].(*domain.Profile)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+func (m *MockHandler) ProfileGet(requestingUserName, userName string) (*domain.User, bool, error) {
+	ret := m.ctrl.Call(m, "ProfileGet", requestingUserName, userName)
+	ret0, _ := ret[0].(*domain.User)
+	ret1, _ := ret[1].(bool)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
 // ProfileGet indicates an expected call of ProfileGet
-func (mr *MockHandlerMockRecorder) ProfileGet(userName interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ProfileGet", reflect.TypeOf((*MockHandler)(nil).ProfileGet), userName)
+func (mr *MockHandlerMockRecorder) ProfileGet(requestingUserName, userName interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ProfileGet", reflect.TypeOf((*MockHandler)(nil).ProfileGet), requestingUserName, userName)
 }
 
 // ProfileUpdateFollow mocks base method
@@ -283,16 +284,17 @@ func (m *MockProfileLogic) EXPECT() *MockProfileLogicMockRecorder {
 }
 
 // ProfileGet mocks base method
-func (m *MockProfileLogic) ProfileGet(userName string) (*domain.Profile, error) {
-	ret := m.ctrl.Call(m, "ProfileGet", userName)
-	ret0, _ := ret[0].(*domain.Profile)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+func (m *MockProfileLogic) ProfileGet(requestingUserName, userName string) (*domain.User, bool, error) {
+	ret := m.ctrl.Call(m, "ProfileGet", requestingUserName, userName)
+	ret0, _ := ret[0].(*domain.User)
+	ret1, _ := ret[1].(bool)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
 // ProfileGet indicates an expected call of ProfileGet
-func (mr *MockProfileLogicMockRecorder) ProfileGet(userName interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ProfileGet", reflect.TypeOf((*MockProfileLogic)(nil).ProfileGet), userName)
+func (mr *MockProfileLogicMockRecorder) ProfileGet(requestingUserName, userName interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ProfileGet", reflect.TypeOf((*MockProfileLogic)(nil).ProfileGet), requestingUserName, userName)
 }
 
 // ProfileUpdateFollow mocks base method

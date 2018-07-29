@@ -25,7 +25,7 @@ func NewArticleFromDomain(article domain.Article) Article {
 		Body:           article.Body,
 		CreatedAt:      article.CreatedAt.UTC().Format(dateFormat),
 		UpdatedAt:      article.UpdatedAt.UTC().Format(dateFormat),
-		Author:         NewProfileFromDomain(article.Author),
+		Author:         NewProfileFromDomain(article.Author, false), //fixme : check this !
 		Tags:           article.TagList,
 		Favorite:       article.Favorited,
 		FavoritesCount: article.FavoritesCount,

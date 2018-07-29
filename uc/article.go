@@ -18,7 +18,7 @@ func (i interactor) ArticlePost(username string, article domain.Article) (*domai
 	}
 
 	article.Slug = slug
-	article.Author = domain.Profile{User: *user, Following: false}
+	article.Author = *user
 
 	if err := i.articleValidator.BeforeCreationCheck(&article); err != nil {
 		return nil, err

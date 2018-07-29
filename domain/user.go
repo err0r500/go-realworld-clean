@@ -72,10 +72,10 @@ func SetUserPassword(input *string) func(fields *User) {
 }
 
 // Profile represents a user account with follow property if his followed by the user
-type Profile struct {
-	User
-	Following bool
-}
+//type Profile struct {
+//	User
+//	Following bool
+//}
 
 func (user User) Follows(userName string) bool {
 	if user.FollowIDs == nil {

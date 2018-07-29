@@ -26,7 +26,7 @@ func (i interactor) CommentsPost(username, slug, comment string) (*domain.Commen
 
 	rawComment := domain.Comment{
 		Body:   comment,
-		Author: domain.Profile{User: *commentPoster},
+		Author: *commentPoster,
 	}
 
 	insertedComment, err := i.commentRW.Create(rawComment)

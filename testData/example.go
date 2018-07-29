@@ -42,19 +42,19 @@ var jane = domain.User{
 	Password:  "janePassword",
 }
 
-func Profile(name string) domain.Profile {
-	switch name {
-	case "janeFollowingRick":
-		return janeFollowingRick
-	default:
-		return janeFollowingRick
-	}
-}
+//func Profile(name string) domain.Profile {
+//	switch name {
+//	case "janeFollowingRick":
+//		return janeFollowingRick
+//	default:
+//		return janeFollowingRick
+//	}
+//}
 
-var janeFollowingRick = domain.Profile{
-	User:      rick,
-	Following: true,
-}
+//var janeFollowingRick = domain.Profile{
+//	User:      rick,
+//	Following: true,
+//}
 
 var janeArticle = domain.Article{
 	Slug:           "articleSlug",
@@ -66,13 +66,13 @@ var janeArticle = domain.Article{
 	UpdatedAt:      time.Now(),
 	Favorited:      true,
 	FavoritesCount: 123,
-	Author:         domain.Profile{User: jane, Following: false},
+	Author:         jane,
 	Comments: []domain.Comment{
 		{ID: 123,
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
 			Body:      "commentBody",
-			Author:    domain.Profile{User: rick, Following: false},
+			Author:    rick,
 		},
 	},
 }

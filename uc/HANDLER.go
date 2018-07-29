@@ -17,7 +17,7 @@ type Handler interface {
 }
 
 type ProfileLogic interface {
-	ProfileGet(userName string) (profile *domain.Profile, err error)
+	ProfileGet(requestingUserName, userName string) (profile *domain.User, follows bool, err error)
 	ProfileUpdateFollow(loggedInUsername, username string, follow bool) (user *domain.User, err error)
 }
 
@@ -62,6 +62,7 @@ type HandlerConstructor struct {
 	AuthHandler      AuthHandler
 	Slugger          Slugger
 	ArticleValidator ArticleValidator
+	TagsRW           TagsRW
 }
 
 func (c HandlerConstructor) New() Handler {
@@ -86,6 +87,9 @@ func (c HandlerConstructor) New() Handler {
 	if c.ArticleValidator == nil {
 		log.Fatal("missing ArticleValidator")
 	}
+	if c.TagsRW == nil {
+		log.Fatal("missing TagsRW")
+	}
 
 	return interactor{
 		logger:           c.Logger,
@@ -95,5 +99,6 @@ func (c HandlerConstructor) New() Handler {
 		authHandler:      c.AuthHandler,
 		slugger:          c.Slugger,
 		articleValidator: c.ArticleValidator,
+		tagsRW:           c.TagsRW,
 	}
 }

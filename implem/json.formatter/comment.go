@@ -27,6 +27,6 @@ func NewCommentFromDomain(comment domain.Comment) Comment {
 		CreatedAt: comment.CreatedAt.UTC().Format(dateFormat),
 		UpdatedAt: comment.UpdatedAt.UTC().Format(dateFormat),
 		Body:      comment.Body,
-		Author:    NewProfileFromDomain(comment.Author),
+		Author:    NewProfileFromDomain(comment.Author, false), //fixme check this
 	}
 }

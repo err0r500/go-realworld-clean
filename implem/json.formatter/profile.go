@@ -11,7 +11,7 @@ type Profile struct {
 	Following bool   `json:"following"`
 }
 
-func NewProfileFromDomain(user domain.Profile) Profile {
+func NewProfileFromDomain(user domain.User, following bool) Profile {
 	var bio, image string
 	if user.Bio != nil {
 		bio = *user.Bio
@@ -24,6 +24,6 @@ func NewProfileFromDomain(user domain.Profile) Profile {
 		Username:  user.Name,
 		Bio:       bio,
 		Picture:   image,
-		Following: user.Following,
+		Following: following,
 	}
 }

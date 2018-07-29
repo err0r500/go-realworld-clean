@@ -9,5 +9,4 @@ var (
 	errProfileNotFound = errors.New("profile not found")
 	ErrUserNotFound    = errors.New("user not found")
 	errArticleNotFound = errors.New("article not found")
-	//errNilPointerWithoutError = errors.New("interface returned a nil pointer without error") // TODO: add interface name in error handling
 )

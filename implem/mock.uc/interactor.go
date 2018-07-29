@@ -332,6 +332,42 @@ func (mr *MockCommentRWMockRecorder) Delete(id interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockCommentRW)(nil).Delete), id)
 }
 
+// MockTagsRW is a mock of TagsRW interface
+type MockTagsRW struct {
+	ctrl     *gomock.Controller
+	recorder *MockTagsRWMockRecorder
+}
+
+// MockTagsRWMockRecorder is the mock recorder for MockTagsRW
+type MockTagsRWMockRecorder struct {
+	mock *MockTagsRW
+}
+
+// NewMockTagsRW creates a new mock instance
+func NewMockTagsRW(ctrl *gomock.Controller) *MockTagsRW {
+	mock := &MockTagsRW{ctrl: ctrl}
+	mock.recorder = &MockTagsRWMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use
+func (m *MockTagsRW) EXPECT() *MockTagsRWMockRecorder {
+	return m.recorder
+}
+
+// GetAll mocks base method
+func (m *MockTagsRW) GetAll() ([]string, error) {
+	ret := m.ctrl.Call(m, "GetAll")
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAll indicates an expected call of GetAll
+func (mr *MockTagsRWMockRecorder) GetAll() *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAll", reflect.TypeOf((*MockTagsRW)(nil).GetAll))
+}
+
 // MockSlugger is a mock of Slugger interface
 type MockSlugger struct {
 	ctrl     *gomock.Controller

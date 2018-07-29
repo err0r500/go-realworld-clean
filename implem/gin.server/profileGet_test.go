@@ -10,6 +10,7 @@ import (
 	"github.com/err0r500/go-realworld-clean/testData"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
 	"gopkg.in/h2non/baloo.v3"
 )
 
@@ -19,11 +20,11 @@ func TestProfileGet_happyCase(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
-	janeFollowingRick := testData.Profile("janeFollowingRick")
+	jane := testData.User("jane")
 	ucHandler := uc.NewMockHandler(mockCtrl)
 	ucHandler.EXPECT().
-		ProfileGet(testData.User("rick").Name).
-		Return(&janeFollowingRick, nil).
+		ProfileGet("", testData.User("rick").Name).
+		Return(&jane, true, nil).
 		Times(1)
 
 	gE := gin.Default()
@@ -34,6 +35,35 @@ func TestProfileGet_happyCase(t *testing.T) {
 
 	baloo.New(ts.URL).
 		Get(profileGetPath).
+		Expect(t).
+		Status(200).
+		JSONSchema(testData.ProfileRespDefinition).
+		Done()
+}
+
+func TestProfileGet_happyCaseAuthenticated(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
+	jane := testData.User("jane")
+	ucHandler := uc.NewMockHandler(mockCtrl)
+	ucHandler.EXPECT().
+		ProfileGet(jane.Name, testData.User("rick").Name).
+		Return(&jane, true, nil).
+		Times(1)
+
+	jwtHandler := jwt.NewTokenHandler("mySalt")
+	gE := gin.Default()
+	server.NewRouter(ucHandler, jwtHandler).SetRoutes(gE)
+	authToken, err := jwtHandler.GenUserToken(testData.User("jane").Name)
+	assert.NoError(t, err)
+
+	ts := httptest.NewServer(gE)
+	defer ts.Close()
+
+	baloo.New(ts.URL).
+		Get(profileGetPath).
+		AddHeader("Authorization", authToken).
 		Expect(t).
 		Status(200).
 		JSONSchema(testData.ProfileRespDefinition).
