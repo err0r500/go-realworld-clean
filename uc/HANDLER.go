@@ -55,11 +55,13 @@ type TagsLogic interface {
 }
 
 type HandlerConstructor struct {
-	Logger        Logger
-	UserRW        UserRW
-	ArticleRW     ArticleRW
-	UserValidator UserValidator
-	AuthHandler   AuthHandler
+	Logger           Logger
+	UserRW           UserRW
+	ArticleRW        ArticleRW
+	UserValidator    UserValidator
+	AuthHandler      AuthHandler
+	Slugger          Slugger
+	ArticleValidator ArticleValidator
 }
 
 func (c HandlerConstructor) New() Handler {
@@ -78,12 +80,20 @@ func (c HandlerConstructor) New() Handler {
 	if c.AuthHandler == nil {
 		log.Fatal("missing AuthHandler")
 	}
+	if c.Slugger == nil {
+		log.Fatal("missing Slugger")
+	}
+	if c.ArticleValidator == nil {
+		log.Fatal("missing ArticleValidator")
+	}
 
 	return interactor{
-		logger:        c.Logger,
-		userRW:        c.UserRW,
-		articleRW:     c.ArticleRW,
-		userValidator: c.UserValidator,
-		authHandler:   c.AuthHandler,
+		logger:           c.Logger,
+		userRW:           c.UserRW,
+		articleRW:        c.ArticleRW,
+		userValidator:    c.UserValidator,
+		authHandler:      c.AuthHandler,
+		slugger:          c.Slugger,
+		articleValidator: c.ArticleValidator,
 	}
 }
