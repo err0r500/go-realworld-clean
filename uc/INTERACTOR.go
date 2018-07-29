@@ -15,6 +15,7 @@ type interactor struct {
 	authHandler      AuthHandler
 	slugger          Slugger
 	commentRW        CommentRW
+	tagsRW           TagsRW
 }
 
 // Logger : only used to log stuff
@@ -47,6 +48,10 @@ type CommentRW interface {
 	Create(comment domain.Comment) (*domain.Comment, error)
 	GetByID(id int) (*domain.Comment, error)
 	Delete(id int) error
+}
+
+type TagsRW interface {
+	GetAll() ([]string, error)
 }
 
 type Slugger interface {

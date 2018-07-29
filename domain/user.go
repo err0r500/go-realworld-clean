@@ -12,6 +12,7 @@ type User struct {
 	Bio       *string
 	ImageLink *string
 	FollowIDs []string
+	Favorites []Article
 }
 
 func UpdateUser(initial *User, opts ...func(fields *User)) {
@@ -99,5 +100,21 @@ func (user *User) UpdateFollowees(followeeName string, follow bool) {
 	}
 	if len(user.FollowIDs) == 0 {
 		user.FollowIDs = nil
+	}
+}
+
+func (user *User) UpdateFavorites(favorite Article, fav bool) {
+	if fav {
+		user.Favorites = append(user.Favorites, favorite)
+		return
+	}
+
+	for i := 0; i < len(user.Favorites); i++ {
+		if user.Favorites[i].Slug == favorite.Slug {
+			user.Favorites = append(user.Favorites[:i], user.Favorites[i+1:]...) // memory leak ? https://github.com/golang/go/wiki/SliceTricks
+		}
+	}
+	if len(user.Favorites) == 0 {
+		user.Favorites = nil
 	}
 }
