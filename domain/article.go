@@ -19,7 +19,7 @@ type Article struct {
 }
 
 type Comment struct {
-	ID        string    `json:"id"`
+	ID        int       `json:"id"`
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
 	Body      string    `json:"body"`
@@ -49,4 +49,17 @@ func (articles ArticleCollection) ApplyLimitAndOffset(limit, offset int) Article
 	}
 
 	return articles[min:max]
+}
+
+func (article *Article) UpdateComments(comment Comment, add bool) {
+	if add {
+		article.Comments = append(article.Comments, comment)
+		return
+	}
+
+	for i := 0; i < len(article.Comments); i++ {
+		if article.Comments[i].ID == comment.ID {
+			article.Comments = append(article.Comments[:i], article.Comments[i+1:]...) // memory leak ? https://github.com/golang/go/wiki/SliceTricks
+		}
+	}
 }

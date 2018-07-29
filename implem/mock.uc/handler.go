@@ -222,7 +222,7 @@ func (mr *MockHandlerMockRecorder) CommentsPost(username, slug, comment interfac
 }
 
 // CommentsDelete mocks base method
-func (m *MockHandler) CommentsDelete(username, slug, id string) error {
+func (m *MockHandler) CommentsDelete(username, slug string, id int) error {
 	ret := m.ctrl.Call(m, "CommentsDelete", username, slug, id)
 	ret0, _ := ret[0].(error)
 	return ret0
@@ -562,7 +562,7 @@ func (mr *MockCommentsLogicMockRecorder) CommentsPost(username, slug, comment in
 }
 
 // CommentsDelete mocks base method
-func (m *MockCommentsLogic) CommentsDelete(username, slug, id string) error {
+func (m *MockCommentsLogic) CommentsDelete(username, slug string, id int) error {
 	ret := m.ctrl.Call(m, "CommentsDelete", username, slug, id)
 	ret0, _ := ret[0].(error)
 	return ret0

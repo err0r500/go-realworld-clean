@@ -14,6 +14,7 @@ type interactor struct {
 	articleValidator ArticleValidator
 	authHandler      AuthHandler
 	slugger          Slugger
+	commentRW        CommentRW
 }
 
 // Logger : only used to log stuff
@@ -40,6 +41,12 @@ type ArticleRW interface {
 	GetByAuthorsNameOrderedByMostRecentAsc(usernames []string) ([]domain.Article, error)
 	GetRecentFiltered(filters Filters) ([]domain.Article, error)
 	Delete(slug string) error
+}
+
+type CommentRW interface {
+	Create(comment domain.Comment) (*domain.Comment, error)
+	GetByID(id int) (*domain.Comment, error)
+	Delete(id int) error
 }
 
 type Slugger interface {

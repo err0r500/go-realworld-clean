@@ -5,7 +5,7 @@ import (
 )
 
 type Comment struct {
-	ID        string  `json:"id"`
+	ID        int     `json:"id"`
 	CreatedAt string  `json:"createdAt"`
 	UpdatedAt string  `json:"updatedAt"`
 	Body      string  `json:"body"`

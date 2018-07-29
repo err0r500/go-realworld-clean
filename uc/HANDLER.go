@@ -43,7 +43,7 @@ type ArticleLogic interface {
 type CommentsLogic interface {
 	CommentsGet(slug string) ([]domain.Comment, error)
 	CommentsPost(username, slug, comment string) (*domain.Comment, error)
-	CommentsDelete(username, slug, id string) error
+	CommentsDelete(username, slug string, id int) error
 }
 
 type FavoritesLogic interface {

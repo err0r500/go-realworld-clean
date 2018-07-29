@@ -271,6 +271,67 @@ func (mr *MockArticleRWMockRecorder) Delete(slug interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockArticleRW)(nil).Delete), slug)
 }
 
+// MockCommentRW is a mock of CommentRW interface
+type MockCommentRW struct {
+	ctrl     *gomock.Controller
+	recorder *MockCommentRWMockRecorder
+}
+
+// MockCommentRWMockRecorder is the mock recorder for MockCommentRW
+type MockCommentRWMockRecorder struct {
+	mock *MockCommentRW
+}
+
+// NewMockCommentRW creates a new mock instance
+func NewMockCommentRW(ctrl *gomock.Controller) *MockCommentRW {
+	mock := &MockCommentRW{ctrl: ctrl}
+	mock.recorder = &MockCommentRWMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use
+func (m *MockCommentRW) EXPECT() *MockCommentRWMockRecorder {
+	return m.recorder
+}
+
+// Create mocks base method
+func (m *MockCommentRW) Create(comment domain.Comment) (*domain.Comment, error) {
+	ret := m.ctrl.Call(m, "Create", comment)
+	ret0, _ := ret[0].(*domain.Comment)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Create indicates an expected call of Create
+func (mr *MockCommentRWMockRecorder) Create(comment interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockCommentRW)(nil).Create), comment)
+}
+
+// GetByID mocks base method
+func (m *MockCommentRW) GetByID(id int) (*domain.Comment, error) {
+	ret := m.ctrl.Call(m, "GetByID", id)
+	ret0, _ := ret[0].(*domain.Comment)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetByID indicates an expected call of GetByID
+func (mr *MockCommentRWMockRecorder) GetByID(id interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByID", reflect.TypeOf((*MockCommentRW)(nil).GetByID), id)
+}
+
+// Delete mocks base method
+func (m *MockCommentRW) Delete(id int) error {
+	ret := m.ctrl.Call(m, "Delete", id)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Delete indicates an expected call of Delete
+func (mr *MockCommentRWMockRecorder) Delete(id interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockCommentRW)(nil).Delete), id)
+}
+
 // MockSlugger is a mock of Slugger interface
 type MockSlugger struct {
 	ctrl     *gomock.Controller

@@ -3,6 +3,8 @@ package server
 import (
 	"net/http"
 
+	"strconv"
+
 	"github.com/err0r500/go-realworld-clean/implem/json.formatter"
 	"github.com/gin-gonic/gin"
 )
@@ -47,8 +49,12 @@ func (rH RouterHandler) commentPost(c *gin.Context) {
 
 func (rH RouterHandler) commentDelete(c *gin.Context) {
 	log := rH.log(rH.MethodAndPath(c))
-
-	if err := rH.ucHandler.CommentsDelete(rH.getUserName(c), c.Param("slug"), c.Param("id")); err != nil {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.Status(http.StatusBadRequest)
+		return
+	}
+	if err := rH.ucHandler.CommentsDelete(rH.getUserName(c), c.Param("slug"), id); err != nil {
 		log(err)
 		c.Status(http.StatusUnprocessableEntity)
 		return

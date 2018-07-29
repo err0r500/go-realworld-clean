@@ -4,6 +4,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"strconv"
+
 	"github.com/err0r500/go-realworld-clean/implem/gin.server"
 	"github.com/err0r500/go-realworld-clean/implem/jwt.authHandler"
 	"github.com/err0r500/go-realworld-clean/implem/mock.uc"
@@ -138,7 +140,7 @@ func TestArticleCommentDelete(t *testing.T) {
 
 	t.Run("happyCase", func(t *testing.T) {
 		baloo.New(ts.URL).
-			Delete(articleCommentPath+"/"+testData.Article("jane").Comments[0].ID).
+			Delete(articleCommentPath+"/"+strconv.Itoa(testData.Article("jane").Comments[0].ID)).
 			AddHeader("Authorization", authToken).
 			Expect(t).
 			Status(200).
@@ -147,7 +149,7 @@ func TestArticleCommentDelete(t *testing.T) {
 
 	t.Run("no auth", func(t *testing.T) {
 		baloo.New(ts.URL).
-			Delete(articleCommentPath + "/" + testData.Article("jane").Comments[0].ID).
+			Delete(articleCommentPath + "/" + strconv.Itoa(testData.Article("jane").Comments[0].ID)).
 			Expect(t).
 			Status(401).
 			Done()

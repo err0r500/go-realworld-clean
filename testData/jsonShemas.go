@@ -169,14 +169,13 @@ var ArticleMultipleRespDefinition = `{
   ]
 }`
 
-//fixme : id is integer in API contract
 var CommentDefinition = `
 ` + ProfileDefinition + `,
 "Comment": {
   "type": "object",
   "properties": {
     "id": {
-      "type": "string"
+      "type": "integer"
     },
     "createdAt": {
       "type": "string",
