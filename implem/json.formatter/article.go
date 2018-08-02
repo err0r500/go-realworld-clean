@@ -33,7 +33,7 @@ func NewArticleFromDomain(article domain.Article) Article {
 }
 
 func NewArticlesFromDomain(articles ...domain.Article) []Article {
-	var ret []Article
+	ret := []Article{}
 	for _, article := range articles {
 		ret = append(ret, NewArticleFromDomain(article))
 	}

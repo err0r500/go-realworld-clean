@@ -16,5 +16,8 @@ func (rH RouterHandler) tagsGet(c *gin.Context) {
 		return
 	}
 
+	if tags == nil {
+		tags = []string{}
+	}
 	c.JSON(http.StatusOK, gin.H{"tags": tags})
 }

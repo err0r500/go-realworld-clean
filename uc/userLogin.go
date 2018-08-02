@@ -8,7 +8,7 @@ func (i interactor) UserLogin(email, password string) (*domain.User, string, err
 		return nil, "", err
 	}
 	if user == nil {
-		return nil, "", ErrUserNotFound
+		return nil, "", ErrNotFound
 	}
 
 	token, err := i.authHandler.GenUserToken(user.Name)

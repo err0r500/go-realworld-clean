@@ -10,7 +10,7 @@ func (i interactor) UserGet(userName string) (*domain.User, string, error) {
 		return nil, "", err
 	}
 	if user == nil {
-		return nil, "", ErrUserNotFound
+		return nil, "", ErrNotFound
 	}
 	if user.Name != userName {
 		return nil, "", errWrongUser

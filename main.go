@@ -3,10 +3,13 @@ package main
 import (
 	"fmt"
 
+	"github.com/err0r500/go-realworld-clean/implem/dummy.articleValidator"
 	"github.com/err0r500/go-realworld-clean/implem/gin.server"
+	"github.com/err0r500/go-realworld-clean/implem/gosimple.slugger"
 	"github.com/err0r500/go-realworld-clean/implem/jwt.authHandler"
 	"github.com/err0r500/go-realworld-clean/implem/logrus.logger"
 	"github.com/err0r500/go-realworld-clean/implem/memory.articleRW"
+	"github.com/err0r500/go-realworld-clean/implem/memory.tagsRW"
 	"github.com/err0r500/go-realworld-clean/implem/memory.userRW"
 	"github.com/err0r500/go-realworld-clean/implem/user.validator"
 	"github.com/err0r500/go-realworld-clean/infra"
@@ -66,11 +69,14 @@ func run() {
 
 	server.NewRouterWithLogger(
 		uc.HandlerConstructor{
-			Logger:        routerLogger,
-			UserRW:        userRW.New(),
-			ArticleRW:     articleRW.New(),
-			UserValidator: validator.New(),
-			AuthHandler:   authHandler,
+			Logger:           routerLogger,
+			UserRW:           userRW.New(),
+			ArticleRW:        articleRW.New(),
+			UserValidator:    validator.New(),
+			AuthHandler:      authHandler,
+			Slugger:          slugger.New(),
+			ArticleValidator: articleValidator.New(),
+			TagsRW:           tagsRW.New(),
 		}.New(),
 		authHandler,
 		routerLogger,

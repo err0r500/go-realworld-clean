@@ -18,28 +18,54 @@ import (
 var tagsPath = "/api/tags"
 
 func TestTagsGet_happyCase(t *testing.T) {
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
+	t.Run("simple", func(t *testing.T) {
+		mockCtrl := gomock.NewController(t)
+		defer mockCtrl.Finish()
 
-	tags := []string{"tag1", "tag2"}
-	ucHandler := uc.NewMockHandler(mockCtrl)
-	ucHandler.EXPECT().
-		Tags().
-		Return(tags, nil).
-		Times(1)
+		tags := []string{"tag1", "tag2"}
+		ucHandler := uc.NewMockHandler(mockCtrl)
+		ucHandler.EXPECT().
+			Tags().
+			Return(tags, nil).
+			Times(1)
 
-	gE := gin.Default()
-	server.NewRouter(ucHandler, nil).SetRoutes(gE)
+		gE := gin.Default()
+		server.NewRouter(ucHandler, nil).SetRoutes(gE)
 
-	ts := httptest.NewServer(gE)
-	defer ts.Close()
+		ts := httptest.NewServer(gE)
+		defer ts.Close()
 
-	baloo.New(ts.URL).
-		Get(tagsPath).
-		Expect(t).
-		Status(http.StatusOK).
-		JSONSchema(testData.TagsResponse).
-		Done()
+		baloo.New(ts.URL).
+			Get(tagsPath).
+			Expect(t).
+			Status(http.StatusOK).
+			JSONSchema(testData.TagsResponse).
+			Done()
+	})
+	t.Run("empty", func(t *testing.T) {
+		mockCtrl := gomock.NewController(t)
+		defer mockCtrl.Finish()
+
+		ucHandler := uc.NewMockHandler(mockCtrl)
+		ucHandler.EXPECT().
+			Tags().
+			Return(nil, nil).
+			Times(1)
+
+		gE := gin.Default()
+		server.NewRouter(ucHandler, nil).SetRoutes(gE)
+
+		ts := httptest.NewServer(gE)
+		defer ts.Close()
+
+		baloo.New(ts.URL).
+			Get(tagsPath).
+			Expect(t).
+			Status(http.StatusOK).
+			BodyEquals(`{"tags":[]}`).
+			Done()
+	})
+
 }
 
 func TestTagsGet_fail(t *testing.T) {

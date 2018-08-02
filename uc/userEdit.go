@@ -24,7 +24,7 @@ func (i interactor) UserEdit(userName string, fieldsToUpdate map[UpdatableProper
 		return nil, "", errWrongUser
 	}
 	if user == nil {
-		return nil, "", ErrUserNotFound
+		return nil, "", ErrNotFound
 	}
 
 	domain.UpdateUser(user,

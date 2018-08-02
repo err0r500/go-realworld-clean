@@ -21,7 +21,7 @@ func New() uc.UserRW {
 
 func (rw rw) Create(username, email, password string) (*domain.User, error) {
 	if _, err := rw.GetByName(username); err == nil {
-		return nil, uc.ErrUserNameAlreadyInUse
+		return nil, uc.ErrAlreadyInUse
 	}
 
 	rw.store.Store(username, domain.User{
@@ -36,7 +36,7 @@ func (rw rw) Create(username, email, password string) (*domain.User, error) {
 func (rw rw) GetByName(userName string) (*domain.User, error) {
 	value, ok := rw.store.Load(userName)
 	if !ok {
-		return nil, uc.ErrUserNotFound
+		return nil, uc.ErrNotFound
 	}
 
 	user, ok := value.(domain.User)
@@ -71,7 +71,7 @@ func (rw rw) GetByEmailAndPassword(email, password string) (*domain.User, error)
 
 func (rw rw) Save(user domain.User) error {
 	if user, _ := rw.GetByName(user.Name); user == nil {
-		return uc.ErrUserNotFound
+		return uc.ErrNotFound
 	}
 
 	rw.store.Store(user.Name, user)

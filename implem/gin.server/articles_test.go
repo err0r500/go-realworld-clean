@@ -57,31 +57,32 @@ func TestArticlesFiltered(t *testing.T) {
 }
 
 func TestArticlesFeed(t *testing.T) {
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
-
-	limit := 10
-	offset := 2
-
-	jane := testData.User("jane")
-
-	ucHandler := mock.NewMockHandler(mockCtrl)
-	ucHandler.EXPECT().
-		ArticlesFeed(jane.Name, limit, offset).
-		Return(domain.ArticleCollection{testData.Article("jane")}, 10, nil).
-		Times(1)
-
-	jwtHandler := jwt.NewTokenHandler("mySalt")
-
-	gE := gin.Default()
-	server.NewRouter(ucHandler, jwtHandler).SetRoutes(gE)
-	ts := httptest.NewServer(gE)
-	defer ts.Close()
-
-	authToken, err := jwtHandler.GenUserToken(jane.Name)
-	assert.NoError(t, err)
-
 	t.Run("happyCase", func(t *testing.T) {
+
+		mockCtrl := gomock.NewController(t)
+		defer mockCtrl.Finish()
+
+		limit := 10
+		offset := 2
+
+		jane := testData.User("jane")
+
+		ucHandler := mock.NewMockHandler(mockCtrl)
+		ucHandler.EXPECT().
+			ArticlesFeed(jane.Name, limit, offset).
+			Return(domain.ArticleCollection{testData.Article("jane")}, 10, nil).
+			Times(1)
+
+		jwtHandler := jwt.NewTokenHandler("mySalt")
+
+		gE := gin.Default()
+		server.NewRouter(ucHandler, jwtHandler).SetRoutes(gE)
+		ts := httptest.NewServer(gE)
+		defer ts.Close()
+
+		authToken, err := jwtHandler.GenUserToken(jane.Name)
+		assert.NoError(t, err)
+
 		baloo.New(ts.URL).
 			Get(articlesFeedPath).
 			AddHeader("Authorization", authToken).
@@ -90,6 +91,43 @@ func TestArticlesFeed(t *testing.T) {
 			Expect(t).
 			Status(200).
 			JSONSchema(testData.ArticleMultipleRespDefinition).
+			Done()
+	})
+
+	t.Run("empty", func(t *testing.T) {
+
+		mockCtrl := gomock.NewController(t)
+		defer mockCtrl.Finish()
+
+		limit := 10
+		offset := 2
+
+		jane := testData.User("jane")
+
+		ucHandler := mock.NewMockHandler(mockCtrl)
+		ucHandler.EXPECT().
+			ArticlesFeed(jane.Name, limit, offset).
+			Return(nil, 0, nil).
+			Times(1)
+
+		jwtHandler := jwt.NewTokenHandler("mySalt")
+
+		gE := gin.Default()
+		server.NewRouter(ucHandler, jwtHandler).SetRoutes(gE)
+		ts := httptest.NewServer(gE)
+		defer ts.Close()
+
+		authToken, err := jwtHandler.GenUserToken(jane.Name)
+		assert.NoError(t, err)
+
+		baloo.New(ts.URL).
+			Get(articlesFeedPath).
+			AddHeader("Authorization", authToken).
+			AddQuery("limit", strconv.Itoa(limit)).
+			AddQuery("offset", strconv.Itoa(offset)).
+			Expect(t).
+			Status(200).
+			BodyEquals(`{"articles":[],"articlesCount":0}`).
 			Done()
 	})
 }
