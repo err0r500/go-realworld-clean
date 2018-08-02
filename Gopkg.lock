@@ -2,6 +2,12 @@
 
 
 [[projects]]
+  name = "github.com/asaskevich/govalidator"
+  packages = ["."]
+  revision = "ccb8e960c48f04d6935e72476ae4a51028f9e22f"
+  version = "v9"
+
+[[projects]]
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
   revision = "346938d642f2ec3594ed81d874461961cd0faa76"
@@ -18,21 +24,6 @@
   name = "github.com/err0r500/go-cleanarch-skeleton"
   packages = ["domain"]
   revision = "0b3ea37744bf8f59d5856fd81beb77100786408d"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/err0r500/go-realworld-clean"
-  packages = [
-    "domain",
-    "implem/gin.server",
-    "implem/json.formatter",
-    "implem/jwt.authHandler",
-    "implem/logrus.logger",
-    "implem/mock.uc",
-    "testData",
-    "uc"
-  ]
-  revision = "e46d98b4d7e37af14273cc1318f594f5ef555f43"
 
 [[projects]]
   name = "github.com/fsnotify/fsnotify"
@@ -66,6 +57,12 @@
   name = "github.com/golang/protobuf"
   packages = ["proto"]
   revision = "5a0f697c9ed9d68fef0116532c6e05cfeae00e55"
+
+[[projects]]
+  name = "github.com/gosimple/slug"
+  packages = ["."]
+  revision = "e9f42fa127660e552d0ad2b589868d403a9be7c6"
+  version = "v1.1.1"
 
 [[projects]]
   branch = "master"
@@ -124,6 +121,12 @@
   packages = ["difflib"]
   revision = "792786c7400a136282c1664665ae0a8db921c6c2"
   version = "v1.0.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/rainycape/unidecode"
+  packages = ["."]
+  revision = "cb7f23ec59bec0d61b19c56cd88cee3d0cc1870c"
 
 [[projects]]
   name = "github.com/sirupsen/logrus"
@@ -288,6 +291,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "56a464270d5f29a5d033b2381a4b6471d9e469f247b50e7190bed56f54aa57c7"
+  inputs-digest = "65318382f611e3b6ee71713ce7616e5c3f4a1ebe8bf696cba3af02605016ceee"
   solver-name = "gps-cdcl"
   solver-version = 1
