@@ -85,7 +85,7 @@ func TestArticlesFeed(t *testing.T) {
 
 		baloo.New(ts.URL).
 			Get(articlesFeedPath).
-			AddHeader("Authorization", authToken).
+			AddHeader("Authorization", testData.TokenPrefix+authToken).
 			AddQuery("limit", strconv.Itoa(limit)).
 			AddQuery("offset", strconv.Itoa(offset)).
 			Expect(t).
@@ -122,7 +122,7 @@ func TestArticlesFeed(t *testing.T) {
 
 		baloo.New(ts.URL).
 			Get(articlesFeedPath).
-			AddHeader("Authorization", authToken).
+			AddHeader("Authorization", testData.TokenPrefix+authToken).
 			AddQuery("limit", strconv.Itoa(limit)).
 			AddQuery("offset", strconv.Itoa(offset)).
 			Expect(t).

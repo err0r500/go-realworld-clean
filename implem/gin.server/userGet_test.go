@@ -15,7 +15,7 @@ import (
 	"gopkg.in/h2non/baloo.v3"
 )
 
-var userGetPath = "/api/users"
+var userGetPath = "/api/user"
 
 func TestUserGet_happyCase(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
@@ -39,7 +39,7 @@ func TestUserGet_happyCase(t *testing.T) {
 
 	baloo.New(ts.URL).
 		Get(userGetPath).
-		AddHeader("Authorization", authToken).
+		AddHeader("Authorization", testData.TokenPrefix+authToken).
 		Expect(t).
 		Status(http.StatusOK).
 		JSONSchema(testData.UserRespDefinition).

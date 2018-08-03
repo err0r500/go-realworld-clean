@@ -3,6 +3,8 @@ package uc_test
 import (
 	"testing"
 
+	"errors"
+
 	"github.com/err0r500/go-realworld-clean/domain"
 	mock "github.com/err0r500/go-realworld-clean/implem/mock.uc"
 	"github.com/err0r500/go-realworld-clean/testData"
@@ -23,7 +25,7 @@ func TestInteractor_ArticlePost(t *testing.T) {
 	i := mock.NewMockedInteractor(mockCtrl)
 	i.UserRW.EXPECT().GetByName(rick.Name).Return(&rick, nil).Times(1)
 	i.Slugger.EXPECT().NewSlug(article.Title).Return(slug).Times(1)
-	i.ArticleRW.EXPECT().GetBySlug(slug).Return(nil, nil).Times(1)
+	i.ArticleRW.EXPECT().GetBySlug(slug).Return(nil, errors.New("not found")).Times(1)
 	i.ArticleValidator.EXPECT().BeforeCreationCheck(gomock.Any()).Return(nil).Times(1)
 	i.ArticleRW.EXPECT().Create(gomock.Any())
 

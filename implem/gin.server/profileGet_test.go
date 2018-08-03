@@ -63,7 +63,7 @@ func TestProfileGet_happyCaseAuthenticated(t *testing.T) {
 
 	baloo.New(ts.URL).
 		Get(profileGetPath).
-		AddHeader("Authorization", authToken).
+		AddHeader("Authorization", testData.TokenPrefix+authToken).
 		Expect(t).
 		Status(200).
 		JSONSchema(testData.ProfileRespDefinition).

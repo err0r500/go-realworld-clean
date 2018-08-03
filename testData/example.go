@@ -42,19 +42,7 @@ var jane = domain.User{
 	Password:  "janePassword",
 }
 
-//func Profile(name string) domain.Profile {
-//	switch name {
-//	case "janeFollowingRick":
-//		return janeFollowingRick
-//	default:
-//		return janeFollowingRick
-//	}
-//}
-
-//var janeFollowingRick = domain.Profile{
-//	User:      rick,
-//	Following: true,
-//}
+const TokenPrefix = "Token "
 
 var janeArticle = domain.Article{
 	Slug:           "articleSlug",

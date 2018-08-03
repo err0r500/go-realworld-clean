@@ -53,7 +53,7 @@ func TestRouterHandler_articlePost(t *testing.T) {
 	t.Run("happycase", func(t *testing.T) {
 		baloo.New(ts.URL).
 			Post(artPath).
-			AddHeader("Authorization", authToken).
+			AddHeader("Authorization", testData.TokenPrefix+authToken).
 			BodyString(reqBody).Expect(t).
 			Status(http.StatusCreated).
 			JSONSchema(testData.ArticleSingleRespDefinition).
@@ -69,7 +69,7 @@ func TestRouterHandler_articlePost(t *testing.T) {
 	t.Run("no body", func(t *testing.T) {
 		baloo.New(ts.URL).
 			Post(artPath).
-			AddHeader("Authorization", authToken).
+			AddHeader("Authorization", testData.TokenPrefix+authToken).
 			Expect(t).
 			Status(http.StatusBadRequest).
 			Done()
@@ -111,7 +111,7 @@ func TestRouterHandler_articlePut(t *testing.T) {
 	t.Run("happycase", func(t *testing.T) {
 		baloo.New(ts.URL).
 			Put(artPath+"/"+expectedArticle.Slug).
-			AddHeader("Authorization", authToken).
+			AddHeader("Authorization", testData.TokenPrefix+authToken).
 			BodyString(reqBody).
 			Expect(t).
 			Status(http.StatusOK).
@@ -131,7 +131,7 @@ func TestRouterHandler_articlePut(t *testing.T) {
 	t.Run("no body", func(t *testing.T) {
 		baloo.New(ts.URL).
 			Put(artPath+"/"+expectedArticle.Slug).
-			AddHeader("Authorization", authToken).
+			AddHeader("Authorization", testData.TokenPrefix+authToken).
 			Expect(t).
 			Status(http.StatusBadRequest).
 			Done()
@@ -185,7 +185,7 @@ func TestRouterHandler_articleDelete(t *testing.T) {
 
 	baloo.New(ts.URL).
 		Delete(artPath+"/"+expectedArticle.Slug).
-		AddHeader("Authorization", authToken).
+		AddHeader("Authorization", testData.TokenPrefix+authToken).
 		Expect(t).
 		Status(http.StatusOK).
 		Done()

@@ -44,7 +44,7 @@ func TestArticleCommentGet(t *testing.T) {
 	t.Run("happyCase", func(t *testing.T) {
 		baloo.New(ts.URL).
 			Get(articleCommentPath).
-			AddHeader("Authorization", authToken).
+			AddHeader("Authorization", testData.TokenPrefix+authToken).
 			Expect(t).
 			Status(200).
 			JSONSchema(testData.CommentsMultipleResponse).
@@ -86,7 +86,7 @@ func TestArticleCommentPost(t *testing.T) {
 	t.Run("happyCase", func(t *testing.T) {
 		baloo.New(ts.URL).
 			Post(articleCommentPath).
-			AddHeader("Authorization", authToken).
+			AddHeader("Authorization", testData.TokenPrefix+authToken).
 			BodyString(validReq).
 			Expect(t).
 			Status(201).
@@ -107,7 +107,7 @@ func TestArticleCommentPost(t *testing.T) {
 	t.Run("no body", func(t *testing.T) {
 		baloo.New(ts.URL).
 			Post(articleCommentPath).
-			AddHeader("Authorization", authToken).
+			AddHeader("Authorization", testData.TokenPrefix+authToken).
 			Expect(t).
 			Status(400).
 			Done()
@@ -141,7 +141,7 @@ func TestArticleCommentDelete(t *testing.T) {
 	t.Run("happyCase", func(t *testing.T) {
 		baloo.New(ts.URL).
 			Delete(articleCommentPath+"/"+strconv.Itoa(testData.Article("jane").Comments[0].ID)).
-			AddHeader("Authorization", authToken).
+			AddHeader("Authorization", testData.TokenPrefix+authToken).
 			Expect(t).
 			Status(200).
 			Done()

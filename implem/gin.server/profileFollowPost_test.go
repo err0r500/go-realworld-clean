@@ -37,7 +37,7 @@ func TestProfileFollowPost_happyCase(t *testing.T) {
 
 	baloo.New(ts.URL).
 		Post(profileFollowPostPath).
-		AddHeader("Authorization", authToken).
+		AddHeader("Authorization", testData.TokenPrefix+authToken).
 		Expect(t).
 		Status(200).
 		JSONSchema(testData.ProfileRespDefinition).

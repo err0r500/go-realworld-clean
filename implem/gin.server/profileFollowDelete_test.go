@@ -39,7 +39,7 @@ func TestProfileFollowDelete_happyCase(t *testing.T) {
 
 	baloo.New(ts.URL).
 		Delete(profileFollowDeletePath).
-		AddHeader("Authorization", authToken).
+		AddHeader("Authorization", testData.TokenPrefix+authToken).
 		Expect(t).
 		Status(200).
 		JSONSchema(testData.ProfileRespDefinition).

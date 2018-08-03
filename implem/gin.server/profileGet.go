@@ -10,8 +10,11 @@ import (
 func (rH RouterHandler) profileGet(c *gin.Context) {
 	log := rH.log(rH.MethodAndPath(c))
 	requestingUserName := ""
-	if userName, err := rH.authHandler.GetUserName(c.GetHeader("Authorization")); err == nil {
-		requestingUserName = userName
+
+	if jwt, err := getJWT(c.GetHeader("Authorization")); err == nil {
+		if userName, err := rH.authHandler.GetUserName(jwt); err == nil {
+			requestingUserName = userName
+		}
 	}
 
 	user, follows, err := rH.ucHandler.ProfileGet(requestingUserName, c.Param("username"))

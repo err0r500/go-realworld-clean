@@ -3,7 +3,6 @@ package logger
 import (
 	"log"
 
-	"github.com/err0r500/go-cleanarch-skeleton/domain"
 	"github.com/err0r500/go-realworld-clean/uc"
 	"github.com/sirupsen/logrus"
 )
@@ -57,37 +56,9 @@ func (l LogrusLogger) Log(args ...interface{}) {
 	l.Logger.Info(args...)
 }
 
+//fixme
 func (l LogrusLogger) newLog(err error, usecase interface{}) {
-	switch v := err.(type) {
-	case *domain.Message:
-		f := logrus.Fields{
-			"type": v.MessageType.String(),
-			"mess": v.Title,
-		}
-
-		f["env"] = l.env
-
-		if v.Additional != "" {
-			f["additional"] = v.Additional
-		}
-
-		ll := l.Logger.WithFields(f)
-		switch v.MessageLevel {
-		case domain.MessDebug:
-			ll.Debug(usecase)
-		case domain.MessInfo:
-			ll.Info(usecase)
-		case domain.MessWarn:
-			ll.Warn(usecase)
-		case domain.MessError:
-			ll.Error(usecase)
-		case domain.MessFatal:
-			ll.Fatal(usecase)
-		}
-
-	default:
-		l.Logger.WithError(err).Error(usecase)
-	}
+	l.Logger.WithError(err).Error(usecase)
 }
 
 type SimpleLogger struct{}

@@ -5,6 +5,10 @@ import (
 
 	"errors"
 
+	"time"
+
+	"log"
+
 	"github.com/err0r500/go-realworld-clean/domain"
 	"github.com/err0r500/go-realworld-clean/uc"
 )
@@ -20,9 +24,11 @@ func New() uc.ArticleRW {
 }
 func (rw rw) Create(article domain.Article) (*domain.Article, error) {
 	if _, err := rw.GetBySlug(article.Slug); err == nil {
+		log.Println(err)
 		return nil, uc.ErrAlreadyInUse
 	}
-
+	article.CreatedAt = time.Now()
+	article.UpdatedAt = time.Now()
 	rw.store.Store(article.Slug, article)
 
 	return rw.GetBySlug(article.Slug)

@@ -4,6 +4,10 @@ import (
 	"fmt"
 	"net/http"
 
+	"strings"
+
+	"errors"
+
 	"github.com/err0r500/go-realworld-clean/uc"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/render"
@@ -53,9 +57,10 @@ func (rH RouterHandler) usersRoutes(api *gin.RouterGroup) {
 	users.POST("", rH.userPost)            // Register a new user
 	users.POST("/login", rH.userLoginPost) // Login for existing user
 
-	users.GET("", rH.jwtMiddleware(), rH.userGet)     // Gets the currently logged-in user
-	users.PUT("", rH.jwtMiddleware(), rH.userPatch)   // WARNING : it's a in fact a PATCH request in the API contract !!!
-	users.PATCH("", rH.jwtMiddleware(), rH.userPatch) // just in case it's fixed one day....
+	user := api.Group("/user")
+	user.GET("", rH.jwtMiddleware(), rH.userGet)     // Gets the currently logged-in user
+	user.PUT("", rH.jwtMiddleware(), rH.userPatch)   // WARNING : it's a in fact a PATCH request in the API contract !!!
+	user.PATCH("", rH.jwtMiddleware(), rH.userPatch) // just in case it's fixed one day....
 }
 
 func (rH RouterHandler) articlesRoutes(api *gin.RouterGroup) {
@@ -87,7 +92,14 @@ const userNameKey = "userNameKey"
 
 func (rH RouterHandler) jwtMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		userName, err := rH.authHandler.GetUserName(c.GetHeader("Authorization"))
+		jwt, err := getJWT(c.GetHeader("Authorization"))
+		if err != nil {
+			c.Status(http.StatusUnauthorized)
+			c.Abort()
+			return
+		}
+
+		userName, err := rH.authHandler.GetUserName(jwt)
 		if err != nil {
 			c.Status(http.StatusUnauthorized)
 			c.Abort()
@@ -97,6 +109,14 @@ func (rH RouterHandler) jwtMiddleware() gin.HandlerFunc {
 		c.Set(userNameKey, userName)
 		c.Next()
 	}
+}
+
+func getJWT(authHeader string) (string, error) {
+	splitted := strings.Split(authHeader, "Token ")
+	if len(splitted) != 2 {
+		return "", errors.New("malformed header")
+	}
+	return splitted[1], nil
 }
 
 func (rH RouterHandler) errorCatcher() gin.HandlerFunc {

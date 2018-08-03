@@ -44,7 +44,7 @@ func TestArticleFavoritePost(t *testing.T) {
 	t.Run("happyCase Add to favorites", func(t *testing.T) {
 		baloo.New(ts.URL).
 			Post(articleFavoritePath).
-			AddHeader("Authorization", authToken).
+			AddHeader("Authorization", testData.TokenPrefix+authToken).
 			Expect(t).
 			Status(200).
 			Done()
@@ -88,7 +88,7 @@ func TestArticleFavoriteDelete(t *testing.T) {
 	t.Run("happyCase Remove from to favorites", func(t *testing.T) {
 		baloo.New(ts.URL).
 			Delete(articleFavoritePath).
-			AddHeader("Authorization", authToken).
+			AddHeader("Authorization", testData.TokenPrefix+authToken).
 			Expect(t).
 			Status(200).
 			JSONSchema(testData.ArticleSingleRespDefinition).

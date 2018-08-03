@@ -13,8 +13,8 @@ func (i interactor) ArticlePost(username string, article domain.Article) (*domai
 	}
 
 	slug := i.slugger.NewSlug(article.Title)
-	if _, err := i.getArticleAndCheckUser("", slug); err != errArticleNotFound {
-		return nil, errors.New("this title is already taken by another article")
+	if _, err := i.articleRW.GetBySlug(slug); err == nil {
+		return nil, ErrAlreadyInUse
 	}
 
 	article.Slug = slug
