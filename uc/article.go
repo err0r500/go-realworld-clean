@@ -29,6 +29,10 @@ func (i interactor) ArticlePost(username string, article domain.Article) (*domai
 		return nil, err
 	}
 
+	if err := i.tagsRW.Add(article.TagList); err != nil {
+		return nil, err
+	}
+
 	return completeArticle, nil
 }
 

@@ -53,10 +53,27 @@ func (rw rw) GetByAuthorsNameOrderedByMostRecentAsc(usernames []string) ([]domai
 	return toReturn, nil
 }
 
-func (rw) GetRecentFiltered(filters uc.Filters) ([]domain.Article, error) {
-	// todo => check if its AND or OR filters
+func (rw rw) GetRecentFiltered(filters []domain.ArticleFilter) ([]domain.Article, error) {
+	var recentArticles []domain.Article
 
-	return nil, nil
+	rw.store.Range(func(key, value interface{}) bool {
+		article, ok := value.(domain.Article)
+		if !ok {
+			// not an article (shouldn't happen) -> skip
+			return true // log this but continue
+		}
+
+		for _, funcToApply := range filters {
+			if !funcToApply(article) { // "AND filter" : if one of the filter is at false, skip the article
+				return true
+			}
+		}
+
+		recentArticles = append(recentArticles, article)
+		return true
+	})
+
+	return recentArticles, nil
 }
 
 func (rw rw) Save(article domain.Article) (*domain.Article, error) {

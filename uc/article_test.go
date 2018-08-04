@@ -27,6 +27,7 @@ func TestInteractor_ArticlePost(t *testing.T) {
 	i.Slugger.EXPECT().NewSlug(article.Title).Return(slug).Times(1)
 	i.ArticleRW.EXPECT().GetBySlug(slug).Return(nil, errors.New("not found")).Times(1)
 	i.ArticleValidator.EXPECT().BeforeCreationCheck(gomock.Any()).Return(nil).Times(1)
+	i.TagsRW.EXPECT().Add(gomock.Any())
 	i.ArticleRW.EXPECT().Create(gomock.Any())
 
 	_, err := i.GetUCHandler().ArticlePost(rick.Name, article)

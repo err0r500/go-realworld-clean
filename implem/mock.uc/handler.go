@@ -132,7 +132,7 @@ func (mr *MockHandlerMockRecorder) ArticlesFeed(username, limit, offset interfac
 }
 
 // GetArticles mocks base method
-func (m *MockHandler) GetArticles(limit, offset int, filters uc.Filters) (domain.ArticleCollection, int, error) {
+func (m *MockHandler) GetArticles(limit, offset int, filters []domain.ArticleFilter) (domain.ArticleCollection, int, error) {
 	ret := m.ctrl.Call(m, "GetArticles", limit, offset, filters)
 	ret0, _ := ret[0].(domain.ArticleCollection)
 	ret1, _ := ret[1].(int)
@@ -427,7 +427,7 @@ func (mr *MockArticlesLogicMockRecorder) ArticlesFeed(username, limit, offset in
 }
 
 // GetArticles mocks base method
-func (m *MockArticlesLogic) GetArticles(limit, offset int, filters uc.Filters) (domain.ArticleCollection, int, error) {
+func (m *MockArticlesLogic) GetArticles(limit, offset int, filters []domain.ArticleFilter) (domain.ArticleCollection, int, error) {
 	ret := m.ctrl.Call(m, "GetArticles", limit, offset, filters)
 	ret0, _ := ret[0].(domain.ArticleCollection)
 	ret1, _ := ret[1].(int)

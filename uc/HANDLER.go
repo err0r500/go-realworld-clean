@@ -30,7 +30,7 @@ type UserLogic interface {
 
 type ArticlesLogic interface {
 	ArticlesFeed(username string, limit, offset int) (articles domain.ArticleCollection, totalArticleCount int, err error)
-	GetArticles(limit, offset int, filters Filters) (articles domain.ArticleCollection, totalArticleCount int, err error)
+	GetArticles(limit, offset int, filters []domain.ArticleFilter) (articles domain.ArticleCollection, totalArticleCount int, err error)
 }
 
 type ArticleLogic interface {

@@ -18,6 +18,29 @@ type Article struct {
 	Comments       []Comment `json:"comments"`
 }
 
+type ArticleFilter func(Article) bool
+
+func Hastag(tag string) func(article Article) bool {
+	return func(article Article) bool {
+		for _, articleTag := range article.TagList {
+			if articleTag == tag {
+				return true
+			}
+		}
+		return false
+	}
+}
+
+func HasAuthor(authorName string) func(article Article) bool {
+	return func(article Article) bool {
+		return article.Author.Name == authorName
+	}
+}
+
+func IsFavorited(article Article) bool {
+	return article.Favorited
+}
+
 type ArticleCollection []Article
 
 func (articles ArticleCollection) ApplyLimitAndOffset(limit, offset int) ArticleCollection {

@@ -6,7 +6,6 @@ package uc
 
 import (
 	domain "github.com/err0r500/go-realworld-clean/domain"
-	uc "github.com/err0r500/go-realworld-clean/uc"
 	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
 )
@@ -247,7 +246,7 @@ func (mr *MockArticleRWMockRecorder) GetByAuthorsNameOrderedByMostRecentAsc(user
 }
 
 // GetRecentFiltered mocks base method
-func (m *MockArticleRW) GetRecentFiltered(filters uc.Filters) ([]domain.Article, error) {
+func (m *MockArticleRW) GetRecentFiltered(filters []domain.ArticleFilter) ([]domain.Article, error) {
 	ret := m.ctrl.Call(m, "GetRecentFiltered", filters)
 	ret0, _ := ret[0].([]domain.Article)
 	ret1, _ := ret[1].(error)
@@ -366,6 +365,18 @@ func (m *MockTagsRW) GetAll() ([]string, error) {
 // GetAll indicates an expected call of GetAll
 func (mr *MockTagsRWMockRecorder) GetAll() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAll", reflect.TypeOf((*MockTagsRW)(nil).GetAll))
+}
+
+// Add mocks base method
+func (m *MockTagsRW) Add(newTags []string) error {
+	ret := m.ctrl.Call(m, "Add", newTags)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Add indicates an expected call of Add
+func (mr *MockTagsRWMockRecorder) Add(newTags interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Add", reflect.TypeOf((*MockTagsRW)(nil).Add), newTags)
 }
 
 // MockSlugger is a mock of Slugger interface

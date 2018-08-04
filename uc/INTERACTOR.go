@@ -40,7 +40,7 @@ type ArticleRW interface {
 	Save(domain.Article) (*domain.Article, error)
 	GetBySlug(slug string) (*domain.Article, error)
 	GetByAuthorsNameOrderedByMostRecentAsc(usernames []string) ([]domain.Article, error)
-	GetRecentFiltered(filters Filters) ([]domain.Article, error)
+	GetRecentFiltered(filters []domain.ArticleFilter) ([]domain.Article, error)
 	Delete(slug string) error
 }
 
@@ -52,6 +52,7 @@ type CommentRW interface {
 
 type TagsRW interface {
 	GetAll() ([]string, error)
+	Add(newTags []string) error
 }
 
 type Slugger interface {
