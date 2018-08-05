@@ -36,14 +36,14 @@ func (rH RouterHandler) articlePost(c *gin.Context) {
 		return
 	}
 
-	article, err := rH.ucHandler.ArticlePost(rH.getUserName(c), articleFromReq(req))
+	user, article, err := rH.ucHandler.ArticlePost(rH.getUserName(c), articleFromReq(req))
 	if err != nil {
 		log(err)
 		c.Status(http.StatusUnprocessableEntity)
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"article": formatter.NewArticleFromDomain(*article, rH.getUserName(c))})
+	c.JSON(http.StatusCreated, gin.H{"article": formatter.NewArticleFromDomain(*article, user)})
 }
 
 func (rH RouterHandler) articlePut(c *gin.Context) {
@@ -55,26 +55,26 @@ func (rH RouterHandler) articlePut(c *gin.Context) {
 		c.Status(http.StatusBadRequest)
 		return
 	}
-	article, err := rH.ucHandler.ArticlePut(rH.getUserName(c), c.Param("slug"), articleFromReq(req))
+	user, article, err := rH.ucHandler.ArticlePut(rH.getUserName(c), c.Param("slug"), articleFromReq(req))
 	if err != nil {
 		log(err)
 		c.Status(http.StatusUnprocessableEntity)
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"article": formatter.NewArticleFromDomain(*article, rH.getUserName(c))})
+	c.JSON(http.StatusOK, gin.H{"article": formatter.NewArticleFromDomain(*article, user)})
 }
 
 func (rH RouterHandler) articleGet(c *gin.Context) {
 	log := rH.log(rH.MethodAndPath(c))
 
-	article, err := rH.ucHandler.ArticleGet(c.Param("slug"))
+	user, article, err := rH.ucHandler.ArticleGet(rH.getUserName(c), c.Param("slug")) // todo add requesting username here
 	if err != nil {
 		log(err)
 		c.Status(http.StatusUnprocessableEntity)
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"article": formatter.NewArticleFromDomain(*article, rH.getUserName(c))})
+	c.JSON(http.StatusOK, gin.H{"article": formatter.NewArticleFromDomain(*article, user)})
 }
 
 func (rH RouterHandler) articleDelete(c *gin.Context) {

@@ -29,14 +29,14 @@ type UserLogic interface {
 }
 
 type ArticlesLogic interface {
-	ArticlesFeed(username string, limit, offset int) (articles domain.ArticleCollection, totalArticleCount int, err error)
-	GetArticles(limit, offset int, filters []domain.ArticleFilter) (articles domain.ArticleCollection, totalArticleCount int, err error)
+	ArticlesFeed(username string, limit, offset int) (requestingUser *domain.User, articles domain.ArticleCollection, totalArticleCount int, err error)
+	GetArticles(username string, limit, offset int, filters []domain.ArticleFilter) (requestingUser *domain.User, articles domain.ArticleCollection, totalArticleCount int, err error)
 }
 
 type ArticleLogic interface {
-	ArticleGet(slug string) (*domain.Article, error)
-	ArticlePost(username string, article domain.Article) (*domain.Article, error)
-	ArticlePut(username, slug string, article domain.Article) (*domain.Article, error)
+	ArticleGet(slug, username string) (*domain.User, *domain.Article, error)
+	ArticlePost(username string, article domain.Article) (*domain.User, *domain.Article, error)
+	ArticlePut(username, slug string, article domain.Article) (*domain.User, *domain.Article, error)
 	ArticleDelete(username, slug string) error
 }
 
@@ -47,7 +47,7 @@ type CommentsLogic interface {
 }
 
 type FavoritesLogic interface {
-	FavoritesUpdate(username, slug string, favortie bool) (*domain.Article, error)
+	FavoritesUpdate(username, slug string, favortie bool) (*domain.User, *domain.Article, error)
 }
 
 type TagsLogic interface {

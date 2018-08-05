@@ -19,15 +19,20 @@ func NewFilters(author, tag, favorite string) []domain.ArticleFilter {
 	return filters
 }
 
-func (i interactor) GetArticles(limit, offset int, filters []domain.ArticleFilter) (domain.ArticleCollection, int, error) {
+func (i interactor) GetArticles(username string, limit, offset int, filters []domain.ArticleFilter) (*domain.User, domain.ArticleCollection, int, error) {
 	if limit <= 0 {
-		return domain.ArticleCollection{}, 0, nil
+		return nil, domain.ArticleCollection{}, 0, nil
 	}
 
 	articles, err := i.articleRW.GetRecentFiltered(filters)
 	if err != nil {
-		return nil, 0, err
+		return nil, nil, 0, err
 	}
 
-	return domain.ArticleCollection(articles).ApplyLimitAndOffset(limit, offset), len(articles), nil
+	user, err := i.userRW.GetByName(username)
+	if err != nil {
+		return nil, nil, 0, err
+	}
+
+	return user, domain.ArticleCollection(articles).ApplyLimitAndOffset(limit, offset), len(articles), nil
 }

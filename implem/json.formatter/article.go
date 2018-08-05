@@ -1,8 +1,10 @@
 package formatter
 
-import "github.com/err0r500/go-realworld-clean/domain"
+import (
+	"time"
 
-const dateFormat = "2006-01-02T15:04:05.999Z"
+	"github.com/err0r500/go-realworld-clean/domain"
+)
 
 type Article struct {
 	Title          string   `json:"title"`
@@ -17,26 +19,39 @@ type Article struct {
 	FavoritesCount int      `json:"favoritesCount"`
 }
 
-func NewArticleFromDomain(article domain.Article, username string) Article {
+func NewArticleFromDomain(article domain.Article, user *domain.User) Article {
+	isFollowingAuthor := false
+	favorite := false
+	if user != nil {
+		for _, userName := range user.FollowIDs {
+			if userName == article.Author.Name {
+				isFollowingAuthor = true
+				break
+			}
+		}
+
+		favorite = domain.ArticleIsFavoritedBy(user.Name)(article)
+	}
+
 	return Article{
 		Slug:           article.Slug,
 		Title:          article.Title,
 		Description:    article.Description,
 		Body:           article.Body,
-		CreatedAt:      article.CreatedAt.UTC().Format(dateFormat),
-		UpdatedAt:      article.UpdatedAt.UTC().Format(dateFormat),
-		Author:         NewProfileFromDomain(article.Author, false), //fixme : check this !
+		CreatedAt:      article.CreatedAt.UTC().Format(time.RFC3339),
+		UpdatedAt:      article.UpdatedAt.UTC().Format(time.RFC3339),
+		Author:         NewProfileFromDomain(article.Author, isFollowingAuthor),
 		Tags:           article.TagList,
-		Favorite:       domain.ArticleIsFavoritedBy(username)(article),
+		Favorite:       favorite,
 		FavoritesCount: len(article.FavoritedBy),
 	}
 }
 
-func NewArticlesFromDomain(username string, articles ...domain.Article) []Article {
-	ret := []Article{}
+func NewArticlesFromDomain(user *domain.User, articles ...domain.Article) []Article {
+	ret := []Article{} // return at least an empty array (not nil)
 
 	for _, article := range articles {
-		ret = append(ret, NewArticleFromDomain(article, username))
+		ret = append(ret, NewArticleFromDomain(article, user))
 	}
 
 	return ret

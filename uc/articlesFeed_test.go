@@ -28,10 +28,11 @@ func TestInteractor_ArticlesFeed_happycases(t *testing.T) {
 		i.UserRW.EXPECT().GetByName(rick.Name).Return(&rick, nil)
 		i.ArticleRW.EXPECT().GetByAuthorsNameOrderedByMostRecentAsc(rick.FollowIDs).Return(expectedArticles, nil).Times(1)
 
-		articles, count, err := i.GetUCHandler().ArticlesFeed(rick.Name, 4, 0)
+		user, articles, count, err := i.GetUCHandler().ArticlesFeed(rick.Name, 4, 0)
 		assert.NoError(t, err)
 		assert.Equal(t, 4, count)
 		assert.Equal(t, expectedArticles, articles)
+		assert.Equal(t, rick, *user)
 	})
 
 	t.Run("total count", func(t *testing.T) {
@@ -42,10 +43,11 @@ func TestInteractor_ArticlesFeed_happycases(t *testing.T) {
 		i.UserRW.EXPECT().GetByName(rick.Name).Return(&rick, nil)
 		i.ArticleRW.EXPECT().GetByAuthorsNameOrderedByMostRecentAsc(rick.FollowIDs).Return(expectedArticles, nil).Times(1)
 
-		articles, count, err := i.GetUCHandler().ArticlesFeed(rick.Name, 2, 0)
+		user, articles, count, err := i.GetUCHandler().ArticlesFeed(rick.Name, 2, 0)
 		assert.NoError(t, err)
 		assert.Equal(t, 4, count)
 		assert.Equal(t, expectedArticles[:2], articles)
+		assert.Equal(t, rick, *user)
 	})
 
 }

@@ -28,7 +28,8 @@ func (rH RouterHandler) articlesFilteredGet(c *gin.Context) {
 		offset = defaultOffset
 	}
 
-	articles, count, err := rH.ucHandler.GetArticles(
+	user, articles, count, err := rH.ucHandler.GetArticles(
+		rH.getUserName(c),
 		limit,
 		offset,
 		uc.NewFilters(
@@ -43,7 +44,7 @@ func (rH RouterHandler) articlesFilteredGet(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"articles": formatter.NewArticlesFromDomain(rH.getUserName(c), articles...), "articlesCount": count})
+	c.JSON(http.StatusOK, gin.H{"articles": formatter.NewArticlesFromDomain(user, articles...), "articlesCount": count})
 }
 
 func (rH RouterHandler) articlesFeedGet(c *gin.Context) {
@@ -59,12 +60,12 @@ func (rH RouterHandler) articlesFeedGet(c *gin.Context) {
 		offset = defaultOffset
 	}
 
-	articles, count, err := rH.ucHandler.ArticlesFeed(rH.getUserName(c), limit, offset)
+	user, articles, count, err := rH.ucHandler.ArticlesFeed(rH.getUserName(c), limit, offset)
 	if err != nil {
 		log(err)
 		c.Status(http.StatusUnprocessableEntity)
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"articles": formatter.NewArticlesFromDomain(rH.getUserName(c), articles...), "articlesCount": count})
+	c.JSON(http.StatusOK, gin.H{"articles": formatter.NewArticlesFromDomain(user, articles...), "articlesCount": count})
 }

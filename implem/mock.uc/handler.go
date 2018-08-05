@@ -118,12 +118,13 @@ func (mr *MockHandlerMockRecorder) UserEdit(userName, newUser interface{}) *gomo
 }
 
 // ArticlesFeed mocks base method
-func (m *MockHandler) ArticlesFeed(username string, limit, offset int) (domain.ArticleCollection, int, error) {
+func (m *MockHandler) ArticlesFeed(username string, limit, offset int) (*domain.User, domain.ArticleCollection, int, error) {
 	ret := m.ctrl.Call(m, "ArticlesFeed", username, limit, offset)
-	ret0, _ := ret[0].(domain.ArticleCollection)
-	ret1, _ := ret[1].(int)
-	ret2, _ := ret[2].(error)
-	return ret0, ret1, ret2
+	ret0, _ := ret[0].(*domain.User)
+	ret1, _ := ret[1].(domain.ArticleCollection)
+	ret2, _ := ret[2].(int)
+	ret3, _ := ret[3].(error)
+	return ret0, ret1, ret2, ret3
 }
 
 // ArticlesFeed indicates an expected call of ArticlesFeed
@@ -132,38 +133,41 @@ func (mr *MockHandlerMockRecorder) ArticlesFeed(username, limit, offset interfac
 }
 
 // GetArticles mocks base method
-func (m *MockHandler) GetArticles(limit, offset int, filters []domain.ArticleFilter) (domain.ArticleCollection, int, error) {
-	ret := m.ctrl.Call(m, "GetArticles", limit, offset, filters)
-	ret0, _ := ret[0].(domain.ArticleCollection)
-	ret1, _ := ret[1].(int)
+func (m *MockHandler) GetArticles(username string, limit, offset int, filters []domain.ArticleFilter) (*domain.User, domain.ArticleCollection, int, error) {
+	ret := m.ctrl.Call(m, "GetArticles", username, limit, offset, filters)
+	ret0, _ := ret[0].(*domain.User)
+	ret1, _ := ret[1].(domain.ArticleCollection)
+	ret2, _ := ret[2].(int)
+	ret3, _ := ret[3].(error)
+	return ret0, ret1, ret2, ret3
+}
+
+// GetArticles indicates an expected call of GetArticles
+func (mr *MockHandlerMockRecorder) GetArticles(username, limit, offset, filters interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetArticles", reflect.TypeOf((*MockHandler)(nil).GetArticles), username, limit, offset, filters)
+}
+
+// ArticleGet mocks base method
+func (m *MockHandler) ArticleGet(slug, username string) (*domain.User, *domain.Article, error) {
+	ret := m.ctrl.Call(m, "ArticleGet", slug, username)
+	ret0, _ := ret[0].(*domain.User)
+	ret1, _ := ret[1].(*domain.Article)
 	ret2, _ := ret[2].(error)
 	return ret0, ret1, ret2
 }
 
-// GetArticles indicates an expected call of GetArticles
-func (mr *MockHandlerMockRecorder) GetArticles(limit, offset, filters interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetArticles", reflect.TypeOf((*MockHandler)(nil).GetArticles), limit, offset, filters)
-}
-
-// ArticleGet mocks base method
-func (m *MockHandler) ArticleGet(slug string) (*domain.Article, error) {
-	ret := m.ctrl.Call(m, "ArticleGet", slug)
-	ret0, _ := ret[0].(*domain.Article)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
 // ArticleGet indicates an expected call of ArticleGet
-func (mr *MockHandlerMockRecorder) ArticleGet(slug interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ArticleGet", reflect.TypeOf((*MockHandler)(nil).ArticleGet), slug)
+func (mr *MockHandlerMockRecorder) ArticleGet(slug, username interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ArticleGet", reflect.TypeOf((*MockHandler)(nil).ArticleGet), slug, username)
 }
 
 // ArticlePost mocks base method
-func (m *MockHandler) ArticlePost(username string, article domain.Article) (*domain.Article, error) {
+func (m *MockHandler) ArticlePost(username string, article domain.Article) (*domain.User, *domain.Article, error) {
 	ret := m.ctrl.Call(m, "ArticlePost", username, article)
-	ret0, _ := ret[0].(*domain.Article)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret0, _ := ret[0].(*domain.User)
+	ret1, _ := ret[1].(*domain.Article)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
 // ArticlePost indicates an expected call of ArticlePost
@@ -172,11 +176,12 @@ func (mr *MockHandlerMockRecorder) ArticlePost(username, article interface{}) *g
 }
 
 // ArticlePut mocks base method
-func (m *MockHandler) ArticlePut(username, slug string, article domain.Article) (*domain.Article, error) {
+func (m *MockHandler) ArticlePut(username, slug string, article domain.Article) (*domain.User, *domain.Article, error) {
 	ret := m.ctrl.Call(m, "ArticlePut", username, slug, article)
-	ret0, _ := ret[0].(*domain.Article)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret0, _ := ret[0].(*domain.User)
+	ret1, _ := ret[1].(*domain.Article)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
 // ArticlePut indicates an expected call of ArticlePut
@@ -235,11 +240,12 @@ func (mr *MockHandlerMockRecorder) CommentsDelete(username, slug, id interface{}
 }
 
 // FavoritesUpdate mocks base method
-func (m *MockHandler) FavoritesUpdate(username, slug string, favortie bool) (*domain.Article, error) {
+func (m *MockHandler) FavoritesUpdate(username, slug string, favortie bool) (*domain.User, *domain.Article, error) {
 	ret := m.ctrl.Call(m, "FavoritesUpdate", username, slug, favortie)
-	ret0, _ := ret[0].(*domain.Article)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret0, _ := ret[0].(*domain.User)
+	ret1, _ := ret[1].(*domain.Article)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
 // FavoritesUpdate indicates an expected call of FavoritesUpdate
@@ -413,12 +419,13 @@ func (m *MockArticlesLogic) EXPECT() *MockArticlesLogicMockRecorder {
 }
 
 // ArticlesFeed mocks base method
-func (m *MockArticlesLogic) ArticlesFeed(username string, limit, offset int) (domain.ArticleCollection, int, error) {
+func (m *MockArticlesLogic) ArticlesFeed(username string, limit, offset int) (*domain.User, domain.ArticleCollection, int, error) {
 	ret := m.ctrl.Call(m, "ArticlesFeed", username, limit, offset)
-	ret0, _ := ret[0].(domain.ArticleCollection)
-	ret1, _ := ret[1].(int)
-	ret2, _ := ret[2].(error)
-	return ret0, ret1, ret2
+	ret0, _ := ret[0].(*domain.User)
+	ret1, _ := ret[1].(domain.ArticleCollection)
+	ret2, _ := ret[2].(int)
+	ret3, _ := ret[3].(error)
+	return ret0, ret1, ret2, ret3
 }
 
 // ArticlesFeed indicates an expected call of ArticlesFeed
@@ -427,17 +434,18 @@ func (mr *MockArticlesLogicMockRecorder) ArticlesFeed(username, limit, offset in
 }
 
 // GetArticles mocks base method
-func (m *MockArticlesLogic) GetArticles(limit, offset int, filters []domain.ArticleFilter) (domain.ArticleCollection, int, error) {
-	ret := m.ctrl.Call(m, "GetArticles", limit, offset, filters)
-	ret0, _ := ret[0].(domain.ArticleCollection)
-	ret1, _ := ret[1].(int)
-	ret2, _ := ret[2].(error)
-	return ret0, ret1, ret2
+func (m *MockArticlesLogic) GetArticles(username string, limit, offset int, filters []domain.ArticleFilter) (*domain.User, domain.ArticleCollection, int, error) {
+	ret := m.ctrl.Call(m, "GetArticles", username, limit, offset, filters)
+	ret0, _ := ret[0].(*domain.User)
+	ret1, _ := ret[1].(domain.ArticleCollection)
+	ret2, _ := ret[2].(int)
+	ret3, _ := ret[3].(error)
+	return ret0, ret1, ret2, ret3
 }
 
 // GetArticles indicates an expected call of GetArticles
-func (mr *MockArticlesLogicMockRecorder) GetArticles(limit, offset, filters interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetArticles", reflect.TypeOf((*MockArticlesLogic)(nil).GetArticles), limit, offset, filters)
+func (mr *MockArticlesLogicMockRecorder) GetArticles(username, limit, offset, filters interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetArticles", reflect.TypeOf((*MockArticlesLogic)(nil).GetArticles), username, limit, offset, filters)
 }
 
 // MockArticleLogic is a mock of ArticleLogic interface
@@ -464,24 +472,26 @@ func (m *MockArticleLogic) EXPECT() *MockArticleLogicMockRecorder {
 }
 
 // ArticleGet mocks base method
-func (m *MockArticleLogic) ArticleGet(slug string) (*domain.Article, error) {
-	ret := m.ctrl.Call(m, "ArticleGet", slug)
-	ret0, _ := ret[0].(*domain.Article)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+func (m *MockArticleLogic) ArticleGet(slug, username string) (*domain.User, *domain.Article, error) {
+	ret := m.ctrl.Call(m, "ArticleGet", slug, username)
+	ret0, _ := ret[0].(*domain.User)
+	ret1, _ := ret[1].(*domain.Article)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
 // ArticleGet indicates an expected call of ArticleGet
-func (mr *MockArticleLogicMockRecorder) ArticleGet(slug interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ArticleGet", reflect.TypeOf((*MockArticleLogic)(nil).ArticleGet), slug)
+func (mr *MockArticleLogicMockRecorder) ArticleGet(slug, username interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ArticleGet", reflect.TypeOf((*MockArticleLogic)(nil).ArticleGet), slug, username)
 }
 
 // ArticlePost mocks base method
-func (m *MockArticleLogic) ArticlePost(username string, article domain.Article) (*domain.Article, error) {
+func (m *MockArticleLogic) ArticlePost(username string, article domain.Article) (*domain.User, *domain.Article, error) {
 	ret := m.ctrl.Call(m, "ArticlePost", username, article)
-	ret0, _ := ret[0].(*domain.Article)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret0, _ := ret[0].(*domain.User)
+	ret1, _ := ret[1].(*domain.Article)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
 // ArticlePost indicates an expected call of ArticlePost
@@ -490,11 +500,12 @@ func (mr *MockArticleLogicMockRecorder) ArticlePost(username, article interface{
 }
 
 // ArticlePut mocks base method
-func (m *MockArticleLogic) ArticlePut(username, slug string, article domain.Article) (*domain.Article, error) {
+func (m *MockArticleLogic) ArticlePut(username, slug string, article domain.Article) (*domain.User, *domain.Article, error) {
 	ret := m.ctrl.Call(m, "ArticlePut", username, slug, article)
-	ret0, _ := ret[0].(*domain.Article)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret0, _ := ret[0].(*domain.User)
+	ret1, _ := ret[1].(*domain.Article)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
 // ArticlePut indicates an expected call of ArticlePut
@@ -599,11 +610,12 @@ func (m *MockFavoritesLogic) EXPECT() *MockFavoritesLogicMockRecorder {
 }
 
 // FavoritesUpdate mocks base method
-func (m *MockFavoritesLogic) FavoritesUpdate(username, slug string, favortie bool) (*domain.Article, error) {
+func (m *MockFavoritesLogic) FavoritesUpdate(username, slug string, favortie bool) (*domain.User, *domain.Article, error) {
 	ret := m.ctrl.Call(m, "FavoritesUpdate", username, slug, favortie)
-	ret0, _ := ret[0].(*domain.Article)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret0, _ := ret[0].(*domain.User)
+	ret1, _ := ret[1].(*domain.Article)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
 // FavoritesUpdate indicates an expected call of FavoritesUpdate

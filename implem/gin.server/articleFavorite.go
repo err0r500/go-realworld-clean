@@ -21,12 +21,12 @@ func (rH RouterHandler) updateFavorite(c *gin.Context) {
 		return
 	}
 
-	article, err := rH.ucHandler.FavoritesUpdate(rH.getUserName(c), c.Param("slug"), favorite)
+	user, article, err := rH.ucHandler.FavoritesUpdate(rH.getUserName(c), c.Param("slug"), favorite)
 	if err != nil {
 		log(err)
 		c.Status(http.StatusUnprocessableEntity)
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"article": formatter.NewArticleFromDomain(*article, rH.getUserName(c))})
+	c.JSON(http.StatusOK, gin.H{"article": formatter.NewArticleFromDomain(*article, user)})
 }

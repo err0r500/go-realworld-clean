@@ -20,15 +20,16 @@ func TestArticleFavoritePost(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
+	testUser := testData.User("jane")
 	expectedComment := testData.Article("")
 	ucHandler := uc.NewMockHandler(mockCtrl)
 	ucHandler.EXPECT().
 		FavoritesUpdate(
-			testData.User("jane").Name,
+			testUser.Name,
 			testData.Article("jane").Slug,
 			true,
 		).
-		Return(&expectedComment, nil).
+		Return(&testUser, &expectedComment, nil).
 		Times(1)
 
 	jwtHandler := jwt.NewTokenHandler("mySalt")
@@ -65,14 +66,15 @@ func TestArticleFavoriteDelete(t *testing.T) {
 	defer mockCtrl.Finish()
 
 	expectedComment := testData.Article("")
+	testUser := testData.User("jane")
 	ucHandler := uc.NewMockHandler(mockCtrl)
 	ucHandler.EXPECT().
 		FavoritesUpdate(
-			testData.User("jane").Name,
+			testUser.Name,
 			testData.Article("jane").Slug,
 			false,
 		).
-		Return(&expectedComment, nil).
+		Return(&testUser, &expectedComment, nil).
 		Times(1)
 
 	jwtHandler := jwt.NewTokenHandler("mySalt")

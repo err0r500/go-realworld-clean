@@ -30,7 +30,7 @@ func TestInteractor_ArticlePost(t *testing.T) {
 	i.TagsRW.EXPECT().Add(gomock.Any())
 	i.ArticleRW.EXPECT().Create(gomock.Any())
 
-	_, err := i.GetUCHandler().ArticlePost(rick.Name, article)
+	_, _, err := i.GetUCHandler().ArticlePost(rick.Name, article)
 	assert.NoError(t, err)
 }
 
@@ -54,8 +54,9 @@ func TestInteractor_ArticlePut(t *testing.T) {
 	i.ArticleRW.EXPECT().GetBySlug(origArticle.Slug).Return(&origArticle, nil).Times(1)
 	i.ArticleValidator.EXPECT().BeforeUpdateCheck(&toInsert).Return(nil).Times(1)
 	i.ArticleRW.EXPECT().Save(toInsert)
+	i.UserRW.EXPECT().GetByName(jane.Name).Return(&jane, nil).Times(1)
 
-	_, err := i.GetUCHandler().ArticlePut(jane.Name, origArticle.Slug, req)
+	_, _, err := i.GetUCHandler().ArticlePut(jane.Name, origArticle.Slug, req)
 	assert.NoError(t, err)
 }
 
@@ -75,11 +76,13 @@ func TestInteractor_ArticleDelete(t *testing.T) {
 func TestInteractor_ArticleGet(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
+	testUser := testData.User("rick")
 	article := testData.Article("janeArticle")
 
 	i := mock.NewMockedInteractor(mockCtrl)
 	i.ArticleRW.EXPECT().GetBySlug(article.Slug).Return(&article, nil).Times(1)
+	i.UserRW.EXPECT().GetByName(testUser.Name).Return(&testUser, nil).Times(1)
 
-	_, err := i.GetUCHandler().ArticleGet(article.Slug)
+	_, _, err := i.GetUCHandler().ArticleGet(testUser.Name, article.Slug)
 	assert.NoError(t, err)
 }

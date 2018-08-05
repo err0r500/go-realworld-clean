@@ -13,9 +13,8 @@ type Article struct {
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 	FavoritedBy []User
-	//FavoritesCount int
-	Author   User
-	Comments []Comment
+	Author      User
+	Comments    []Comment
 }
 
 type ArticleFilter func(Article) bool

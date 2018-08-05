@@ -75,6 +75,7 @@ func (user User) Follows(userName string) bool {
 	if user.FollowIDs == nil {
 		return false
 	}
+
 	sort.Strings(user.FollowIDs)
 	i := sort.SearchStrings(user.FollowIDs, userName)
 	return i < len(user.FollowIDs) && user.FollowIDs[i] == userName

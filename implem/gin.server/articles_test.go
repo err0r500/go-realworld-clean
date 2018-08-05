@@ -21,6 +21,7 @@ var articlesFilteredPath = "/api/articles"
 var articlesFeedPath = "/api/articles/feed"
 
 func TestArticlesFiltered(t *testing.T) {
+	// todo : add test with auth
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
@@ -32,8 +33,8 @@ func TestArticlesFiltered(t *testing.T) {
 
 	ucHandler := mock.NewMockHandler(mockCtrl)
 	ucHandler.EXPECT().
-		GetArticles(limit, offset, gomock.Any()).
-		Return(domain.ArticleCollection{testData.Article("jane")}, 10, nil).
+		GetArticles("", limit, offset, gomock.Any()).
+		Return(nil, domain.ArticleCollection{testData.Article("jane")}, 10, nil).
 		Times(1)
 
 	gE := gin.Default()
@@ -69,7 +70,7 @@ func TestArticlesFeed(t *testing.T) {
 		ucHandler := mock.NewMockHandler(mockCtrl)
 		ucHandler.EXPECT().
 			ArticlesFeed(jane.Name, limit, offset).
-			Return(domain.ArticleCollection{testData.Article("jane")}, 10, nil).
+			Return(nil, domain.ArticleCollection{testData.Article("jane")}, 10, nil).
 			Times(1)
 
 		jwtHandler := jwt.NewTokenHandler("mySalt")
@@ -106,7 +107,7 @@ func TestArticlesFeed(t *testing.T) {
 		ucHandler := mock.NewMockHandler(mockCtrl)
 		ucHandler.EXPECT().
 			ArticlesFeed(jane.Name, limit, offset).
-			Return(nil, 0, nil).
+			Return(&jane, nil, 0, nil).
 			Times(1)
 
 		jwtHandler := jwt.NewTokenHandler("mySalt")

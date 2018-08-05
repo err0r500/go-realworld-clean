@@ -24,10 +24,12 @@ func TestRouterHandler_articlePost(t *testing.T) {
 	defer mockCtrl.Finish()
 
 	expectedArticle := testData.Article("jane")
+	testUser := testData.User("jane")
+
 	ucHandler := uc.NewMockHandler(mockCtrl)
 	ucHandler.EXPECT().
-		ArticlePost(testData.User("jane").Name, gomock.Any()).
-		Return(&expectedArticle, nil).
+		ArticlePost(testUser.Name, gomock.Any()).
+		Return(&testUser, &expectedArticle, nil).
 		Times(1)
 
 	jwtHandler := jwt.NewTokenHandler("mySalt")
@@ -80,13 +82,14 @@ func TestRouterHandler_articlePut(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
+	testUser := testData.User("jane")
 	expectedArticle := testData.Article("jane")
 	jwtHandler := jwt.NewTokenHandler("mySalt")
 
 	ucHandler := uc.NewMockHandler(mockCtrl)
 	ucHandler.EXPECT().
-		ArticlePut(testData.User("jane").Name, expectedArticle.Slug, gomock.Any()).
-		Return(&expectedArticle, nil).
+		ArticlePut(testUser.Name, expectedArticle.Slug, gomock.Any()).
+		Return(&testUser, &expectedArticle, nil).
 		Times(1)
 
 	gE := gin.Default()
@@ -143,10 +146,11 @@ func TestRouterHandler_articleGet(t *testing.T) {
 	defer mockCtrl.Finish()
 
 	expectedArticle := testData.Article("jane")
+	//testUser := testData.User("jane")
 	ucHandler := uc.NewMockHandler(mockCtrl)
 	ucHandler.EXPECT().
-		ArticleGet(expectedArticle.Slug).
-		Return(&expectedArticle, nil).
+		ArticleGet("", expectedArticle.Slug).
+		Return(nil, &expectedArticle, nil).
 		Times(1)
 
 	gE := gin.Default()
