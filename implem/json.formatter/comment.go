@@ -1,8 +1,6 @@
 package formatter
 
 import (
-	"time"
-
 	"github.com/err0r500/go-realworld-clean/domain"
 )
 
@@ -26,8 +24,8 @@ func NewCommentsFromDomain(comments ...domain.Comment) []Comment {
 func NewCommentFromDomain(comment domain.Comment) Comment {
 	return Comment{
 		ID:        comment.ID,
-		CreatedAt: comment.CreatedAt.UTC().Format(time.RFC3339),
-		UpdatedAt: comment.UpdatedAt.UTC().Format(time.RFC3339),
+		CreatedAt: comment.CreatedAt.UTC().Format(dateLayout),
+		UpdatedAt: comment.UpdatedAt.UTC().Format(dateLayout),
 		Body:      comment.Body,
 		Author:    NewProfileFromDomain(comment.Author, false), //fixme check this
 	}

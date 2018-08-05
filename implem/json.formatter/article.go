@@ -1,10 +1,10 @@
 package formatter
 
 import (
-	"time"
-
 	"github.com/err0r500/go-realworld-clean/domain"
 )
+
+const dateLayout = "2006-01-02T15:04:05.999Z"
 
 type Article struct {
 	Title          string   `json:"title"`
@@ -38,8 +38,8 @@ func NewArticleFromDomain(article domain.Article, user *domain.User) Article {
 		Title:          article.Title,
 		Description:    article.Description,
 		Body:           article.Body,
-		CreatedAt:      article.CreatedAt.UTC().Format(time.RFC3339),
-		UpdatedAt:      article.UpdatedAt.UTC().Format(time.RFC3339),
+		CreatedAt:      article.CreatedAt.UTC().Format(dateLayout),
+		UpdatedAt:      article.UpdatedAt.UTC().Format(dateLayout),
 		Author:         NewProfileFromDomain(article.Author, isFollowingAuthor),
 		Tags:           article.TagList,
 		Favorite:       favorite,
