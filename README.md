@@ -1,11 +1,25 @@
-# go-realworld-clean
+# ![RealWorld Example App](https://github.com/gothinkster/realworld-starter-kit/raw/master/logo.png)
+
+> ### Golang clean-architecture codebase containing real world examples (CRUD, auth, advanced patterns, etc) that adheres to the [RealWorld](https://github.com/gothinkster/realworld) spec and API.
+
+
+### [Demo](https://github.com/gothinkster/realworld)&nbsp;&nbsp;&nbsp;&nbsp;[RealWorld](https://github.com/gothinkster/realworld)
+
+
+This codebase was created to demonstrate a fully fledged fullstack application built with  go including CRUD operations, authentication, routing, pagination, and more.
+
+We've gone to great lengths to adhere to the go community styleguides & best practices.
+
+For more information on how to this works with other frontends/backends, head over to the [RealWorld](https://github.com/gothinkster/realworld) repo.
+
 
 [![Build Status](https://travis-ci.org/err0r500/go-realworld-clean.svg?branch=master)](https://travis-ci.org/err0r500/go-realworld-clean)
 [![BCH compliance](https://bettercodehub.com/edge/badge/err0r500/go-realworld-clean?branch=master)](https://bettercodehub.com/)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/107e5849415b40f4ae9c235afecebf56)](https://www.codacy.com/app/Err0r500/go-realworld-clean?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=err0r500/go-realworld-clean&amp;utm_campaign=Badge_Grade)
 [![codecov](https://codecov.io/gh/err0r500/go-realworld-clean/branch/master/graph/badge.svg)](https://codecov.io/gh/err0r500/go-realworld-clean)
 
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/err0r500/go-realworld-clean/blob/master/LICENSE)
+
+# How it works
 
 ## Clean Architecture :
 Layers ( from the most abstract to the most concrete ) :
@@ -14,34 +28,26 @@ Layers ( from the most abstract to the most concrete ) :
 - implem : implementations of the interfaces used in the business logic (uc layer)
 - infra : setup/configuration of the implementation
 
-Golden rule : a layer never imports something from a layer below it
+#### Golden rules : 
+- a layer never imports something from a layer below it
+- 3rd-party libraries are forbidden in the 2 topmost layers
 
-## Install and Hooks
+#### Benefits :
+- flexibility
+- testability
 
-Make sure you installed [dep](https://github.com/golang/dep) and 
-[golangci-lint](https://github.com/golangci/golangci-lint). Then install the
-dependencies using the `dep` command:
-
+# Getting started
+### Install dependencies 
 ```
-$ go get -u github.com/golang/dep/cmd/dep
-$ go get -u github.com/golangci/golangci-lint/cmd/golangci-lint
-$ dep ensure
+go get -u github.com/golang/dep/cmd/dep
+$GOPATH/bin/dep ensure
+make
 ```
-
-Then generate the mock to pass tests:
-
+### Run the app
+```bash
+./go-realworld-clean
 ```
-$ make mock
-```
-
-To enable the pre-commit hook:
-
-```
-$ git config core.hooksPath .githooks
-```
-
-## Configuration
-
+# Additional
 ## Make Targets
 
 The version is either `0.1.0` if no tag has ever been defined or the latest
