@@ -21,39 +21,75 @@ var articlesFilteredPath = "/api/articles"
 var articlesFeedPath = "/api/articles/feed"
 
 func TestArticlesFiltered(t *testing.T) {
-	// todo : add test with auth
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
-
 	limit := 10
 	offset := 2
 	author := "jane"
 	tag := "tag1"
 	fav := "false"
 
-	ucHandler := mock.NewMockHandler(mockCtrl)
-	ucHandler.EXPECT().
-		GetArticles("", limit, offset, gomock.Any()).
-		Return(nil, domain.ArticleCollection{testData.Article("jane")}, 10, nil).
-		Times(1)
+	t.Run("no auth", func(t *testing.T) {
+		mockCtrl := gomock.NewController(t)
+		defer mockCtrl.Finish()
+		ucHandler := mock.NewMockHandler(mockCtrl)
+		ucHandler.EXPECT().
+			GetArticles("", limit, offset, gomock.Any()).
+			Return(nil, domain.ArticleCollection{testData.Article("jane")}, 10, nil).
+			Times(1)
 
-	gE := gin.Default()
-	server.NewRouter(ucHandler, nil).SetRoutes(gE)
-	ts := httptest.NewServer(gE)
-	defer ts.Close()
+		gE := gin.Default()
+		server.NewRouter(ucHandler, nil).SetRoutes(gE)
+		ts := httptest.NewServer(gE)
+		defer ts.Close()
 
-	t.Run("happyCase", func(t *testing.T) {
-		baloo.New(ts.URL).
-			Get(articlesFilteredPath).
-			AddQuery("limit", strconv.Itoa(limit)).
-			AddQuery("offset", strconv.Itoa(offset)).
-			AddQuery("author", author).
-			AddQuery("tag", tag).
-			AddQuery("favorited", fav).
-			Expect(t).
-			Status(200).
-			JSONSchema(testData.ArticleMultipleRespDefinition).
-			Done()
+		t.Run("happyCase", func(t *testing.T) {
+			baloo.New(ts.URL).
+				Get(articlesFilteredPath).
+				AddQuery("limit", strconv.Itoa(limit)).
+				AddQuery("offset", strconv.Itoa(offset)).
+				AddQuery("author", author).
+				AddQuery("tag", tag).
+				AddQuery("favorited", fav).
+				Expect(t).
+				Status(200).
+				JSONSchema(testData.ArticleMultipleRespDefinition).
+				Done()
+		})
+	})
+
+	t.Run("logged user", func(t *testing.T) {
+		mockCtrl := gomock.NewController(t)
+		defer mockCtrl.Finish()
+
+		testUser := testData.User("jane")
+		ucHandler := mock.NewMockHandler(mockCtrl)
+		ucHandler.EXPECT().
+			GetArticles(testUser.Name, limit, offset, gomock.Any()).
+			Return(nil, domain.ArticleCollection{testData.Article("jane")}, 10, nil).
+			Times(1)
+
+		jwtHandler := jwt.NewTokenHandler("mySalt")
+		gE := gin.Default()
+		server.NewRouter(ucHandler, jwtHandler).SetRoutes(gE)
+		authToken, err := jwtHandler.GenUserToken(testUser.Name)
+		assert.NoError(t, err)
+
+		ts := httptest.NewServer(gE)
+		defer ts.Close()
+
+		t.Run("happyCase", func(t *testing.T) {
+			baloo.New(ts.URL).
+				Get(articlesFilteredPath).
+				AddQuery("limit", strconv.Itoa(limit)).
+				AddQuery("offset", strconv.Itoa(offset)).
+				AddQuery("author", author).
+				AddQuery("tag", tag).
+				AddQuery("favorited", fav).
+				AddHeader("Authorization", testData.TokenPrefix+authToken).
+				Expect(t).
+				Status(200).
+				JSONSchema(testData.ArticleMultipleRespDefinition).
+				Done()
+		})
 	})
 }
 

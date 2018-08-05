@@ -111,6 +111,20 @@ func (rH RouterHandler) jwtMiddleware() gin.HandlerFunc {
 	}
 }
 
+func (rH RouterHandler) getUserNameFromToken(c *gin.Context) string {
+	jwt, err := getJWT(c.GetHeader("Authorization"))
+	if err != nil {
+		return ""
+	}
+
+	userName, err := rH.authHandler.GetUserName(jwt)
+	if err != nil {
+		return ""
+	}
+
+	return userName
+}
+
 func getJWT(authHeader string) (string, error) {
 	splitted := strings.Split(authHeader, "Token ")
 	if len(splitted) != 2 {

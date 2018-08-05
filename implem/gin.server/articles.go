@@ -29,7 +29,7 @@ func (rH RouterHandler) articlesFilteredGet(c *gin.Context) {
 	}
 
 	user, articles, count, err := rH.ucHandler.GetArticles(
-		rH.getUserName(c),
+		rH.getUserNameFromToken(c),
 		limit,
 		offset,
 		uc.NewFilters(
@@ -60,7 +60,7 @@ func (rH RouterHandler) articlesFeedGet(c *gin.Context) {
 		offset = defaultOffset
 	}
 
-	user, articles, count, err := rH.ucHandler.ArticlesFeed(rH.getUserName(c), limit, offset)
+	user, articles, count, err := rH.ucHandler.ArticlesFeed(rH.getUserNameFromToken(c), limit, offset)
 	if err != nil {
 		log(err)
 		c.Status(http.StatusUnprocessableEntity)

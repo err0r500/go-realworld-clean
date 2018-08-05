@@ -9,15 +9,8 @@ import (
 
 func (rH RouterHandler) profileGet(c *gin.Context) {
 	log := rH.log(rH.MethodAndPath(c))
-	requestingUserName := ""
 
-	if jwt, err := getJWT(c.GetHeader("Authorization")); err == nil {
-		if userName, err := rH.authHandler.GetUserName(jwt); err == nil {
-			requestingUserName = userName
-		}
-	}
-
-	user, follows, err := rH.ucHandler.ProfileGet(requestingUserName, c.Param("username"))
+	user, follows, err := rH.ucHandler.ProfileGet(rH.getUserNameFromToken(c), c.Param("username"))
 	if err != nil {
 		log(err)
 		c.Status(http.StatusUnprocessableEntity)
