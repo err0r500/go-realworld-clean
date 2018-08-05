@@ -58,7 +58,6 @@ func TestArticlesFiltered(t *testing.T) {
 
 func TestArticlesFeed(t *testing.T) {
 	t.Run("happyCase", func(t *testing.T) {
-
 		mockCtrl := gomock.NewController(t)
 		defer mockCtrl.Finish()
 

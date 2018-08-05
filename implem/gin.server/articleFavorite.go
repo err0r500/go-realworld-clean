@@ -28,5 +28,5 @@ func (rH RouterHandler) updateFavorite(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"article": formatter.NewArticleFromDomain(*article)})
+	c.JSON(http.StatusOK, gin.H{"article": formatter.NewArticleFromDomain(*article, rH.getUserName(c))})
 }

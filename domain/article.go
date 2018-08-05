@@ -12,7 +12,7 @@ type Article struct {
 	TagList        []string  `json:"tagList"`
 	CreatedAt      time.Time `json:"createdAt"`
 	UpdatedAt      time.Time `json:"updatedAt"`
-	Favorited      bool      `json:"favorited"`
+	FavoritedBy    []User    `json:"favoritedBy"`
 	FavoritesCount int       `json:"favoritesCount"`
 	Author         User      `json:"author"`
 	Comments       []Comment `json:"comments"`
@@ -20,7 +20,7 @@ type Article struct {
 
 type ArticleFilter func(Article) bool
 
-func Hastag(tag string) func(article Article) bool {
+func ArticleHasTag(tag string) func(article Article) bool {
 	return func(article Article) bool {
 		for _, articleTag := range article.TagList {
 			if articleTag == tag {
@@ -31,14 +31,24 @@ func Hastag(tag string) func(article Article) bool {
 	}
 }
 
-func HasAuthor(authorName string) func(article Article) bool {
+func ArticleHasAuthor(authorName string) func(article Article) bool {
 	return func(article Article) bool {
 		return article.Author.Name == authorName
 	}
 }
 
-func IsFavorited(article Article) bool {
-	return article.Favorited
+func ArticleIsFavoritedBy(username string) func(article Article) bool {
+	return func(article Article) bool {
+		if username == "" {
+			return false
+		}
+		for _, user := range article.FavoritedBy {
+			if user.Name == username {
+				return true
+			}
+		}
+		return false
+	}
 }
 
 type ArticleCollection []Article
@@ -75,6 +85,18 @@ func (article *Article) UpdateComments(comment Comment, add bool) {
 	for i := 0; i < len(article.Comments); i++ {
 		if article.Comments[i].ID == comment.ID {
 			article.Comments = append(article.Comments[:i], article.Comments[i+1:]...) // memory leak ? https://github.com/golang/go/wiki/SliceTricks
+		}
+	}
+}
+func (article *Article) UpdateFavoritedBy(user User, add bool) {
+	if add {
+		article.FavoritedBy = append(article.FavoritedBy, user)
+		return
+	}
+
+	for i := 0; i < len(article.Comments); i++ {
+		if article.FavoritedBy[i].Name == user.Name {
+			article.FavoritedBy = append(article.FavoritedBy[:i], article.FavoritedBy[i+1:]...) // memory leak ? https://github.com/golang/go/wiki/SliceTricks
 		}
 	}
 }

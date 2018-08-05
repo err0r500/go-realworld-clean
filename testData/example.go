@@ -52,7 +52,7 @@ var janeArticle = domain.Article{
 	TagList:        []string{"tagList"},
 	CreatedAt:      time.Now(),
 	UpdatedAt:      time.Now(),
-	Favorited:      true,
+	FavoritedBy:    []domain.User{rick},
 	FavoritesCount: 123,
 	Author:         jane,
 	Comments: []domain.Comment{

@@ -17,7 +17,7 @@ type Article struct {
 	FavoritesCount int      `json:"favoritesCount"`
 }
 
-func NewArticleFromDomain(article domain.Article) Article {
+func NewArticleFromDomain(article domain.Article, username string) Article {
 	return Article{
 		Slug:           article.Slug,
 		Title:          article.Title,
@@ -27,15 +27,16 @@ func NewArticleFromDomain(article domain.Article) Article {
 		UpdatedAt:      article.UpdatedAt.UTC().Format(dateFormat),
 		Author:         NewProfileFromDomain(article.Author, false), //fixme : check this !
 		Tags:           article.TagList,
-		Favorite:       article.Favorited,
+		Favorite:       domain.ArticleIsFavoritedBy(username)(article),
 		FavoritesCount: article.FavoritesCount,
 	}
 }
 
-func NewArticlesFromDomain(articles ...domain.Article) []Article {
+func NewArticlesFromDomain(username string, articles ...domain.Article) []Article {
 	ret := []Article{}
+
 	for _, article := range articles {
-		ret = append(ret, NewArticleFromDomain(article))
+		ret = append(ret, NewArticleFromDomain(article, username))
 	}
 
 	return ret

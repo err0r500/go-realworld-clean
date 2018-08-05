@@ -14,12 +14,11 @@ func (i interactor) FavoritesUpdate(username, slug string, favorite bool) (*doma
 		return nil, err
 	}
 
-	user.UpdateFavorites(*article, favorite)
+	article.UpdateFavoritedBy(*user, favorite)
+
 	if err := i.userRW.Save(*user); err != nil {
 		return nil, err
 	}
-
-	article.Favorited = favorite
 
 	return article, nil
 }

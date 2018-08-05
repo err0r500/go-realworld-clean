@@ -5,19 +5,16 @@ import (
 )
 
 func NewFilters(author, tag, favorite string) []domain.ArticleFilter {
-	filters := []domain.ArticleFilter{}
+	var filters []domain.ArticleFilter
 	if author != "" {
-		filters = append(filters, domain.HasAuthor(author))
+		filters = append(filters, domain.ArticleHasAuthor(author))
 	}
 	if tag != "" {
-		filters = append(filters, domain.Hastag(tag))
+		filters = append(filters, domain.ArticleHasTag(tag))
 	}
-
-	//fav, err := strconv.ParseBool(favorite)
-	//if err != nil {
-	//	return filters
-	//}
-	//filters.FavoritedFilter = &fav
+	if favorite != "" {
+		filters = append(filters, domain.ArticleIsFavoritedBy(favorite))
+	}
 
 	return filters
 }

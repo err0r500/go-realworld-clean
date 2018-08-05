@@ -43,7 +43,7 @@ func (rH RouterHandler) articlesFilteredGet(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"articles": formatter.NewArticlesFromDomain(articles...), "articlesCount": count})
+	c.JSON(http.StatusOK, gin.H{"articles": formatter.NewArticlesFromDomain(rH.getUserName(c), articles...), "articlesCount": count})
 }
 
 func (rH RouterHandler) articlesFeedGet(c *gin.Context) {
@@ -66,5 +66,5 @@ func (rH RouterHandler) articlesFeedGet(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"articles": formatter.NewArticlesFromDomain(articles...), "articlesCount": count})
+	c.JSON(http.StatusOK, gin.H{"articles": formatter.NewArticlesFromDomain(rH.getUserName(c), articles...), "articlesCount": count})
 }

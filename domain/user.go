@@ -102,19 +102,3 @@ func (user *User) UpdateFollowees(followeeName string, follow bool) {
 		user.FollowIDs = nil
 	}
 }
-
-func (user *User) UpdateFavorites(favorite Article, fav bool) {
-	if fav {
-		user.Favorites = append(user.Favorites, favorite)
-		return
-	}
-
-	for i := 0; i < len(user.Favorites); i++ {
-		if user.Favorites[i].Slug == favorite.Slug {
-			user.Favorites = append(user.Favorites[:i], user.Favorites[i+1:]...) // memory leak ? https://github.com/golang/go/wiki/SliceTricks
-		}
-	}
-	if len(user.Favorites) == 0 {
-		user.Favorites = nil
-	}
-}
