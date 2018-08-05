@@ -26,3 +26,29 @@ func TestArticleCollection_ApplyLimitAndOffset(t *testing.T) {
 		assert.Equal(t, domain.ArticleCollection{}, articles.ApplyLimitAndOffset(-1, 0))
 	})
 }
+
+func TestArticleHasAuthor(t *testing.T) {
+	filter := domain.ArticleHasAuthor("author")
+	assert.True(t, filter(domain.Article{Author: domain.User{Name: "author"}}))
+	assert.False(t, filter(domain.Article{Author: domain.User{Name: "otherAuthor"}}))
+}
+
+func TestArticleHasTag(t *testing.T) {
+	filter := domain.ArticleHasTag("tag")
+	assert.True(t, filter(domain.Article{TagList: []string{"tag"}}))
+	assert.False(t, filter(domain.Article{TagList: []string{"otherTag"}}))
+}
+
+func TestArticleIsFavoritedBy(t *testing.T) {
+	t.Run("with userName", func(t *testing.T) {
+		filter := domain.ArticleIsFavoritedBy("user")
+		assert.True(t, filter(domain.Article{FavoritedBy: []domain.User{{Name: "user"}}}))
+		assert.False(t, filter(domain.Article{FavoritedBy: []domain.User{{Name: "otherUser"}}}))
+		assert.False(t, filter(domain.Article{FavoritedBy: []domain.User{{Name: ""}}}))
+	})
+
+	t.Run("without username", func(t *testing.T) {
+		emptyFilter := domain.ArticleIsFavoritedBy("")
+		assert.False(t, emptyFilter(domain.Article{FavoritedBy: []domain.User{{Name: ""}}})) // always returns false
+	})
+}

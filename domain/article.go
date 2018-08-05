@@ -87,6 +87,7 @@ func (article *Article) UpdateComments(comment Comment, add bool) {
 		}
 	}
 }
+
 func (article *Article) UpdateFavoritedBy(user User, add bool) {
 	if add {
 		article.FavoritedBy = append(article.FavoritedBy, user)
