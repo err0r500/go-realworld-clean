@@ -29,9 +29,13 @@ func (i interactor) GetArticles(username string, limit, offset int, filters []do
 		return nil, nil, 0, err
 	}
 
-	user, err := i.userRW.GetByName(username)
-	if err != nil {
-		return nil, nil, 0, err
+	var user *domain.User
+	if username != "" {
+		var errGet error
+		user, errGet = i.userRW.GetByName(username)
+		if errGet != nil {
+			return nil, nil, 0, errGet
+		}
 	}
 
 	return user, domain.ArticleCollection(articles).ApplyLimitAndOffset(limit, offset), len(articles), nil

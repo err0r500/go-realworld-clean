@@ -68,7 +68,7 @@ func (rH RouterHandler) articlePut(c *gin.Context) {
 func (rH RouterHandler) articleGet(c *gin.Context) {
 	log := rH.log(rH.MethodAndPath(c))
 
-	user, article, err := rH.ucHandler.ArticleGet(rH.getUserName(c), c.Param("slug")) // todo add requesting username here
+	user, article, err := rH.ucHandler.ArticleGet(rH.getUserName(c), c.Param("slug"))
 	if err != nil {
 		log(err)
 		c.Status(http.StatusUnprocessableEntity)

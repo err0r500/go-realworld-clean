@@ -66,9 +66,13 @@ func (i interactor) ArticlePut(username string, slug string, reqArticle domain.A
 }
 
 func (i interactor) ArticleGet(username, slug string) (*domain.User, *domain.Article, error) {
-	user, err := i.userRW.GetByName(username)
-	if err != nil {
-		return nil, nil, err
+	var user *domain.User
+	if username != "" {
+		var errGet error
+		user, errGet = i.userRW.GetByName(username)
+		if errGet != nil {
+			return nil, nil, errGet
+		}
 	}
 
 	article, err := i.articleRW.GetBySlug(slug)

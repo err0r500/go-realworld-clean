@@ -9,9 +9,13 @@ func (i interactor) ArticlesFeed(username string, limit, offset int) (*domain.Us
 		return nil, domain.ArticleCollection{}, 0, nil
 	}
 
-	user, err := i.userRW.GetByName(username)
-	if err != nil {
-		return nil, nil, 0, err
+	var user *domain.User
+	if username != "" {
+		var errGet error
+		user, errGet = i.userRW.GetByName(username)
+		if errGet != nil {
+			return nil, nil, 0, errGet
+		}
 	}
 	articles, err := i.articleRW.GetByAuthorsNameOrderedByMostRecentAsc(user.FollowIDs)
 	if err != nil {
