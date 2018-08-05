@@ -3,9 +3,9 @@ package domain
 import "time"
 
 type Comment struct {
-	ID        int       `json:"id"`
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
-	Body      string    `json:"body"`
-	Author    User      `json:"author"`
+	ID        int
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	Body      string
+	Author    User
 }

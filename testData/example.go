@@ -45,16 +45,15 @@ var jane = domain.User{
 const TokenPrefix = "Token "
 
 var janeArticle = domain.Article{
-	Slug:           "articleSlug",
-	Title:          "articleTitle",
-	Description:    "description",
-	Body:           "body",
-	TagList:        []string{"tagList"},
-	CreatedAt:      time.Now(),
-	UpdatedAt:      time.Now(),
-	FavoritedBy:    []domain.User{rick},
-	FavoritesCount: 123,
-	Author:         jane,
+	Slug:        "articleSlug",
+	Title:       "articleTitle",
+	Description: "description",
+	Body:        "body",
+	TagList:     []string{"tagList"},
+	CreatedAt:   time.Now(),
+	UpdatedAt:   time.Now(),
+	FavoritedBy: []domain.User{rick},
+	Author:      jane,
 	Comments: []domain.Comment{
 		{ID: 123,
 			CreatedAt: time.Now(),

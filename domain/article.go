@@ -5,22 +5,22 @@ import (
 )
 
 type Article struct {
-	Slug           string    `json:"slug"`
-	Title          string    `json:"title"`
-	Description    string    `json:"description"`
-	Body           string    `json:"body"`
-	TagList        []string  `json:"tagList"`
-	CreatedAt      time.Time `json:"createdAt"`
-	UpdatedAt      time.Time `json:"updatedAt"`
-	FavoritedBy    []User    `json:"favoritedBy"`
-	FavoritesCount int       `json:"favoritesCount"`
-	Author         User      `json:"author"`
-	Comments       []Comment `json:"comments"`
+	Slug        string
+	Title       string
+	Description string
+	Body        string
+	TagList     []string
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+	FavoritedBy []User
+	//FavoritesCount int
+	Author   User
+	Comments []Comment
 }
 
 type ArticleFilter func(Article) bool
 
-func ArticleHasTag(tag string) func(article Article) bool {
+func ArticleHasTag(tag string) ArticleFilter {
 	return func(article Article) bool {
 		for _, articleTag := range article.TagList {
 			if articleTag == tag {
@@ -31,13 +31,13 @@ func ArticleHasTag(tag string) func(article Article) bool {
 	}
 }
 
-func ArticleHasAuthor(authorName string) func(article Article) bool {
+func ArticleHasAuthor(authorName string) ArticleFilter {
 	return func(article Article) bool {
 		return article.Author.Name == authorName
 	}
 }
 
-func ArticleIsFavoritedBy(username string) func(article Article) bool {
+func ArticleIsFavoritedBy(username string) ArticleFilter {
 	return func(article Article) bool {
 		if username == "" {
 			return false

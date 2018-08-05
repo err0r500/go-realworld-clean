@@ -28,7 +28,7 @@ func NewArticleFromDomain(article domain.Article, username string) Article {
 		Author:         NewProfileFromDomain(article.Author, false), //fixme : check this !
 		Tags:           article.TagList,
 		Favorite:       domain.ArticleIsFavoritedBy(username)(article),
-		FavoritesCount: article.FavoritesCount,
+		FavoritesCount: len(article.FavoritedBy),
 	}
 }
 
