@@ -4,18 +4,8 @@ import (
 	"github.com/err0r500/go-realworld-clean/domain"
 )
 
-type UpdatableProperty int
-
-const (
-	Email UpdatableProperty = iota
-	Name
-	Bio
-	ImageLink
-	Password
-)
-
-//UserEdit(userName string, newUser map[UpdatableProperty]*string) (user *domain.User, err error)
-func (i interactor) UserEdit(userName string, fieldsToUpdate map[UpdatableProperty]*string) (*domain.User, string, error) {
+//UserEdit(userName string, newUser map[UserUpdatableProperty]*string) (user *domain.User, err error)
+func (i interactor) UserEdit(userName string, fieldsToUpdate map[domain.UserUpdatableProperty]*string) (*domain.User, string, error) {
 	user, err := i.userRW.GetByName(userName)
 	if err != nil {
 		return nil, "", err
@@ -28,11 +18,11 @@ func (i interactor) UserEdit(userName string, fieldsToUpdate map[UpdatableProper
 	}
 
 	domain.UpdateUser(user,
-		domain.SetUserName(fieldsToUpdate[Name]),
-		domain.SetUserEmail(fieldsToUpdate[Email]),
-		domain.SetUserBio(fieldsToUpdate[Bio]),
-		domain.SetUserImageLink(fieldsToUpdate[ImageLink]),
-		domain.SetUserPassword(fieldsToUpdate[Password]),
+		domain.SetUserName(fieldsToUpdate[domain.UserName]),
+		domain.SetUserEmail(fieldsToUpdate[domain.UserEmail]),
+		domain.SetUserBio(fieldsToUpdate[domain.UserBio]),
+		domain.SetUserImageLink(fieldsToUpdate[domain.UserImageLink]),
+		domain.SetUserPassword(fieldsToUpdate[domain.UserPassword]),
 	)
 
 	if err := i.userValidator.CheckUser(*user); err != nil {

@@ -1,5 +1,3 @@
-// +build !netgo
-
 package testData
 
 import (
@@ -28,24 +26,24 @@ func Article(name string) domain.Article {
 
 var rick = domain.User{
 	Name:      "rick",
-	Email:     "rick@example.com",
+	Email:     "rick@what.com",
 	Bio:       &rickBio,
 	ImageLink: nil,
-	Password:  "rickPassword",
+	Password:  "password",
 }
 
 var jane = domain.User{
-	Name:      "jane",
-	Email:     "jane@example.com",
+	Name:      "johnjacob",
+	Email:     "joe@what.com",
 	Bio:       nil,
 	ImageLink: &janeImg,
-	Password:  "janePassword",
+	Password:  "password",
 }
 
 const TokenPrefix = "Token "
 
 var janeArticle = domain.Article{
-	Slug:        "articleSlug",
+	Slug:        "how-to-train-your-dragon",
 	Title:       "articleTitle",
 	Description: "description",
 	Body:        "body",

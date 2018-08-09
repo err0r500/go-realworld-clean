@@ -42,8 +42,6 @@ func TestInteractor_ArticlePut(t *testing.T) {
 	req := domain.Article{
 		Title:       "newTitle",
 		Description: "newDescription",
-		Body:        origArticle.Body,
-		TagList:     origArticle.TagList,
 	}
 
 	toInsert := origArticle
@@ -56,7 +54,7 @@ func TestInteractor_ArticlePut(t *testing.T) {
 	i.ArticleRW.EXPECT().Save(toInsert)
 	i.UserRW.EXPECT().GetByName(jane.Name).Return(&jane, nil).Times(1)
 
-	_, _, err := i.GetUCHandler().ArticlePut(jane.Name, origArticle.Slug, req)
+	_, _, err := i.GetUCHandler().ArticlePut(jane.Name, origArticle.Slug, map[domain.ArticleUpdatableField]*string{domain.Title: &req.Title, domain.Description: &req.Description})
 	assert.NoError(t, err)
 }
 

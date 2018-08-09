@@ -17,6 +17,44 @@ type Article struct {
 	Comments    []Comment
 }
 
+type ArticleUpdatableField int
+
+const (
+	Title ArticleUpdatableField = iota
+	Description
+	Body
+)
+
+func UpdateArticle(initial *Article, opts ...func(fields *Article)) {
+	for _, v := range opts {
+		v(initial)
+	}
+}
+
+func SetArticleTitle(input *string) func(fields *Article) {
+	return func(initial *Article) {
+		if input != nil {
+			initial.Title = *input
+		}
+	}
+}
+
+func SetArticleDescription(input *string) func(fields *Article) {
+	return func(initial *Article) {
+		if input != nil {
+			initial.Description = *input
+		}
+	}
+}
+
+func SetArticleBody(input *string) func(fields *Article) {
+	return func(initial *Article) {
+		if input != nil {
+			initial.Body = *input
+		}
+	}
+}
+
 type ArticleFilter func(Article) bool
 
 func ArticleHasTag(tag string) ArticleFilter {

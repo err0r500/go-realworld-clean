@@ -25,7 +25,7 @@ type UserLogic interface {
 	UserCreate(username, email, password string) (user *domain.User, token string, err error)
 	UserLogin(email, password string) (user *domain.User, token string, err error)
 	UserGet(userName string) (user *domain.User, token string, err error)
-	UserEdit(userName string, newUser map[UpdatableProperty]*string) (user *domain.User, token string, err error)
+	UserEdit(userName string, newUser map[domain.UserUpdatableProperty]*string) (user *domain.User, token string, err error)
 }
 
 type ArticlesLogic interface {
@@ -36,7 +36,7 @@ type ArticlesLogic interface {
 type ArticleLogic interface {
 	ArticleGet(slug, username string) (*domain.User, *domain.Article, error)
 	ArticlePost(username string, article domain.Article) (*domain.User, *domain.Article, error)
-	ArticlePut(username, slug string, article domain.Article) (*domain.User, *domain.Article, error)
+	ArticlePut(username, slug string, fieldsToUpdate map[domain.ArticleUpdatableField]*string) (*domain.User, *domain.Article, error)
 	ArticleDelete(username, slug string) error
 }
 

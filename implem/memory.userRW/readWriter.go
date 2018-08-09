@@ -4,8 +4,12 @@ import (
 	"errors"
 	"sync"
 
+	"log"
+
 	"github.com/err0r500/go-realworld-clean/domain"
+	"github.com/err0r500/go-realworld-clean/testData"
 	"github.com/err0r500/go-realworld-clean/uc"
+	"github.com/spf13/viper"
 )
 
 type rw struct {
@@ -14,9 +18,17 @@ type rw struct {
 }
 
 func New() uc.UserRW {
-	return rw{
+	rw := rw{
 		store: &sync.Map{},
 	}
+
+	if viper.GetBool("populate") {
+		log.Print("append user")
+		rick := testData.User("rick")
+		rw.Create(rick.Name, rick.Email, rick.Password)
+	}
+
+	return rw
 }
 
 func (rw rw) Create(username, email, password string) (*domain.User, error) {

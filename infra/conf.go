@@ -33,13 +33,11 @@ func ServerConfig(cmd *cobra.Command) {
 	cmd.Flags().String("server.allowedOrigins", "*", "allowed origins for the server")
 	cmd.Flags().String("server.token", "", "authorization token to use if any")
 	cmd.Flags().String("jwt.salt", "", "used to sign the JWTs")
-
 	viper.BindPFlags(cmd.Flags())
 }
 
 func DatabaseConfig(cmd *cobra.Command) {
-	cmd.Flags().String("bolt.path", "data.db", "path of the bolt database")
-	cmd.Flags().Int("ignore_delta", 2, "merge metrics that differ by that distance")
+	cmd.Flags().Bool("populate", false, "used to populate databases in order to run integration tests")
 
 	viper.BindPFlags(cmd.Flags())
 }

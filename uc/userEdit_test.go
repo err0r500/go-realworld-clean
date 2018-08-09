@@ -3,9 +3,9 @@ package uc_test
 import (
 	"testing"
 
+	"github.com/err0r500/go-realworld-clean/domain"
 	mock "github.com/err0r500/go-realworld-clean/implem/mock.uc"
 	"github.com/err0r500/go-realworld-clean/testData"
-	"github.com/err0r500/go-realworld-clean/uc"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 )
@@ -24,9 +24,9 @@ func TestEditUser_happyCase(t *testing.T) {
 	i.UserRW.EXPECT().Save(expectedUser).Return(nil).Times(1)
 	i.AuthHandler.EXPECT().GenUserToken(expectedUser.Name).Return("token", nil).Times(1)
 
-	retUser, token, err := i.GetUCHandler().UserEdit(rick.Name, map[uc.UpdatableProperty]*string{
-		uc.Email: &jane.Email,
-		uc.Bio:   testData.User("jane").Bio, //nil
+	retUser, token, err := i.GetUCHandler().UserEdit(rick.Name, map[domain.UserUpdatableProperty]*string{
+		domain.UserEmail: &jane.Email,
+		domain.UserBio:   testData.User("jane").Bio, //nil
 	})
 
 	assert.NoError(t, err)

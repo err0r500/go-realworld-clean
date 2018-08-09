@@ -14,6 +14,15 @@ type User struct {
 	FollowIDs []string
 	Favorites []Article
 }
+type UserUpdatableProperty int
+
+const (
+	UserEmail UserUpdatableProperty = iota
+	UserName
+	UserBio
+	UserImageLink
+	UserPassword
+)
 
 func UpdateUser(initial *User, opts ...func(fields *User)) {
 	for _, v := range opts {

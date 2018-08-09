@@ -36,17 +36,18 @@ func (i interactor) ArticlePost(username string, article domain.Article) (*domai
 	return user, completeArticle, nil
 }
 
-func (i interactor) ArticlePut(username string, slug string, reqArticle domain.Article) (*domain.User, *domain.Article, error) {
+func (i interactor) ArticlePut(username string, slug string, fieldsToUpdate map[domain.ArticleUpdatableField]*string) (*domain.User, *domain.Article, error) {
 	article, err := i.getArticleAndCheckUser(username, slug)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	// real PUT request, all fields are mandatory in request
-	article.Title = reqArticle.Title
-	article.Description = reqArticle.Description
-	article.Body = reqArticle.Body
-	article.TagList = reqArticle.TagList
+	domain.UpdateArticle(article,
+		domain.SetArticleTitle(fieldsToUpdate[domain.Title]),
+		domain.SetArticleDescription(fieldsToUpdate[domain.Description]),
+		domain.SetArticleBody(fieldsToUpdate[domain.Body]),
+	)
+	// todo handle taglist ?
 
 	if err := i.articleValidator.BeforeUpdateCheck(article); err != nil {
 		return nil, nil, err

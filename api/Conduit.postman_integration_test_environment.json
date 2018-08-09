@@ -4,7 +4,7 @@
     {
       "enabled": true,
       "key": "apiUrl",
-      "value": "https://conduit.productionready.io/api",
+      "value": "http://localhost:8080/api",
       "type": "text"
     },
     {

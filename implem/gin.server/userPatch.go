@@ -3,8 +3,8 @@ package server
 import (
 	"net/http"
 
+	"github.com/err0r500/go-realworld-clean/domain"
 	"github.com/err0r500/go-realworld-clean/implem/json.formatter"
-	"github.com/err0r500/go-realworld-clean/uc"
 	"github.com/gin-gonic/gin"
 )
 
@@ -19,13 +19,13 @@ type userPutRequest struct {
 	} `json:"user,required"`
 }
 
-func (req userPutRequest) getEditableFields() map[uc.UpdatableProperty]*string {
-	return map[uc.UpdatableProperty]*string{
-		uc.Email:     req.User.Email,
-		uc.Name:      req.User.Name,
-		uc.Bio:       req.User.Bio,
-		uc.ImageLink: req.User.Image,
-		uc.Password:  req.User.Password,
+func (req userPutRequest) getEditableFields() map[domain.UserUpdatableProperty]*string {
+	return map[domain.UserUpdatableProperty]*string{
+		domain.UserEmail:     req.User.Email,
+		domain.UserName:      req.User.Name,
+		domain.UserBio:       req.User.Bio,
+		domain.UserImageLink: req.User.Image,
+		domain.UserPassword:  req.User.Password,
 	}
 }
 

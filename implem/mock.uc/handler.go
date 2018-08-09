@@ -6,7 +6,6 @@ package uc
 
 import (
 	domain "github.com/err0r500/go-realworld-clean/domain"
-	uc "github.com/err0r500/go-realworld-clean/uc"
 	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
 )
@@ -104,7 +103,7 @@ func (mr *MockHandlerMockRecorder) UserGet(userName interface{}) *gomock.Call {
 }
 
 // UserEdit mocks base method
-func (m *MockHandler) UserEdit(userName string, newUser map[uc.UpdatableProperty]*string) (*domain.User, string, error) {
+func (m *MockHandler) UserEdit(userName string, newUser map[domain.UserUpdatableProperty]*string) (*domain.User, string, error) {
 	ret := m.ctrl.Call(m, "UserEdit", userName, newUser)
 	ret0, _ := ret[0].(*domain.User)
 	ret1, _ := ret[1].(string)
@@ -176,8 +175,8 @@ func (mr *MockHandlerMockRecorder) ArticlePost(username, article interface{}) *g
 }
 
 // ArticlePut mocks base method
-func (m *MockHandler) ArticlePut(username, slug string, article domain.Article) (*domain.User, *domain.Article, error) {
-	ret := m.ctrl.Call(m, "ArticlePut", username, slug, article)
+func (m *MockHandler) ArticlePut(username, slug string, fieldsToUpdate map[domain.ArticleUpdatableField]*string) (*domain.User, *domain.Article, error) {
+	ret := m.ctrl.Call(m, "ArticlePut", username, slug, fieldsToUpdate)
 	ret0, _ := ret[0].(*domain.User)
 	ret1, _ := ret[1].(*domain.Article)
 	ret2, _ := ret[2].(error)
@@ -185,8 +184,8 @@ func (m *MockHandler) ArticlePut(username, slug string, article domain.Article) 
 }
 
 // ArticlePut indicates an expected call of ArticlePut
-func (mr *MockHandlerMockRecorder) ArticlePut(username, slug, article interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ArticlePut", reflect.TypeOf((*MockHandler)(nil).ArticlePut), username, slug, article)
+func (mr *MockHandlerMockRecorder) ArticlePut(username, slug, fieldsToUpdate interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ArticlePut", reflect.TypeOf((*MockHandler)(nil).ArticlePut), username, slug, fieldsToUpdate)
 }
 
 // ArticleDelete mocks base method
@@ -382,7 +381,7 @@ func (mr *MockUserLogicMockRecorder) UserGet(userName interface{}) *gomock.Call 
 }
 
 // UserEdit mocks base method
-func (m *MockUserLogic) UserEdit(userName string, newUser map[uc.UpdatableProperty]*string) (*domain.User, string, error) {
+func (m *MockUserLogic) UserEdit(userName string, newUser map[domain.UserUpdatableProperty]*string) (*domain.User, string, error) {
 	ret := m.ctrl.Call(m, "UserEdit", userName, newUser)
 	ret0, _ := ret[0].(*domain.User)
 	ret1, _ := ret[1].(string)
@@ -500,8 +499,8 @@ func (mr *MockArticleLogicMockRecorder) ArticlePost(username, article interface{
 }
 
 // ArticlePut mocks base method
-func (m *MockArticleLogic) ArticlePut(username, slug string, article domain.Article) (*domain.User, *domain.Article, error) {
-	ret := m.ctrl.Call(m, "ArticlePut", username, slug, article)
+func (m *MockArticleLogic) ArticlePut(username, slug string, fieldsToUpdate map[domain.ArticleUpdatableField]*string) (*domain.User, *domain.Article, error) {
+	ret := m.ctrl.Call(m, "ArticlePut", username, slug, fieldsToUpdate)
 	ret0, _ := ret[0].(*domain.User)
 	ret1, _ := ret[1].(*domain.Article)
 	ret2, _ := ret[2].(error)
@@ -509,8 +508,8 @@ func (m *MockArticleLogic) ArticlePut(username, slug string, article domain.Arti
 }
 
 // ArticlePut indicates an expected call of ArticlePut
-func (mr *MockArticleLogicMockRecorder) ArticlePut(username, slug, article interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ArticlePut", reflect.TypeOf((*MockArticleLogic)(nil).ArticlePut), username, slug, article)
+func (mr *MockArticleLogicMockRecorder) ArticlePut(username, slug, fieldsToUpdate interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ArticlePut", reflect.TypeOf((*MockArticleLogic)(nil).ArticlePut), username, slug, fieldsToUpdate)
 }
 
 // ArticleDelete mocks base method

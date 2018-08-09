@@ -10,19 +10,27 @@ import (
 
 type ArticleReq struct {
 	Article struct {
-		Title       string   `json:"title,required"`
-		Description string   `json:"description,required"`
-		Body        string   `json:"body,required"`
-		TagList     []string `json:"tagList,required"`
+		Title       *string   `json:"title"`
+		Description *string   `json:"description"`
+		Body        *string   `json:"body"`
+		TagList     *[]string `json:"tagList"`
 	} `json:"article,required"`
+}
+
+func (req ArticleReq) getEditableFields() map[domain.ArticleUpdatableField]*string {
+	return map[domain.ArticleUpdatableField]*string{
+		domain.Title:       req.Article.Title,
+		domain.Description: req.Article.Description,
+		domain.Body:        req.Article.Body,
+	}
 }
 
 func articleFromReq(req *ArticleReq) domain.Article {
 	return domain.Article{
-		Title:       req.Article.Title,
-		Description: req.Article.Description,
-		Body:        req.Article.Body,
-		TagList:     req.Article.TagList,
+		Title:       *req.Article.Title,
+		Description: *req.Article.Description,
+		Body:        *req.Article.Body,
+		TagList:     *req.Article.TagList,
 	}
 }
 
@@ -55,7 +63,7 @@ func (rH RouterHandler) articlePut(c *gin.Context) {
 		c.Status(http.StatusBadRequest)
 		return
 	}
-	user, article, err := rH.ucHandler.ArticlePut(rH.getUserName(c), c.Param("slug"), articleFromReq(req))
+	user, article, err := rH.ucHandler.ArticlePut(rH.getUserName(c), c.Param("slug"), req.getEditableFields())
 	if err != nil {
 		log(err)
 		c.Status(http.StatusUnprocessableEntity)
