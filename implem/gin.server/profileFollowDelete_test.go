@@ -27,7 +27,7 @@ func TestProfileFollowDelete_happyCase(t *testing.T) {
 		Return(&domain.User{}, nil).
 		Times(1)
 
-	jwtHandler := jwt.NewTokenHandler("mySalt")
+	jwtHandler := jwt.New("mySalt")
 
 	gE := gin.Default()
 	server.NewRouter(ucHandler, jwtHandler).SetRoutes(gE)

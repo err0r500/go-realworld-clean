@@ -10,7 +10,7 @@ import (
 func TestUserToken_happyCase(t *testing.T) {
 	testUserName := "userName"
 
-	tH := jwt.NewTokenHandler("theJWTsalt")
+	tH := jwt.New("theJWTsalt")
 	token, err := tH.GenUserToken(testUserName)
 	assert.NoError(t, err)
 
@@ -20,19 +20,19 @@ func TestUserToken_happyCase(t *testing.T) {
 }
 
 func TestUserToken_GenToken_fails(t *testing.T) {
-	tH := jwt.NewTokenHandler("theJWTsalt")
+	tH := jwt.New("theJWTsalt")
 	token, err := tH.GenUserToken("")
 	assert.Error(t, err)
 	assert.Equal(t, "", token)
 }
 
 func TestUserToken_GetuserName_fails(t *testing.T) {
-	tH := jwt.NewTokenHandler("theJWTsalt")
+	tH := jwt.New("theJWTsalt")
 	token, err := tH.GenUserToken("userName")
 	assert.NoError(t, err)
 
 	t.Run("otherSalt", func(t *testing.T) {
-		tH2 := jwt.NewTokenHandler("otherSalt")
+		tH2 := jwt.New("otherSalt")
 		userName, err := tH2.GetUserName(token)
 		assert.Error(t, err)
 		assert.Equal(t, "", userName)

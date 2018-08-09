@@ -32,7 +32,7 @@ func TestRouterHandler_articlePost(t *testing.T) {
 		Return(&testUser, &expectedArticle, nil).
 		Times(1)
 
-	jwtHandler := jwt.NewTokenHandler("mySalt")
+	jwtHandler := jwt.New("mySalt")
 
 	gE := gin.Default()
 	server.NewRouter(ucHandler, jwtHandler).SetRoutes(gE)
@@ -84,7 +84,7 @@ func TestRouterHandler_articlePut(t *testing.T) {
 
 	testUser := testData.User("jane")
 	expectedArticle := testData.Article("jane")
-	jwtHandler := jwt.NewTokenHandler("mySalt")
+	jwtHandler := jwt.New("mySalt")
 
 	ucHandler := uc.NewMockHandler(mockCtrl)
 	ucHandler.EXPECT().
@@ -154,7 +154,7 @@ func TestRouterHandler_articleGet(t *testing.T) {
 		Times(1)
 
 	gE := gin.Default()
-	server.NewRouterWithLogger(ucHandler, jwt.NewTokenHandler("mySalt"), uc.SimpleLogger{}).SetRoutes(gE)
+	server.NewRouterWithLogger(ucHandler, jwt.New("mySalt"), uc.SimpleLogger{}).SetRoutes(gE)
 	ts := httptest.NewServer(gE)
 	defer ts.Close()
 
@@ -177,7 +177,7 @@ func TestRouterHandler_articleDelete(t *testing.T) {
 		Return(nil).
 		Times(1)
 
-	jwtHandler := jwt.NewTokenHandler("mySalt")
+	jwtHandler := jwt.New("mySalt")
 
 	gE := gin.Default()
 	server.NewRouter(ucHandler, jwtHandler).SetRoutes(gE)

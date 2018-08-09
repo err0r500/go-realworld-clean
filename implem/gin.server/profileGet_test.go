@@ -28,7 +28,7 @@ func TestProfileGet_happyCase(t *testing.T) {
 		Times(1)
 
 	gE := gin.Default()
-	server.NewRouter(ucHandler, jwt.NewTokenHandler("mySalt")).SetRoutes(gE)
+	server.NewRouter(ucHandler, jwt.New("mySalt")).SetRoutes(gE)
 
 	ts := httptest.NewServer(gE)
 	defer ts.Close()
@@ -52,7 +52,7 @@ func TestProfileGet_happyCaseAuthenticated(t *testing.T) {
 		Return(&jane, true, nil).
 		Times(1)
 
-	jwtHandler := jwt.NewTokenHandler("mySalt")
+	jwtHandler := jwt.New("mySalt")
 	gE := gin.Default()
 	server.NewRouter(ucHandler, jwtHandler).SetRoutes(gE)
 	authToken, err := jwtHandler.GenUserToken(testData.User("jane").Name)

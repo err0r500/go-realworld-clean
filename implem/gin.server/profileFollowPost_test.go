@@ -26,7 +26,7 @@ func TestProfileFollowPost_happyCase(t *testing.T) {
 		Return(&rick, nil).
 		Times(1)
 
-	jwtHandler := jwt.NewTokenHandler("mySalt")
+	jwtHandler := jwt.New("mySalt")
 	gE := gin.Default()
 	server.NewRouter(ucHandler, jwtHandler).SetRoutes(gE)
 	authToken, err := jwtHandler.GenUserToken(testData.User("jane").Name)

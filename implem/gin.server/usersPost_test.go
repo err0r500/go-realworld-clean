@@ -28,7 +28,7 @@ func TestUserPost_happyCase(t *testing.T) {
 		Times(1)
 
 	gE := gin.Default()
-	server.NewRouter(ucHandler, jwt.NewTokenHandler("mySalt")).SetRoutes(gE)
+	server.NewRouter(ucHandler, jwt.New("mySalt")).SetRoutes(gE)
 
 	ts := httptest.NewServer(gE)
 	defer ts.Close()

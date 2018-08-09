@@ -61,7 +61,7 @@ func run() {
 		infra.DebugMode,
 	)
 
-	authHandler := jwt.NewTokenHandler(viper.GetString("jwt.Salt"))
+	authHandler := jwt.New(viper.GetString("jwt.Salt"))
 	routerLogger := logger.NewLogger("TEST",
 		viper.GetString("log.level"),
 		viper.GetString("log.format"),

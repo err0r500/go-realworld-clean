@@ -31,7 +31,7 @@ func TestArticleCommentGet(t *testing.T) {
 		Return(expectedComment, nil).
 		Times(1)
 
-	jwtHandler := jwt.NewTokenHandler("mySalt")
+	jwtHandler := jwt.New("mySalt")
 
 	gE := gin.Default()
 	server.NewRouter(ucHandler, jwtHandler).SetRoutes(gE)
@@ -67,7 +67,7 @@ func TestArticleCommentPost(t *testing.T) {
 		Return(&expectedComment, nil).
 		Times(1)
 
-	jwtHandler := jwt.NewTokenHandler("mySalt")
+	jwtHandler := jwt.New("mySalt")
 
 	gE := gin.Default()
 	server.NewRouter(ucHandler, jwtHandler).SetRoutes(gE)
@@ -128,7 +128,7 @@ func TestArticleCommentDelete(t *testing.T) {
 		Return(nil).
 		Times(1)
 
-	jwtHandler := jwt.NewTokenHandler("mySalt")
+	jwtHandler := jwt.New("mySalt")
 
 	gE := gin.Default()
 	server.NewRouter(ucHandler, jwtHandler).SetRoutes(gE)

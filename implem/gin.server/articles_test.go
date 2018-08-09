@@ -67,7 +67,7 @@ func TestArticlesFiltered(t *testing.T) {
 			Return(nil, domain.ArticleCollection{testData.Article("jane")}, 10, nil).
 			Times(1)
 
-		jwtHandler := jwt.NewTokenHandler("mySalt")
+		jwtHandler := jwt.New("mySalt")
 		gE := gin.Default()
 		server.NewRouter(ucHandler, jwtHandler).SetRoutes(gE)
 		authToken, err := jwtHandler.GenUserToken(testUser.Name)
@@ -109,7 +109,7 @@ func TestArticlesFeed(t *testing.T) {
 			Return(nil, domain.ArticleCollection{testData.Article("jane")}, 10, nil).
 			Times(1)
 
-		jwtHandler := jwt.NewTokenHandler("mySalt")
+		jwtHandler := jwt.New("mySalt")
 
 		gE := gin.Default()
 		server.NewRouter(ucHandler, jwtHandler).SetRoutes(gE)
@@ -146,7 +146,7 @@ func TestArticlesFeed(t *testing.T) {
 			Return(&jane, nil, 0, nil).
 			Times(1)
 
-		jwtHandler := jwt.NewTokenHandler("mySalt")
+		jwtHandler := jwt.New("mySalt")
 
 		gE := gin.Default()
 		server.NewRouter(ucHandler, jwtHandler).SetRoutes(gE)

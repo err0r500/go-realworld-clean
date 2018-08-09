@@ -30,7 +30,7 @@ func TestUserPut_happyCase(t *testing.T) {
 		Times(1)
 
 	gE := gin.Default()
-	jwtHandler := jwt.NewTokenHandler("mySalt")
+	jwtHandler := jwt.New("mySalt")
 	router := server.NewRouter(ucHandler, jwtHandler)
 	router.Logger = logger.SimpleLogger{}
 	router.SetRoutes(gE)

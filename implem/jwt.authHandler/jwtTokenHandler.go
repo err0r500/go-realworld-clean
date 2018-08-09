@@ -15,7 +15,7 @@ type tokenHandler struct {
 	salt []byte
 }
 
-func NewTokenHandler(salt string) uc.AuthHandler {
+func New(salt string) uc.AuthHandler {
 	return tokenHandler{
 		salt: []byte(salt),
 	}

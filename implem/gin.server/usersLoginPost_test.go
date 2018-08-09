@@ -27,7 +27,7 @@ func TestUserLoginPost_happyCase(t *testing.T) {
 		Return(&jane, "authToken", nil).
 		Times(1)
 
-	jwtHandler := jwt.NewTokenHandler("mySalt")
+	jwtHandler := jwt.New("mySalt")
 	gE := gin.Default()
 	server.NewRouter(ucHandler, jwtHandler).SetRoutes(gE)
 

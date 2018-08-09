@@ -32,7 +32,7 @@ func TestArticleFavoritePost(t *testing.T) {
 		Return(&testUser, &expectedComment, nil).
 		Times(1)
 
-	jwtHandler := jwt.NewTokenHandler("mySalt")
+	jwtHandler := jwt.New("mySalt")
 
 	gE := gin.Default()
 	server.NewRouter(ucHandler, jwtHandler).SetRoutes(gE)
@@ -77,7 +77,7 @@ func TestArticleFavoriteDelete(t *testing.T) {
 		Return(&testUser, &expectedComment, nil).
 		Times(1)
 
-	jwtHandler := jwt.NewTokenHandler("mySalt")
+	jwtHandler := jwt.New("mySalt")
 
 	gE := gin.Default()
 	server.NewRouter(ucHandler, jwtHandler).SetRoutes(gE)
