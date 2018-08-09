@@ -9,6 +9,7 @@ import (
 	"github.com/err0r500/go-realworld-clean/implem/jwt.authHandler"
 	"github.com/err0r500/go-realworld-clean/implem/logrus.logger"
 	"github.com/err0r500/go-realworld-clean/implem/memory.articleRW"
+	"github.com/err0r500/go-realworld-clean/implem/memory.commentRW"
 	"github.com/err0r500/go-realworld-clean/implem/memory.tagsRW"
 	"github.com/err0r500/go-realworld-clean/implem/memory.userRW"
 	"github.com/err0r500/go-realworld-clean/implem/user.validator"
@@ -77,6 +78,7 @@ func run() {
 			Slugger:          slugger.New(),
 			ArticleValidator: articleValidator.New(),
 			TagsRW:           tagsRW.New(),
+			CommentRW:        commentRW.New(),
 		}.New(),
 		authHandler,
 		routerLogger,

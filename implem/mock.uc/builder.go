@@ -19,6 +19,7 @@ type MockedInteractor struct {
 	Slugger          *MockSlugger
 	ArticleValidator *MockArticleValidator
 	TagsRW           *MockTagsRW
+	CommentRW        *MockCommentRW
 }
 
 type SimpleLogger struct{}
@@ -38,6 +39,7 @@ func NewMockedInteractor(mockCtrl *gomock.Controller) MockedInteractor {
 		Slugger:          NewMockSlugger(mockCtrl),
 		ArticleValidator: NewMockArticleValidator(mockCtrl),
 		TagsRW:           NewMockTagsRW(mockCtrl),
+		CommentRW:        NewMockCommentRW(mockCtrl),
 	}
 }
 
@@ -52,5 +54,6 @@ func (i MockedInteractor) GetUCHandler() uc.Handler {
 		Slugger:          i.Slugger,
 		ArticleValidator: i.ArticleValidator,
 		TagsRW:           i.TagsRW,
+		CommentRW:        i.CommentRW,
 	}.New()
 }

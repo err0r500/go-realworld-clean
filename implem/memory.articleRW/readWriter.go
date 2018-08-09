@@ -81,6 +81,7 @@ func (rw rw) Save(article domain.Article) (*domain.Article, error) {
 		return nil, uc.ErrNotFound
 	}
 
+	article.UpdatedAt = time.Now()
 	rw.store.Store(article.Slug, article)
 
 	return rw.GetBySlug(article.Slug)

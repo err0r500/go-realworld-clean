@@ -5,6 +5,8 @@ import (
 
 	"errors"
 
+	"time"
+
 	"github.com/err0r500/go-realworld-clean/domain"
 	"github.com/err0r500/go-realworld-clean/uc"
 )
@@ -23,6 +25,8 @@ func (rw rw) Create(comment domain.Comment) (*domain.Comment, error) {
 	if _, err := rw.GetByID(comment.ID); err == nil {
 		return nil, uc.ErrAlreadyInUse
 	}
+	comment.CreatedAt = time.Now()
+	comment.UpdatedAt = time.Now()
 
 	rw.store.Store(comment.ID, comment)
 

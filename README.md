@@ -49,6 +49,12 @@ make
 ```
 
 ### Run the integration tests
+Start the server with an existing user
+```
+./go-realworld-clean --populate=true
+```
+
+In another terminal, run the tests against the API
 ```
 newman run api/Conduit.postman_collection.json \
   -e api/Conduit.postman_integration_test_environment.json \

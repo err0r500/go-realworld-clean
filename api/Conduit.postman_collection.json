@@ -1662,6 +1662,66 @@
 			"description": null,
 			"item": [
 				{
+					"name": "Create Comment for Article",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"var responseJSON = JSON.parse(responseBody);",
+									"",
+									"tests['Response contains \"comment\" property'] = responseJSON.hasOwnProperty('comment');",
+									"",
+									"var comment = responseJSON.comment || {};",
+									"",
+									"tests['Comment has \"id\" property'] = comment.hasOwnProperty('id');",
+									"tests['Comment has \"body\" property'] = comment.hasOwnProperty('body');",
+									"tests['Comment has \"createdAt\" property'] = comment.hasOwnProperty('createdAt');",
+									"tests['\"createdAt\" property is an ISO 8601 timestamp'] = new Date(comment.createdAt).toISOString() === comment.createdAt;",
+									"tests['Comment has \"updatedAt\" property'] = comment.hasOwnProperty('updatedAt');",
+									"tests['\"updatedAt\" property is an ISO 8601 timestamp'] = new Date(comment.updatedAt).toISOString() === comment.updatedAt;",
+									"tests['Comment has \"author\" property'] = comment.hasOwnProperty('author');",
+									""
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-Requested-With",
+								"value": "XMLHttpRequest"
+							},
+							{
+								"key": "Authorization",
+								"value": "Token {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"comment\":{\"body\":\"Thank you so much!\"}}"
+						},
+						"url": {
+							"raw": "{{apiUrl}}/articles/how-to-train-your-dragon/comments",
+							"host": [
+								"{{apiUrl}}"
+							],
+							"path": [
+								"articles",
+								"how-to-train-your-dragon",
+								"comments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "All Comments for Article",
 					"event": [
 						{
@@ -1714,66 +1774,6 @@
 						"body": {
 							"mode": "raw",
 							"raw": ""
-						},
-						"url": {
-							"raw": "{{apiUrl}}/articles/how-to-train-your-dragon/comments",
-							"host": [
-								"{{apiUrl}}"
-							],
-							"path": [
-								"articles",
-								"how-to-train-your-dragon",
-								"comments"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Create Comment for Article",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"var responseJSON = JSON.parse(responseBody);",
-									"",
-									"tests['Response contains \"comment\" property'] = responseJSON.hasOwnProperty('comment');",
-									"",
-									"var comment = responseJSON.comment || {};",
-									"",
-									"tests['Comment has \"id\" property'] = comment.hasOwnProperty('id');",
-									"tests['Comment has \"body\" property'] = comment.hasOwnProperty('body');",
-									"tests['Comment has \"createdAt\" property'] = comment.hasOwnProperty('createdAt');",
-									"tests['\"createdAt\" property is an ISO 8601 timestamp'] = new Date(comment.createdAt).toISOString() === comment.createdAt;",
-									"tests['Comment has \"updatedAt\" property'] = comment.hasOwnProperty('updatedAt');",
-									"tests['\"updatedAt\" property is an ISO 8601 timestamp'] = new Date(comment.updatedAt).toISOString() === comment.updatedAt;",
-									"tests['Comment has \"author\" property'] = comment.hasOwnProperty('author');",
-									""
-								]
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "X-Requested-With",
-								"value": "XMLHttpRequest"
-							},
-							{
-								"key": "Authorization",
-								"value": "Token {{token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\"comment\":{\"body\":\"Thank you so much!\"}}"
 						},
 						"url": {
 							"raw": "{{apiUrl}}/articles/how-to-train-your-dragon/comments",

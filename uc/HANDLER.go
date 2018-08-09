@@ -58,6 +58,7 @@ type HandlerConstructor struct {
 	Logger           Logger
 	UserRW           UserRW
 	ArticleRW        ArticleRW
+	CommentRW        CommentRW
 	UserValidator    UserValidator
 	AuthHandler      AuthHandler
 	Slugger          Slugger
@@ -90,6 +91,9 @@ func (c HandlerConstructor) New() Handler {
 	if c.TagsRW == nil {
 		log.Fatal("missing TagsRW")
 	}
+	if c.CommentRW == nil {
+		log.Fatal("missing CommentRW")
+	}
 
 	return interactor{
 		logger:           c.Logger,
@@ -100,5 +104,6 @@ func (c HandlerConstructor) New() Handler {
 		slugger:          c.Slugger,
 		articleValidator: c.ArticleValidator,
 		tagsRW:           c.TagsRW,
+		commentRW:        c.CommentRW,
 	}
 }
