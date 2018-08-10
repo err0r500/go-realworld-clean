@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/err0r500/go-realworld-clean/domain"
+	"github.com/err0r500/go-realworld-clean/testData"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -51,4 +52,75 @@ func TestArticleIsFavoritedBy(t *testing.T) {
 		emptyFilter := domain.ArticleIsFavoritedBy("")
 		assert.False(t, emptyFilter(domain.Article{FavoritedBy: []domain.User{{Name: ""}}})) // always returns false
 	})
+}
+
+func TestUpdateArticle(t *testing.T) {
+	origArticle := testData.Article("jane")
+
+	t.Run("remain unchanged", func(t *testing.T) {
+		article := origArticle
+		domain.UpdateArticle(&article,
+			domain.SetArticleBody(nil),
+			domain.SetArticleTitle(nil),
+			domain.SetArticleDescription(nil),
+		)
+		assert.Equal(t, origArticle, article)
+
+		domain.UpdateArticle(&article)
+		assert.Equal(t, origArticle, article)
+
+	})
+
+	t.Run("remain unchanged", func(t *testing.T) {
+		article := origArticle
+		newBody := "newBody"
+		newTitle := "newTitle"
+		newDescription := "newDescription"
+
+		domain.UpdateArticle(&article,
+			domain.SetArticleBody(&newBody),
+			domain.SetArticleTitle(&newTitle),
+			domain.SetArticleDescription(&newDescription),
+		)
+
+		assert.Equal(t, newBody, article.Body)
+		assert.Equal(t, newTitle, article.Title)
+		assert.Equal(t, newDescription, article.Description)
+	})
+}
+
+func TestArticle_UpdateComments(t *testing.T) {
+	article := domain.Article{}
+	comment1 := domain.Comment{ID: 123}
+	comment2 := domain.Comment{ID: 1234}
+
+	article.UpdateComments(comment1, true)
+	assert.Equal(t, []domain.Comment{comment1}, article.Comments)
+
+	article.UpdateComments(comment2, true)
+	assert.Equal(t, []domain.Comment{comment1, comment2}, article.Comments)
+
+	article.UpdateComments(comment1, false)
+	assert.Equal(t, []domain.Comment{comment2}, article.Comments)
+
+	article.UpdateComments(comment1, false)
+	assert.Equal(t, []domain.Comment{comment2}, article.Comments)
+}
+
+func TestArticle_UpdateFavoritedBy(t *testing.T) {
+	article := domain.Article{}
+	user1 := domain.User{Name: "user1"}
+	user2 := domain.User{Name: "user2"}
+
+	article.UpdateFavoritedBy(user1, true)
+	assert.Equal(t, []domain.User{user1}, article.FavoritedBy)
+
+	article.UpdateFavoritedBy(user2, true)
+	assert.Equal(t, []domain.User{user1, user2}, article.FavoritedBy)
+
+	article.UpdateFavoritedBy(user1, false)
+	assert.Equal(t, []domain.User{user2}, article.FavoritedBy)
+
+	article.UpdateFavoritedBy(user1, false)
+	assert.Equal(t, []domain.User{user2}, article.FavoritedBy)
 }

@@ -25,7 +25,7 @@ type UserLogic interface {
 	UserCreate(username, email, password string) (user *domain.User, token string, err error)
 	UserLogin(email, password string) (user *domain.User, token string, err error)
 	UserGet(userName string) (user *domain.User, token string, err error)
-	UserEdit(userName string, newUser map[domain.UserUpdatableProperty]*string) (user *domain.User, token string, err error)
+	UserEdit(userName string, fieldsToUpdate map[domain.UserUpdatableProperty]*string) (user *domain.User, token string, err error)
 }
 
 type ArticlesLogic interface {

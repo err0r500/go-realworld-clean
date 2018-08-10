@@ -17,6 +17,14 @@ type Article struct {
 	Comments    []Comment
 }
 
+type Comment struct {
+	ID        int
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	Body      string
+	Author    User
+}
+
 type ArticleUpdatableField int
 
 const (
@@ -132,7 +140,7 @@ func (article *Article) UpdateFavoritedBy(user User, add bool) {
 		return
 	}
 
-	for i := 0; i < len(article.Comments); i++ {
+	for i := 0; i < len(article.FavoritedBy); i++ {
 		if article.FavoritedBy[i].Name == user.Name {
 			article.FavoritedBy = append(article.FavoritedBy[:i], article.FavoritedBy[i+1:]...) // memory leak ? https://github.com/golang/go/wiki/SliceTricks
 		}
