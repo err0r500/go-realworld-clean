@@ -9,7 +9,7 @@ import (
 
 	server "github.com/err0r500/go-realworld-clean/implem/gin.server"
 	jwt "github.com/err0r500/go-realworld-clean/implem/jwt.authHandler"
-	"github.com/err0r500/go-realworld-clean/implem/mock.uc"
+	"github.com/err0r500/go-realworld-clean/implem/uc.mock"
 	"github.com/err0r500/go-realworld-clean/testData"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
@@ -26,7 +26,7 @@ func TestRouterHandler_articlePost(t *testing.T) {
 	expectedArticle := testData.Article("jane")
 	testUser := testData.User("jane")
 
-	ucHandler := uc.NewMockHandler(mockCtrl)
+	ucHandler := mock.NewMockHandler(mockCtrl)
 	ucHandler.EXPECT().
 		ArticlePost(testUser.Name, gomock.Any()).
 		Return(&testUser, &expectedArticle, nil).
@@ -86,14 +86,14 @@ func TestRouterHandler_articlePut(t *testing.T) {
 	expectedArticle := testData.Article("jane")
 	jwtHandler := jwt.New("mySalt")
 
-	ucHandler := uc.NewMockHandler(mockCtrl)
+	ucHandler := mock.NewMockHandler(mockCtrl)
 	ucHandler.EXPECT().
 		ArticlePut(testUser.Name, expectedArticle.Slug, gomock.Any()).
 		Return(&testUser, &expectedArticle, nil).
 		Times(1)
 
 	gE := gin.Default()
-	server.NewRouterWithLogger(ucHandler, jwtHandler, uc.SimpleLogger{}).SetRoutes(gE)
+	server.NewRouterWithLogger(ucHandler, jwtHandler, mock.SimpleLogger{}).SetRoutes(gE)
 	ts := httptest.NewServer(gE)
 	defer ts.Close()
 
@@ -147,14 +147,14 @@ func TestRouterHandler_articleGet(t *testing.T) {
 
 	expectedArticle := testData.Article("jane")
 	//testUser := testData.User("jane")
-	ucHandler := uc.NewMockHandler(mockCtrl)
+	ucHandler := mock.NewMockHandler(mockCtrl)
 	ucHandler.EXPECT().
 		ArticleGet("", expectedArticle.Slug).
 		Return(nil, &expectedArticle, nil).
 		Times(1)
 
 	gE := gin.Default()
-	server.NewRouterWithLogger(ucHandler, jwt.New("mySalt"), uc.SimpleLogger{}).SetRoutes(gE)
+	server.NewRouterWithLogger(ucHandler, jwt.New("mySalt"), mock.SimpleLogger{}).SetRoutes(gE)
 	ts := httptest.NewServer(gE)
 	defer ts.Close()
 
@@ -171,7 +171,7 @@ func TestRouterHandler_articleDelete(t *testing.T) {
 	defer mockCtrl.Finish()
 
 	expectedArticle := testData.Article("jane")
-	ucHandler := uc.NewMockHandler(mockCtrl)
+	ucHandler := mock.NewMockHandler(mockCtrl)
 	ucHandler.EXPECT().
 		ArticleDelete(testData.User("jane").Name, expectedArticle.Slug).
 		Return(nil).

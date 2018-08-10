@@ -8,7 +8,7 @@ import (
 	"github.com/err0r500/go-realworld-clean/implem/gin.server"
 	"github.com/err0r500/go-realworld-clean/implem/jwt.authHandler"
 	logger "github.com/err0r500/go-realworld-clean/implem/logrus.logger"
-	"github.com/err0r500/go-realworld-clean/implem/mock.uc"
+	"github.com/err0r500/go-realworld-clean/implem/uc.mock"
 	"github.com/err0r500/go-realworld-clean/testData"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
@@ -23,7 +23,7 @@ func TestUserPut_happyCase(t *testing.T) {
 	defer mockCtrl.Finish()
 
 	jane := testData.User("jane")
-	ucHandler := uc.NewMockHandler(mockCtrl)
+	ucHandler := mock.NewMockHandler(mockCtrl)
 	ucHandler.EXPECT().
 		UserEdit(testData.User("rick").Name, gomock.Any()).
 		Return(&jane, "token", nil).

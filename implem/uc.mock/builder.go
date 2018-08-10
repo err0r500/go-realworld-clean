@@ -1,6 +1,6 @@
 // +build !netgo
 
-package uc
+package mock
 
 import (
 	"log"
@@ -9,8 +9,8 @@ import (
 	"github.com/golang/mock/gomock"
 )
 
-// MockedInteractor : is used in order to update its properties accordingly to each test conditions
-type MockedInteractor struct {
+// Interactor : is used in order to update its properties accordingly to each test conditions
+type Interactor struct {
 	Logger           *MockLogger
 	UserRW           *MockUserRW
 	ArticleRW        *MockArticleRW
@@ -23,7 +23,7 @@ type MockedInteractor struct {
 }
 
 type Tester struct {
-	Calls      func(interactor *MockedInteractor)
+	Calls      func(*Interactor)
 	ShouldPass bool
 }
 
@@ -33,9 +33,9 @@ func (SimpleLogger) Log(logs ...interface{}) {
 	log.Println(logs...)
 }
 
-//NewMockedInteractor : the MockedInteractor constructor
-func NewMockedInteractor(mockCtrl *gomock.Controller) MockedInteractor {
-	return MockedInteractor{
+//NewMockedInteractor : the Interactor constructor
+func NewMockedInteractor(mockCtrl *gomock.Controller) Interactor {
+	return Interactor{
 		Logger:           NewMockLogger(mockCtrl),
 		UserRW:           NewMockUserRW(mockCtrl),
 		ArticleRW:        NewMockArticleRW(mockCtrl),
@@ -49,7 +49,7 @@ func NewMockedInteractor(mockCtrl *gomock.Controller) MockedInteractor {
 }
 
 //GetUCHandler : returns a uc.interactor in order to call its methods aka the use cases to test
-func (i MockedInteractor) GetUCHandler() uc.Handler {
+func (i Interactor) GetUCHandler() uc.Handler {
 	return uc.HandlerConstructor{
 		Logger:           i.Logger,
 		UserRW:           i.UserRW,

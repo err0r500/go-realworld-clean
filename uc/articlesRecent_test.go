@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/err0r500/go-realworld-clean/domain"
-	mock "github.com/err0r500/go-realworld-clean/implem/mock.uc"
+	"github.com/err0r500/go-realworld-clean/implem/uc.mock"
 	"github.com/err0r500/go-realworld-clean/testData"
 	"github.com/err0r500/go-realworld-clean/uc"
 	"github.com/golang/mock/gomock"

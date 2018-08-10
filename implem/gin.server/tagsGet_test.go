@@ -8,7 +8,7 @@ import (
 	"errors"
 
 	"github.com/err0r500/go-realworld-clean/implem/gin.server"
-	"github.com/err0r500/go-realworld-clean/implem/mock.uc"
+	"github.com/err0r500/go-realworld-clean/implem/uc.mock"
 	"github.com/err0r500/go-realworld-clean/testData"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
@@ -23,7 +23,7 @@ func TestTagsGet_happyCase(t *testing.T) {
 		defer mockCtrl.Finish()
 
 		tags := []string{"tag1", "tag2"}
-		ucHandler := uc.NewMockHandler(mockCtrl)
+		ucHandler := mock.NewMockHandler(mockCtrl)
 		ucHandler.EXPECT().
 			Tags().
 			Return(tags, nil).
@@ -46,7 +46,7 @@ func TestTagsGet_happyCase(t *testing.T) {
 		mockCtrl := gomock.NewController(t)
 		defer mockCtrl.Finish()
 
-		ucHandler := uc.NewMockHandler(mockCtrl)
+		ucHandler := mock.NewMockHandler(mockCtrl)
 		ucHandler.EXPECT().
 			Tags().
 			Return(nil, nil).
@@ -72,14 +72,14 @@ func TestTagsGet_fail(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
-	ucHandler := uc.NewMockHandler(mockCtrl)
+	ucHandler := mock.NewMockHandler(mockCtrl)
 	ucHandler.EXPECT().
 		Tags().
 		Return(nil, errors.New("")).
 		Times(1)
 
 	gE := gin.Default()
-	server.NewRouterWithLogger(ucHandler, nil, uc.SimpleLogger{}).SetRoutes(gE)
+	server.NewRouterWithLogger(ucHandler, nil, mock.SimpleLogger{}).SetRoutes(gE)
 
 	ts := httptest.NewServer(gE)
 	defer ts.Close()

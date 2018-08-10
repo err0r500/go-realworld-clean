@@ -6,7 +6,7 @@ import (
 	"errors"
 
 	"github.com/err0r500/go-realworld-clean/domain"
-	mock "github.com/err0r500/go-realworld-clean/implem/mock.uc"
+	"github.com/err0r500/go-realworld-clean/implem/uc.mock"
 	"github.com/err0r500/go-realworld-clean/testData"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -21,7 +21,7 @@ func TestEditUser_happyCase(t *testing.T) {
 	rick := testData.User("rick")
 	jane := testData.User("jane")
 
-	urw := func(i *mock.MockedInteractor) {
+	urw := func(i *mock.Interactor) {
 		i.UserRW.EXPECT().GetByName(rick.Name).Return(&rick, nil).Times(1)
 	}
 
@@ -48,31 +48,31 @@ func TestEditUser_happyCase(t *testing.T) {
 func TestInteractor_UserEdit_fails(t *testing.T) {
 
 	mutations := map[string]mock.Tester{
-		"shouldPass": {Calls: func(i *mock.MockedInteractor) {
+		"shouldPass": {Calls: func(i *mock.Interactor) {
 			// change nothing
 		}, ShouldPass: true},
 		"error return on uRW.GetByName": {
-			Calls: func(i *mock.MockedInteractor) {
+			Calls: func(i *mock.Interactor) {
 				i.UserRW.EXPECT().GetByName(gomock.Any()).Return(nil, errors.New(""))
 			}},
 		"nil, nil return on uRW.GetByName": {
-			Calls: func(i *mock.MockedInteractor) {
+			Calls: func(i *mock.Interactor) {
 				i.UserRW.EXPECT().GetByName(gomock.Any()).Return(nil, nil)
 			}},
 		"uRW.GetByName returns wrong name": {
-			Calls: func(i *mock.MockedInteractor) {
+			Calls: func(i *mock.Interactor) {
 				i.UserRW.EXPECT().GetByName(gomock.Any()).Return(&domain.User{Name: "hi there"}, nil)
 			}},
 		"user not validated": {
-			Calls: func(i *mock.MockedInteractor) {
+			Calls: func(i *mock.Interactor) {
 				i.UserValidator.EXPECT().CheckUser(gomock.Any()).Return(errors.New(""))
 			}},
 		"failed to save the user": {
-			Calls: func(i *mock.MockedInteractor) {
+			Calls: func(i *mock.Interactor) {
 				i.UserRW.EXPECT().Save(gomock.Any()).Return(errors.New(""))
 			}},
 		"failed to gen token": {
-			Calls: func(i *mock.MockedInteractor) {
+			Calls: func(i *mock.Interactor) {
 				i.AuthHandler.EXPECT().GenUserToken(gomock.Any()).Return("", errors.New("")).AnyTimes()
 			}},
 	}
@@ -80,7 +80,7 @@ func TestInteractor_UserEdit_fails(t *testing.T) {
 	rick := testData.User("rick")
 
 	// same as the happy case but with any parameter and called any number of times (including 0)
-	validCalls := func(i *mock.MockedInteractor) {
+	validCalls := func(i *mock.Interactor) {
 		i.Logger.EXPECT().Log(gomock.Any()).AnyTimes()
 		i.UserRW.EXPECT().GetByName(gomock.Any()).Return(&rick, nil).AnyTimes()
 		i.UserValidator.EXPECT().CheckUser(gomock.Any()).Return(nil).AnyTimes()

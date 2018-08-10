@@ -2,12 +2,13 @@
 // Source: ./uc/INTERACTOR.go
 
 // Package uc is a generated GoMock package.
-package uc
+package mock
 
 import (
+	reflect "reflect"
+
 	domain "github.com/err0r500/go-realworld-clean/domain"
 	gomock "github.com/golang/mock/gomock"
-	reflect "reflect"
 )
 
 // MockLogger is a mock of Logger interface

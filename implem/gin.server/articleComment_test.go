@@ -8,7 +8,7 @@ import (
 
 	"github.com/err0r500/go-realworld-clean/implem/gin.server"
 	"github.com/err0r500/go-realworld-clean/implem/jwt.authHandler"
-	"github.com/err0r500/go-realworld-clean/implem/mock.uc"
+	"github.com/err0r500/go-realworld-clean/implem/uc.mock"
 	"github.com/err0r500/go-realworld-clean/testData"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
@@ -23,7 +23,7 @@ func TestArticleCommentGet(t *testing.T) {
 	defer mockCtrl.Finish()
 
 	expectedComment := testData.Article("").Comments
-	ucHandler := uc.NewMockHandler(mockCtrl)
+	ucHandler := mock.NewMockHandler(mockCtrl)
 	ucHandler.EXPECT().
 		CommentsGet(
 			testData.Article("jane").Slug,
@@ -57,7 +57,7 @@ func TestArticleCommentPost(t *testing.T) {
 	defer mockCtrl.Finish()
 
 	expectedComment := testData.Article("").Comments[0]
-	ucHandler := uc.NewMockHandler(mockCtrl)
+	ucHandler := mock.NewMockHandler(mockCtrl)
 	ucHandler.EXPECT().
 		CommentsPost(
 			testData.User("jane").Name,
@@ -118,7 +118,7 @@ func TestArticleCommentDelete(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
-	ucHandler := uc.NewMockHandler(mockCtrl)
+	ucHandler := mock.NewMockHandler(mockCtrl)
 	ucHandler.EXPECT().
 		CommentsDelete(
 			testData.User("jane").Name,

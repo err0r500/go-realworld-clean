@@ -6,7 +6,7 @@ import (
 	"errors"
 
 	"github.com/err0r500/go-realworld-clean/domain"
-	mock "github.com/err0r500/go-realworld-clean/implem/mock.uc"
+	"github.com/err0r500/go-realworld-clean/implem/uc.mock"
 	"github.com/err0r500/go-realworld-clean/testData"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"

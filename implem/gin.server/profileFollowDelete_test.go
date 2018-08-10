@@ -7,7 +7,7 @@ import (
 	"github.com/err0r500/go-realworld-clean/domain"
 	"github.com/err0r500/go-realworld-clean/implem/gin.server"
 	"github.com/err0r500/go-realworld-clean/implem/jwt.authHandler"
-	"github.com/err0r500/go-realworld-clean/implem/mock.uc"
+	"github.com/err0r500/go-realworld-clean/implem/uc.mock"
 	"github.com/err0r500/go-realworld-clean/testData"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
@@ -21,7 +21,7 @@ func TestProfileFollowDelete_happyCase(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
-	ucHandler := uc.NewMockHandler(mockCtrl)
+	ucHandler := mock.NewMockHandler(mockCtrl)
 	ucHandler.EXPECT().
 		ProfileUpdateFollow(testData.User("jane").Name, testData.User("rick").Name, false).
 		Return(&domain.User{}, nil).

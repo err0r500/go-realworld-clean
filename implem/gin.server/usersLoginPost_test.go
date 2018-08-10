@@ -7,7 +7,7 @@ import (
 
 	"github.com/err0r500/go-realworld-clean/implem/gin.server"
 	jwt "github.com/err0r500/go-realworld-clean/implem/jwt.authHandler"
-	"github.com/err0r500/go-realworld-clean/implem/mock.uc"
+	"github.com/err0r500/go-realworld-clean/implem/uc.mock"
 	"github.com/err0r500/go-realworld-clean/testData"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
@@ -21,7 +21,7 @@ func TestUserLoginPost_happyCase(t *testing.T) {
 	defer mockCtrl.Finish()
 
 	jane := testData.User("jane")
-	ucHandler := uc.NewMockHandler(mockCtrl)
+	ucHandler := mock.NewMockHandler(mockCtrl)
 	ucHandler.EXPECT().
 		UserLogin(jane.Email, jane.Password).
 		Return(&jane, "authToken", nil).

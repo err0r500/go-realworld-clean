@@ -9,7 +9,7 @@ import (
 	"github.com/err0r500/go-realworld-clean/domain"
 	"github.com/err0r500/go-realworld-clean/implem/gin.server"
 	jwt "github.com/err0r500/go-realworld-clean/implem/jwt.authHandler"
-	mock "github.com/err0r500/go-realworld-clean/implem/mock.uc"
+	"github.com/err0r500/go-realworld-clean/implem/uc.mock"
 	"github.com/err0r500/go-realworld-clean/testData"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
