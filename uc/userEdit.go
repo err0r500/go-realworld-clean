@@ -10,11 +10,11 @@ func (i interactor) UserEdit(userName string, fieldsToUpdate map[domain.UserUpda
 	if err != nil {
 		return nil, "", err
 	}
-	if user.Name != userName {
-		return nil, "", errWrongUser
-	}
 	if user == nil {
 		return nil, "", ErrNotFound
+	}
+	if user.Name != userName {
+		return nil, "", errWrongUser
 	}
 
 	domain.UpdateUser(user,

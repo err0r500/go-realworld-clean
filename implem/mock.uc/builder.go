@@ -22,6 +22,8 @@ type MockedInteractor struct {
 	CommentRW        *MockCommentRW
 }
 
+type TestFunc = func(interactor *MockedInteractor)
+
 type SimpleLogger struct{}
 
 func (SimpleLogger) Log(logs ...interface{}) {
