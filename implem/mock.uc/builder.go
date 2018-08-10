@@ -11,7 +11,7 @@ import (
 
 // MockedInteractor : is used in order to update its properties accordingly to each test conditions
 type MockedInteractor struct {
-	Logger           uc.Logger
+	Logger           *MockLogger
 	UserRW           *MockUserRW
 	ArticleRW        *MockArticleRW
 	UserValidator    *MockUserValidator
@@ -22,7 +22,10 @@ type MockedInteractor struct {
 	CommentRW        *MockCommentRW
 }
 
-type TestFunc = func(interactor *MockedInteractor)
+type Tester struct {
+	Calls      func(interactor *MockedInteractor)
+	ShouldPass bool
+}
 
 type SimpleLogger struct{}
 
@@ -33,7 +36,7 @@ func (SimpleLogger) Log(logs ...interface{}) {
 //NewMockedInteractor : the MockedInteractor constructor
 func NewMockedInteractor(mockCtrl *gomock.Controller) MockedInteractor {
 	return MockedInteractor{
-		Logger:           SimpleLogger{},
+		Logger:           NewMockLogger(mockCtrl),
 		UserRW:           NewMockUserRW(mockCtrl),
 		ArticleRW:        NewMockArticleRW(mockCtrl),
 		UserValidator:    NewMockUserValidator(mockCtrl),
