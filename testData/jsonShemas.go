@@ -58,13 +58,23 @@ var ProfileDefinition = `
     },
     "following": {
       "type": "boolean"
+    },
+	"createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time"
     }
   },
   "required": [
     "username",
     "bio",
     "image",
-    "following"
+    "following",
+	"createdAt",
+	"updatedAt"
   ]
 }`
 

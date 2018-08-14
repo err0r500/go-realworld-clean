@@ -7,6 +7,9 @@ func (i interactor) CommentsGet(slug string) ([]domain.Comment, error) {
 	if err != nil {
 		return nil, err
 	}
+	if article.Comments == nil {
+		article.Comments = []domain.Comment{}
+	}
 
 	return article.Comments, nil
 }

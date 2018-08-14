@@ -13,7 +13,7 @@ type Comment struct {
 }
 
 func NewCommentsFromDomain(comments ...domain.Comment) []Comment {
-	var ret []Comment
+	ret := []Comment{} // return at least an empty array (not nil)
 	for _, comment := range comments {
 		ret = append(ret, NewCommentFromDomain(comment))
 	}
@@ -27,6 +27,6 @@ func NewCommentFromDomain(comment domain.Comment) Comment {
 		CreatedAt: comment.CreatedAt.UTC().Format(dateLayout),
 		UpdatedAt: comment.UpdatedAt.UTC().Format(dateLayout),
 		Body:      comment.Body,
-		Author:    NewProfileFromDomain(comment.Author, false), //fixme check this
+		Author:    NewProfileFromDomain(comment.Author, false),
 	}
 }

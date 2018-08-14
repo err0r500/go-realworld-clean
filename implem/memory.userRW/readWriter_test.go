@@ -52,5 +52,13 @@ func TestRw_GetByEmailAndPassword(t *testing.T) {
 	user, err := rw.GetByEmailAndPassword(jane.Email, jane.Password)
 
 	assert.NoError(t, err)
-	assert.Equal(t, jane, *user)
+	assert.Equal(t, jane.Name, user.Name)
+	assert.Equal(t, jane.Email, user.Email)
+	assert.Equal(t, jane.Password, user.Password)
+	assert.Equal(t, jane.Bio, user.Bio)
+	assert.Equal(t, jane.ImageLink, user.ImageLink)
+	assert.Equal(t, jane.FollowIDs, user.FollowIDs)
+	assert.Equal(t, jane.Favorites, user.Favorites)
+	assert.NotNil(t, jane.CreatedAt)
+	assert.NotNil(t, jane.UpdatedAt)
 }

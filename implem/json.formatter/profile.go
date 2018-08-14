@@ -9,6 +9,8 @@ type Profile struct {
 	Bio       string `json:"bio"`
 	Picture   string `json:"image"`
 	Following bool   `json:"following"`
+	CreatedAt string `json:"createdAt"`
+	UpdatedAt string `json:"updatedAt"`
 }
 
 func NewProfileFromDomain(user domain.User, following bool) Profile {
@@ -25,5 +27,7 @@ func NewProfileFromDomain(user domain.User, following bool) Profile {
 		Bio:       bio,
 		Picture:   image,
 		Following: following,
+		CreatedAt: user.CreatedAt.UTC().Format(dateLayout),
+		UpdatedAt: user.UpdatedAt.UTC().Format(dateLayout),
 	}
 }

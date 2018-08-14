@@ -3,11 +3,13 @@ package formatter
 import "github.com/err0r500/go-realworld-clean/domain"
 
 type UserResp struct {
-	Email    string `json:"email"`
-	Token    string `json:"token"`
-	Username string `json:"username"`
-	Bio      string `json:"bio"`
-	Image    string `json:"image"`
+	Email     string `json:"email"`
+	Token     string `json:"token"`
+	Username  string `json:"username"`
+	Bio       string `json:"bio"`
+	Image     string `json:"image"`
+	CreatedAt string `json:"createdAt"`
+	UpdatedAt string `json:"updatedAt"`
 }
 
 func NewUserResp(user domain.User, token string) UserResp {
@@ -19,10 +21,12 @@ func NewUserResp(user domain.User, token string) UserResp {
 		image = *user.ImageLink
 	}
 	return UserResp{
-		Email:    user.Email,
-		Token:    token,
-		Username: user.Name,
-		Bio:      bio,
-		Image:    image,
+		Email:     user.Email,
+		Token:     token,
+		Username:  user.Name,
+		Bio:       bio,
+		Image:     image,
+		CreatedAt: user.CreatedAt.UTC().Format(dateLayout),
+		UpdatedAt: user.UpdatedAt.UTC().Format(dateLayout),
 	}
 }

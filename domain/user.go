@@ -2,6 +2,7 @@ package domain
 
 import (
 	"sort"
+	"time"
 )
 
 // User represents a user account in the system
@@ -13,6 +14,8 @@ type User struct {
 	ImageLink *string
 	FollowIDs []string
 	Favorites []Article
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 type UserUpdatableProperty int
 

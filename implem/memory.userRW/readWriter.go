@@ -6,6 +6,8 @@ import (
 
 	"log"
 
+	"time"
+
 	"github.com/err0r500/go-realworld-clean/domain"
 	"github.com/err0r500/go-realworld-clean/testData"
 	"github.com/err0r500/go-realworld-clean/uc"
@@ -37,9 +39,11 @@ func (rw rw) Create(username, email, password string) (*domain.User, error) {
 	}
 
 	rw.store.Store(username, domain.User{
-		Name:     username,
-		Email:    email,
-		Password: password,
+		Name:      username,
+		Email:     email,
+		Password:  password,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
 	})
 
 	return rw.GetByName(username)
@@ -86,6 +90,7 @@ func (rw rw) Save(user domain.User) error {
 		return uc.ErrNotFound
 	}
 
+	user.UpdatedAt = time.Now()
 	rw.store.Store(user.Name, user)
 
 	return nil
