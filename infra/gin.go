@@ -1,11 +1,13 @@
 package infra
 
 import (
+	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/itsjamie/gin-cors"
+	cors "github.com/itsjamie/gin-cors"
 )
 
 type GinServerMode int
@@ -49,7 +51,7 @@ func NewServer(port int, mode GinServerMode) GinServer {
 func SetCors(engine *gin.Engine, allowedOrigins string) {
 	engine.Use(cors.Middleware(cors.Config{
 		Origins:         allowedOrigins,
-		Methods:         "GET, PUT, POST, DELETE, OPTION, PATCH",
+		Methods:         strings.Join([]string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodOptions, http.MethodPatch}, ","),
 		RequestHeaders:  "Origin, Authorization, Content-Type",
 		ExposedHeaders:  "",
 		MaxAge:          50 * time.Second,
