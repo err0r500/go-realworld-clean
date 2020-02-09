@@ -37,10 +37,8 @@ Layers ( from the most abstract to the most concrete ) :
 - testability
 
 # Getting started
-### Install dependencies 
+### Build the app 
 ```
-go get -u github.com/golang/dep/cmd/dep
-$GOPATH/bin/dep ensure
 make
 ```
 ### Run the app

@@ -10,7 +10,7 @@ BUILD=$(shell git rev-parse HEAD 2> /dev/null || echo "undefined")
 LDFLAGS=-ldflags "-X main.Version=$(VERSION) -X main.Build=$(BUILD)"
 
 all:
-	go build -o $(BINARY) $(LDFLAGS)
+	GO111MODULE=on go build -o $(BINARY) $(LDFLAGS)
 
 init:
 	git config core.hooksPath .githooks
@@ -29,7 +29,7 @@ latest:
 		-f Dockerfile --no-cache .
 
 test:
-	go test ./...
+	GO111MODULE=on go test ./...
 
 clean:
 	if [ -f $(BINARY) ] ; then rm $(BINARY) ; fi
