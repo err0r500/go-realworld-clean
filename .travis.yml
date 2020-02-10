@@ -2,12 +2,11 @@ language: go
 sudo: false
 
 go:
-  - 1.10.x
+  - 1.13.x
   - tip
 
 before_install:
-  - go get -u github.com/golang/dep/...
-  - dep ensure
+  - go build 
 
 script:
   - ./testCoverage.sh
