@@ -45,7 +45,7 @@ func (rw rw) Create(ctx context.Context, article domain.Article) (*domain.Articl
 	return rw.GetBySlug(ctx, article.Slug)
 }
 
-func (rw rw) GetByAuthorsNameOrderedByMostRecentAsc(ctx context.Context, usernames []string) ([]domain.Article, error) {
+func (rw rw) GetByAuthorsNameOrderedByMostRecentAsc(ctx context.Context, usernames []string) ([]domain.Article, bool) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "inmem_articlerw:get_by_author_most_recent")
 	defer span.Finish()
 
@@ -64,10 +64,10 @@ func (rw rw) GetByAuthorsNameOrderedByMostRecentAsc(ctx context.Context, usernam
 		return true
 	})
 
-	return toReturn, nil
+	return toReturn, true
 }
 
-func (rw rw) GetRecentFiltered(ctx context.Context, filters []domain.ArticleFilter) ([]domain.Article, error) {
+func (rw rw) GetRecentFiltered(ctx context.Context, filters []domain.ArticleFilter) ([]domain.Article, bool) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "inmem_articlerw:get_recent_filtered")
 	defer span.Finish()
 
@@ -90,7 +90,7 @@ func (rw rw) GetRecentFiltered(ctx context.Context, filters []domain.ArticleFilt
 		return true
 	})
 
-	return recentArticles, nil
+	return recentArticles, true
 }
 
 func (rw rw) Save(ctx context.Context, article domain.Article) (*domain.Article, bool) {

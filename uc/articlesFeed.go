@@ -23,9 +23,9 @@ func (i interactor) ArticlesFeed(ctx context.Context, username string, limit, of
 			return nil, nil, 0, errGet
 		}
 	}
-	articles, err := i.articleRW.GetByAuthorsNameOrderedByMostRecentAsc(ctx, user.FollowIDs)
-	if err != nil {
-		return nil, nil, 0, err
+	articles, ok := i.articleRW.GetByAuthorsNameOrderedByMostRecentAsc(ctx, user.FollowIDs)
+	if !ok {
+		return nil, nil, 0, ErrTechnical
 	}
 
 	return user, domain.ArticleCollection(articles).ApplyLimitAndOffset(limit, offset), len(articles), nil // needs the original length

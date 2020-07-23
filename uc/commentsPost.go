@@ -2,9 +2,11 @@ package uc
 
 import (
 	"context"
+	"errors"
 
 	"github.com/err0r500/go-realworld-clean/domain"
 	"github.com/opentracing/opentracing-go"
+	"github.com/opentracing/opentracing-go/log"
 )
 
 func (i interactor) CommentsPost(ctx context.Context, username, slug, comment string) (*domain.Comment, error) {
@@ -29,9 +31,13 @@ func (i interactor) CommentsPost(ctx context.Context, username, slug, comment st
 		Author: *commentPoster,
 	}
 
-	insertedComment, err := i.commentRW.Create(rawComment)
-	if err != nil {
-		return nil, err
+	insertedComment, ok := i.commentRW.Create(ctx, rawComment)
+	if !ok {
+		return nil, ErrTechnical
+	}
+	if insertedComment == nil {
+		span.LogFields(log.Error(errors.New("create comment returned a nil pointer")))
+		return nil, ErrTechnical
 	}
 
 	article.Comments = append(article.Comments, *insertedComment)

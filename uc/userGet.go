@@ -13,7 +13,7 @@ func (i interactor) UserGet(userName string) (*domain.User, string, error) {
 		return nil, "", ErrNotFound
 	}
 	if user.Name != userName {
-		return nil, "", errWrongUser
+		return nil, "", ErrUnauthorized
 	}
 
 	token, err := i.authHandler.GenUserToken(userName)

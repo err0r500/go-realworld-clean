@@ -8,7 +8,7 @@ func (i interactor) ProfileUpdateFollow(userName, followeeName string, follow bo
 		return nil, err
 	}
 	if user.Name != userName {
-		return nil, errWrongUser
+		return nil, ErrUnauthorized
 	}
 	if user == nil {
 		return nil, ErrNotFound

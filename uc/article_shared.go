@@ -22,8 +22,8 @@ func (i interactor) getArticleAndCheckUser(ctx context.Context, username, slug s
 
 	// check only if a username is specified
 	if username != "" && completeArticle.Author.Name != username {
-		span.LogFields(log.Error(errWrongUser))
-		return nil, errWrongUser
+		span.LogFields(log.Error(ErrUnauthorized))
+		return nil, ErrUnauthorized
 	}
 
 	return completeArticle, nil

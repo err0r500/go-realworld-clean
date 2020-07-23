@@ -41,15 +41,15 @@ type ArticleRW interface {
 	Create(ctx context.Context, _ domain.Article) (*domain.Article, bool)
 	Save(ctx context.Context, _ domain.Article) (*domain.Article, bool)
 	GetBySlug(ctx context.Context, slug string) (*domain.Article, bool)
-	GetByAuthorsNameOrderedByMostRecentAsc(ctx context.Context, usernames []string) ([]domain.Article, error)
-	GetRecentFiltered(ctx context.Context, filters []domain.ArticleFilter) ([]domain.Article, error)
+	GetByAuthorsNameOrderedByMostRecentAsc(ctx context.Context, usernames []string) ([]domain.Article, bool)
+	GetRecentFiltered(ctx context.Context, filters []domain.ArticleFilter) ([]domain.Article, bool)
 	Delete(ctx context.Context, slug string) bool
 }
 
 type CommentRW interface {
-	Create(comment domain.Comment) (*domain.Comment, error)
-	GetByID(id int) (*domain.Comment, error)
-	Delete(id int) error
+	Create(ctx context.Context, comment domain.Comment) (*domain.Comment, bool)
+	GetByID(ctx context.Context, id int) (*domain.Comment, bool)
+	Delete(ctx context.Context, id int) bool
 }
 
 type TagsRW interface {

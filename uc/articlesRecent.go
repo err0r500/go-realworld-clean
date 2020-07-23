@@ -31,9 +31,9 @@ func (i interactor) GetArticles(ctx context.Context, username string, limit, off
 		return nil, domain.ArticleCollection{}, 0, nil
 	}
 
-	articles, err := i.articleRW.GetRecentFiltered(ctx, filters)
-	if err != nil {
-		return nil, nil, 0, err
+	articles, ok := i.articleRW.GetRecentFiltered(ctx, filters)
+	if !ok {
+		return nil, nil, 0, ErrTechnical
 	}
 
 	var user *domain.User
