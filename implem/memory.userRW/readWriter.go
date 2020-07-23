@@ -1,10 +1,12 @@
 package userRW
 
 import (
+	"context"
 	"errors"
 	"sync"
 
-	"log"
+	"github.com/opentracing/opentracing-go"
+	"github.com/opentracing/opentracing-go/log"
 
 	"time"
 
@@ -25,17 +27,23 @@ func New() uc.UserRW {
 	}
 
 	if viper.GetBool("populate") {
-		log.Print("append user")
 		rick := testData.User("rick")
-		rw.Create(rick.Name, rick.Email, rick.Password)
+		rw.Create(context.Background(), rick.Name, rick.Email, rick.Password)
 	}
 
 	return rw
 }
 
-func (rw rw) Create(username, email, password string) (*domain.User, error) {
-	if _, err := rw.GetByName(username); err == nil {
-		return nil, uc.ErrConflict
+func (rw rw) Create(ctx context.Context, username, email, password string) (*domain.User, bool) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "inmem_userrw:create")
+	defer span.Finish()
+
+	mayUser, ok := rw.GetByName(ctx, username)
+	if !ok {
+		return nil, false
+	}
+	if mayUser != nil {
+		span.LogFields(log.Error(uc.ErrConflict))
 	}
 
 	rw.store.Store(username, domain.User{
@@ -46,24 +54,35 @@ func (rw rw) Create(username, email, password string) (*domain.User, error) {
 		UpdatedAt: time.Now(),
 	})
 
-	return rw.GetByName(username)
+	u, ok := rw.GetByName(ctx, username)
+	if !ok {
+		return nil, false
+	}
+	return u, true
 }
 
-func (rw rw) GetByName(userName string) (*domain.User, error) {
+func (rw rw) GetByName(ctx context.Context, userName string) (*domain.User, bool) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "inmem_userrw:get_by_name")
+	defer span.Finish()
+
 	value, ok := rw.store.Load(userName)
 	if !ok {
-		return nil, uc.ErrNotFound
+		return nil, true
 	}
 
 	user, ok := value.(domain.User)
 	if !ok {
-		return nil, errors.New("not a user stored at key")
+		span.LogFields(log.Error(uc.ErrTechnical))
+		return nil, false
 	}
 
-	return &user, nil
+	return &user, true
 }
 
-func (rw rw) GetByEmailAndPassword(email, password string) (*domain.User, error) {
+func (rw rw) GetByEmailAndPassword(ctx context.Context, email, password string) (*domain.User, bool) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "inmem_userrw:get_by_email_pass")
+	defer span.Finish()
+
 	var err error
 	var foundUser domain.User
 
@@ -82,16 +101,29 @@ func (rw rw) GetByEmailAndPassword(email, password string) (*domain.User, error)
 		return true // keep iterating
 	})
 
-	return &foundUser, err
+	if err != nil {
+		return nil, false
+	}
+
+	return &foundUser, true
 }
 
-func (rw rw) Save(user domain.User) error {
-	if user, _ := rw.GetByName(user.Name); user == nil {
-		return uc.ErrNotFound
+func (rw rw) Save(ctx context.Context, user domain.User) bool {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "inmem_userrw:save")
+	defer span.Finish()
+
+	mayUser, ok := rw.GetByName(ctx, user.Name)
+	if !ok {
+		span.LogFields(log.Error(uc.ErrTechnical))
+		return false
+	}
+	if mayUser == nil {
+		span.LogFields(log.Error(uc.ErrNotFound))
+		return false
 	}
 
 	user.UpdatedAt = time.Now()
 	rw.store.Store(user.Name, user)
 
-	return nil
+	return true
 }

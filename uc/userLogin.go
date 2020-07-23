@@ -1,20 +1,28 @@
 package uc
 
-import "github.com/err0r500/go-realworld-clean/domain"
+import (
+	"context"
 
-func (i interactor) UserLogin(email, password string) (*domain.User, string, error) {
-	user, err := i.userRW.GetByEmailAndPassword(email, password)
-	if err != nil {
-		return nil, "", err
+	"github.com/err0r500/go-realworld-clean/domain"
+	"github.com/opentracing/opentracing-go"
+)
+
+func (i interactor) UserLogin(ctx context.Context, email, password string) (*domain.User, string, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "uc:user_login")
+	defer span.Finish()
+
+	mayUser, ok := i.userRW.GetByEmailAndPassword(ctx, email, password)
+	if !ok {
+		return nil, "", ErrTechnical
 	}
-	if user == nil {
+	if mayUser == nil {
 		return nil, "", ErrNotFound
 	}
 
-	token, err := i.authHandler.GenUserToken(user.Name)
+	token, err := i.authHandler.GenUserToken(mayUser.Name)
 	if err != nil {
 		return nil, "", err
 	}
 
-	return user, token, nil
+	return mayUser, token, nil
 }

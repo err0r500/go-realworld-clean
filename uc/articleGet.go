@@ -13,13 +13,15 @@ func (i interactor) ArticleGet(ctx context.Context, username, slug string) (*dom
 	defer span.Finish()
 
 	var user *domain.User
-
 	if username != "" {
-		var errGet error
-		user, errGet = i.userRW.GetByName(username)
-		if errGet != nil {
-			return nil, nil, errGet
+		mayUser, ok := i.userRW.GetByName(ctx, username)
+		if !ok {
+			return nil, nil, ErrTechnical
 		}
+		if mayUser == nil {
+			return nil, nil, ErrNotFound
+		}
+		user = mayUser
 	}
 
 	article, ok := i.articleRW.GetBySlug(ctx, slug)

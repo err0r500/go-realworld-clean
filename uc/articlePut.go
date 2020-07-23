@@ -27,9 +27,12 @@ func (i interactor) ArticlePut(ctx context.Context, username string, slug string
 		return nil, nil, err
 	}
 
-	user, err := i.userRW.GetByName(username)
-	if err != nil {
-		return nil, nil, err
+	user, ok := i.userRW.GetByName(ctx, username)
+	if !ok {
+		return nil, nil, ErrTechnical
+	}
+	if user == nil {
+		return nil, nil, ErrNotFound
 	}
 
 	savedArticle, ok := i.articleRW.Save(ctx, *article)

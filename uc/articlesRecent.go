@@ -38,10 +38,9 @@ func (i interactor) GetArticles(ctx context.Context, username string, limit, off
 
 	var user *domain.User
 	if username != "" {
-		var errGet error
-		user, errGet = i.userRW.GetByName(username)
-		if errGet != nil {
-			return nil, nil, 0, errGet
+		user, ok = i.userRW.GetByName(ctx, username)
+		if !ok {
+			return nil, nil, 0, ErrTechnical
 		}
 	}
 

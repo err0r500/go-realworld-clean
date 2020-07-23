@@ -18,15 +18,15 @@ type Handler interface {
 }
 
 type ProfileLogic interface {
-	ProfileGet(requestingUserName, userName string) (profile *domain.User, follows bool, err error)
-	ProfileUpdateFollow(loggedInUsername, username string, follow bool) (user *domain.User, err error)
+	ProfileGet(ctx context.Context, requestingUserName, userName string) (profile *domain.User, follows bool, err error)
+	ProfileUpdateFollow(ctx context.Context, loggedInUsername, username string, follow bool) (user *domain.User, err error)
 }
 
 type UserLogic interface {
-	UserCreate(username, email, password string) (user *domain.User, token string, err error)
-	UserLogin(email, password string) (user *domain.User, token string, err error)
-	UserGet(userName string) (user *domain.User, token string, err error)
-	UserEdit(userName string, fieldsToUpdate map[domain.UserUpdatableProperty]*string) (user *domain.User, token string, err error)
+	UserCreate(ctx context.Context, username, email, password string) (user *domain.User, token string, err error)
+	UserLogin(ctx context.Context, email, password string) (user *domain.User, token string, err error)
+	UserGet(ctx context.Context, userName string) (user *domain.User, token string, err error)
+	UserEdit(ctx context.Context, userName string, fieldsToUpdate map[domain.UserUpdatableProperty]*string) (user *domain.User, token string, err error)
 }
 
 type ArticlesLogic interface {
@@ -52,7 +52,7 @@ type FavoritesLogic interface {
 }
 
 type TagsLogic interface {
-	Tags() ([]string, error)
+	Tags(ctx context.Context) ([]string, error)
 }
 
 type HandlerConstructor struct {

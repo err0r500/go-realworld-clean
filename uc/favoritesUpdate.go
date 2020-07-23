@@ -11,9 +11,9 @@ func (i interactor) FavoritesUpdate(ctx context.Context, username, slug string, 
 	span, ctx := opentracing.StartSpanFromContext(ctx, "uc:favorites_update")
 	defer span.Finish()
 
-	user, err := i.userRW.GetByName(username)
-	if err != nil {
-		return nil, nil, err
+	user, ok := i.userRW.GetByName(ctx, username)
+	if !ok {
+		return nil, nil, ErrTechnical
 	}
 
 	article, ok := i.articleRW.GetBySlug(ctx, slug)

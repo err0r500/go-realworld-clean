@@ -3,6 +3,8 @@ package server
 import (
 	"net/http"
 
+	"github.com/opentracing/opentracing-go"
+
 	"strconv"
 
 	formatter "github.com/err0r500/go-realworld-clean/implem/json.formatter"
@@ -50,6 +52,9 @@ func (rH RouterHandler) articlesFilteredGet(c *gin.Context) {
 func (rH RouterHandler) articlesFeedGet(c *gin.Context) {
 	log := rH.log(rH.MethodAndPath(c))
 
+	span, ctx := opentracing.StartSpanFromContext(c.Request.Context(), "http:get_articles_feed")
+	defer span.Finish()
+
 	limit, err := strconv.Atoi(c.Query("limit"))
 	if err != nil {
 		limit = defaultLimit
@@ -60,7 +65,7 @@ func (rH RouterHandler) articlesFeedGet(c *gin.Context) {
 		offset = defaultOffset
 	}
 
-	user, articles, count, err := rH.ucHandler.ArticlesFeed(c, rH.getUserNameFromToken(c), limit, offset)
+	user, articles, count, err := rH.ucHandler.ArticlesFeed(ctx, rH.getUserNameFromToken(c), limit, offset)
 	if err != nil {
 		log(err)
 		c.Status(http.StatusUnprocessableEntity)

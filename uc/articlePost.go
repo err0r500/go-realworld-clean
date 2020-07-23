@@ -11,9 +11,9 @@ func (i interactor) ArticlePost(ctx context.Context, username string, article do
 	span, ctx := opentracing.StartSpanFromContext(ctx, "uc:article_post")
 	defer span.Finish()
 
-	user, err := i.userRW.GetByName(username)
-	if err != nil {
-		return nil, nil, err
+	user, ok := i.userRW.GetByName(ctx, username)
+	if !ok {
+		return nil, nil, ErrTechnical
 	}
 
 	slug := i.slugger.NewSlug(article.Title)
@@ -37,8 +37,8 @@ func (i interactor) ArticlePost(ctx context.Context, username string, article do
 		return nil, nil, ErrTechnical
 	}
 
-	if err := i.tagsRW.Add(article.TagList); err != nil {
-		return nil, nil, err
+	if ok := i.tagsRW.Add(ctx, article.TagList); !ok {
+		return nil, nil, ErrTechnical
 	}
 
 	return user, completeArticle, nil

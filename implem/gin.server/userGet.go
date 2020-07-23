@@ -3,14 +3,19 @@ package server
 import (
 	"net/http"
 
-	"github.com/err0r500/go-realworld-clean/implem/json.formatter"
+	formatter "github.com/err0r500/go-realworld-clean/implem/json.formatter"
+	"github.com/opentracing/opentracing-go"
+
 	"github.com/gin-gonic/gin"
 )
 
 func (rH RouterHandler) userGet(c *gin.Context) {
 	log := rH.log(rH.MethodAndPath(c))
 
-	user, token, err := rH.ucHandler.UserGet(rH.getUserName(c))
+	span, ctx := opentracing.StartSpanFromContext(c.Request.Context(), "http:get_user")
+	defer span.Finish()
+
+	user, token, err := rH.ucHandler.UserGet(ctx, rH.getUserName(c))
 	if err != nil {
 		log(err)
 		c.Status(http.StatusUnprocessableEntity)

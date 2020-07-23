@@ -1,14 +1,19 @@
 package uc
 
 import (
+	"context"
+
 	"github.com/err0r500/go-realworld-clean/domain"
+	"github.com/opentracing/opentracing-go"
 )
 
-//UserEdit(userName string, newUser map[UserUpdatableProperty]*string) (user *domain.User, err error)
-func (i interactor) UserEdit(userName string, fieldsToUpdate map[domain.UserUpdatableProperty]*string) (*domain.User, string, error) {
-	user, err := i.userRW.GetByName(userName)
-	if err != nil {
-		return nil, "", err
+func (i interactor) UserEdit(ctx context.Context, userName string, fieldsToUpdate map[domain.UserUpdatableProperty]*string) (*domain.User, string, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "uc:user_edit")
+	defer span.Finish()
+
+	user, ok := i.userRW.GetByName(ctx, userName)
+	if !ok {
+		return nil, "", ErrTechnical
 	}
 	if user == nil {
 		return nil, "", ErrNotFound
@@ -29,8 +34,8 @@ func (i interactor) UserEdit(userName string, fieldsToUpdate map[domain.UserUpda
 		return nil, "", err
 	}
 
-	if err := i.userRW.Save(*user); err != nil {
-		return nil, "", err
+	if ok := i.userRW.Save(ctx, *user); !ok {
+		return nil, "", ErrTechnical
 	}
 
 	token, err := i.authHandler.GenUserToken(user.Name)

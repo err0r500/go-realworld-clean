@@ -13,9 +13,9 @@ func (i interactor) CommentsPost(ctx context.Context, username, slug, comment st
 	span, ctx := opentracing.StartSpanFromContext(ctx, "uc:comments_post")
 	defer span.Finish()
 
-	commentPoster, err := i.userRW.GetByName(username)
-	if err != nil {
-		return nil, err
+	commentPoster, ok := i.userRW.GetByName(ctx, username)
+	if !ok {
+		return nil, ErrTechnical
 	}
 
 	article, ok := i.articleRW.GetBySlug(ctx, slug)

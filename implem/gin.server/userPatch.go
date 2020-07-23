@@ -3,8 +3,10 @@ package server
 import (
 	"net/http"
 
+	"github.com/opentracing/opentracing-go"
+
 	"github.com/err0r500/go-realworld-clean/domain"
-	"github.com/err0r500/go-realworld-clean/implem/json.formatter"
+	formatter "github.com/err0r500/go-realworld-clean/implem/json.formatter"
 	"github.com/gin-gonic/gin"
 )
 
@@ -32,6 +34,9 @@ func (req userPutRequest) getEditableFields() map[domain.UserUpdatableProperty]*
 func (rH RouterHandler) userPatch(c *gin.Context) {
 	log := rH.log(rH.MethodAndPath(c))
 
+	span, ctx := opentracing.StartSpanFromContext(c.Request.Context(), "http:patch_user")
+	defer span.Finish()
+
 	req := &userPutRequest{}
 	if err := c.BindJSON(req); err != nil {
 		log(err)
@@ -39,7 +44,7 @@ func (rH RouterHandler) userPatch(c *gin.Context) {
 		return
 	}
 
-	user, token, err := rH.ucHandler.UserEdit(rH.getUserName(c), req.getEditableFields())
+	user, token, err := rH.ucHandler.UserEdit(ctx, rH.getUserName(c), req.getEditableFields())
 	if err != nil {
 		log(err)
 		c.Status(http.StatusUnprocessableEntity)

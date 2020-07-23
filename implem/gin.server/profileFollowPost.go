@@ -3,14 +3,19 @@ package server
 import (
 	"net/http"
 
-	"github.com/err0r500/go-realworld-clean/implem/json.formatter"
+	formatter "github.com/err0r500/go-realworld-clean/implem/json.formatter"
+	"github.com/opentracing/opentracing-go"
+
 	"github.com/gin-gonic/gin"
 )
 
 func (rH RouterHandler) profileFollowPost(c *gin.Context) {
 	log := rH.log(rH.MethodAndPath(c))
 
-	user, err := rH.ucHandler.ProfileUpdateFollow(rH.getUserName(c), c.Param("username"), true)
+	span, ctx := opentracing.StartSpanFromContext(c.Request.Context(), "http:post_profile_follow")
+	defer span.Finish()
+
+	user, err := rH.ucHandler.ProfileUpdateFollow(ctx, rH.getUserName(c), c.Param("username"), true)
 	if err != nil {
 		log(err)
 		c.Status(http.StatusUnprocessableEntity)

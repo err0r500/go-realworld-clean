@@ -31,10 +31,10 @@ type AuthHandler interface {
 }
 
 type UserRW interface {
-	Create(username, email, password string) (*domain.User, error)
-	GetByName(userName string) (*domain.User, error)
-	GetByEmailAndPassword(email, password string) (*domain.User, error)
-	Save(user domain.User) error
+	Create(ctx context.Context, username, email, password string) (*domain.User, bool)
+	GetByName(ctx context.Context, userName string) (*domain.User, bool)
+	GetByEmailAndPassword(ctx context.Context, email, password string) (*domain.User, bool)
+	Save(ctx context.Context, user domain.User) bool
 }
 
 type ArticleRW interface {
@@ -53,8 +53,8 @@ type CommentRW interface {
 }
 
 type TagsRW interface {
-	GetAll() ([]string, error)
-	Add(newTags []string) error
+	GetAll(ctx context.Context) ([]string, bool)
+	Add(ctx context.Context, newTags []string) bool
 }
 
 type Slugger interface {
