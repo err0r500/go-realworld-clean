@@ -1,16 +1,27 @@
 package uc
 
-import "github.com/err0r500/go-realworld-clean/domain"
+import (
+	"context"
 
-func (i interactor) CommentsPost(username, slug, comment string) (*domain.Comment, error) {
+	"github.com/err0r500/go-realworld-clean/domain"
+	"github.com/opentracing/opentracing-go"
+)
+
+func (i interactor) CommentsPost(ctx context.Context, username, slug, comment string) (*domain.Comment, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "uc:comments_post")
+	defer span.Finish()
+
 	commentPoster, err := i.userRW.GetByName(username)
 	if err != nil {
 		return nil, err
 	}
 
-	article, err := i.articleRW.GetBySlug(slug)
-	if err != nil {
-		return nil, err
+	article, ok := i.articleRW.GetBySlug(ctx, slug)
+	if !ok {
+		return nil, errTechnical
+	}
+	if article == nil {
+		return nil, ErrNotFound
 	}
 
 	rawComment := domain.Comment{
@@ -25,8 +36,8 @@ func (i interactor) CommentsPost(username, slug, comment string) (*domain.Commen
 
 	article.Comments = append(article.Comments, *insertedComment)
 
-	if _, err := i.articleRW.Save(*article); err != nil {
-		return nil, err
+	if _, ok := i.articleRW.Save(ctx, *article); !ok {
+		return nil, ErrTechnical
 	}
 
 	return insertedComment, nil

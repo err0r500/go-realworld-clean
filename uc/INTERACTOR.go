@@ -1,6 +1,8 @@
 package uc
 
 import (
+	"context"
+
 	"github.com/err0r500/go-realworld-clean/domain"
 )
 
@@ -36,12 +38,12 @@ type UserRW interface {
 }
 
 type ArticleRW interface {
-	Create(domain.Article) (*domain.Article, error)
-	Save(domain.Article) (*domain.Article, error)
-	GetBySlug(slug string) (*domain.Article, error)
-	GetByAuthorsNameOrderedByMostRecentAsc(usernames []string) ([]domain.Article, error)
-	GetRecentFiltered(filters []domain.ArticleFilter) ([]domain.Article, error)
-	Delete(slug string) error
+	Create(ctx context.Context, _ domain.Article) (*domain.Article, bool)
+	Save(ctx context.Context, _ domain.Article) (*domain.Article, bool)
+	GetBySlug(ctx context.Context, slug string) (*domain.Article, bool)
+	GetByAuthorsNameOrderedByMostRecentAsc(ctx context.Context, usernames []string) ([]domain.Article, error)
+	GetRecentFiltered(ctx context.Context, filters []domain.ArticleFilter) ([]domain.Article, error)
+	Delete(ctx context.Context, slug string) bool
 }
 
 type CommentRW interface {

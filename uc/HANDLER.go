@@ -1,6 +1,7 @@
 package uc
 
 import (
+	"context"
 	"log"
 
 	"github.com/err0r500/go-realworld-clean/domain"
@@ -29,25 +30,25 @@ type UserLogic interface {
 }
 
 type ArticlesLogic interface {
-	ArticlesFeed(username string, limit, offset int) (requestingUser *domain.User, articles domain.ArticleCollection, totalArticleCount int, err error)
-	GetArticles(username string, limit, offset int, filters []domain.ArticleFilter) (requestingUser *domain.User, articles domain.ArticleCollection, totalArticleCount int, err error)
+	ArticlesFeed(ctx context.Context, username string, limit, offset int) (requestingUser *domain.User, articles domain.ArticleCollection, totalArticleCount int, err error)
+	GetArticles(ctx context.Context, username string, limit, offset int, filters []domain.ArticleFilter) (requestingUser *domain.User, articles domain.ArticleCollection, totalArticleCount int, err error)
 }
 
 type ArticleLogic interface {
-	ArticleGet(slug, username string) (*domain.User, *domain.Article, error)
-	ArticlePost(username string, article domain.Article) (*domain.User, *domain.Article, error)
-	ArticlePut(username, slug string, fieldsToUpdate map[domain.ArticleUpdatableField]*string) (*domain.User, *domain.Article, error)
-	ArticleDelete(username, slug string) error
+	ArticleGet(ctx context.Context, slug, username string) (*domain.User, *domain.Article, error)
+	ArticlePost(ctx context.Context, username string, article domain.Article) (*domain.User, *domain.Article, error)
+	ArticlePut(ctx context.Context, username, slug string, fieldsToUpdate map[domain.ArticleUpdatableField]*string) (*domain.User, *domain.Article, error)
+	ArticleDelete(ctx context.Context, username, slug string) error
 }
 
 type CommentsLogic interface {
-	CommentsGet(slug string) ([]domain.Comment, error)
-	CommentsPost(username, slug, comment string) (*domain.Comment, error)
-	CommentsDelete(username, slug string, id int) error
+	CommentsGet(ctx context.Context, slug string) ([]domain.Comment, error)
+	CommentsPost(ctx context.Context, username, slug, comment string) (*domain.Comment, error)
+	CommentsDelete(ctx context.Context, username, slug string, id int) error
 }
 
 type FavoritesLogic interface {
-	FavoritesUpdate(username, slug string, favortie bool) (*domain.User, *domain.Article, error)
+	FavoritesUpdate(ctx context.Context, username, slug string, favortie bool) (*domain.User, *domain.Article, error)
 }
 
 type TagsLogic interface {

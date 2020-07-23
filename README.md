@@ -41,24 +41,25 @@ Layers ( from the most abstract to the most concrete ) :
 ```
 make
 ```
+
 ### Run the app
+
+start the stack (app + jaeger)
 ```bash
-./go-realworld-clean
+docker-compose up -d
 ```
 
-### Run the integration tests
-Start the server with an existing user
-```
-./go-realworld-clean --populate=true
-```
-
-In another terminal, run the tests against the API
+run a few requests
 ```
 newman run api/Conduit.postman_collection.json \
   -e api/Conduit.postman_integration_test_environment.json \
   --global-var "EMAIL=joe@what.com" \
   --global-var "PASSWORD=password"
 ```
+
+visualize the control flow with the [Jaeger UI](http://localhost:16686)
+
+
 # Additional
 ## Make Targets
 

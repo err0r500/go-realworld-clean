@@ -1,6 +1,15 @@
 package uc
 
-func (i interactor) CommentsDelete(username, slug string, id int) error {
+import (
+	"context"
+
+	"github.com/opentracing/opentracing-go"
+)
+
+func (i interactor) CommentsDelete(ctx context.Context, username, slug string, id int) error {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "uc:comments_delete")
+	defer span.Finish()
+
 	comment, err := i.commentRW.GetByID(id)
 	if err != nil {
 		return err
@@ -13,15 +22,15 @@ func (i interactor) CommentsDelete(username, slug string, id int) error {
 		return err
 	}
 
-	article, err := i.articleRW.GetBySlug(slug)
-	if err != nil {
+	article, ok := i.articleRW.GetBySlug(ctx, slug)
+	if !ok {
 		return err
 	}
 
 	article.UpdateComments(*comment, false)
 
-	if _, err := i.articleRW.Save(*article); err != nil {
-		return err
+	if _, ok := i.articleRW.Save(ctx, *article); !ok {
+		return ErrTechnical
 	}
 
 	return nil

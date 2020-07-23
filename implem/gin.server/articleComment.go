@@ -5,14 +5,14 @@ import (
 
 	"strconv"
 
-	"github.com/err0r500/go-realworld-clean/implem/json.formatter"
+	formatter "github.com/err0r500/go-realworld-clean/implem/json.formatter"
 	"github.com/gin-gonic/gin"
 )
 
 func (rH RouterHandler) commentsGet(c *gin.Context) {
 	log := rH.log(rH.MethodAndPath(c))
 
-	comments, err := rH.ucHandler.CommentsGet(c.Param("slug"))
+	comments, err := rH.ucHandler.CommentsGet(c, c.Param("slug"))
 	if err != nil {
 		log(err)
 		c.Status(http.StatusUnprocessableEntity)
@@ -37,7 +37,7 @@ func (rH RouterHandler) commentPost(c *gin.Context) {
 		return
 	}
 
-	comment, err := rH.ucHandler.CommentsPost(rH.getUserName(c), c.Param("slug"), req.Comment.Body)
+	comment, err := rH.ucHandler.CommentsPost(c, rH.getUserName(c), c.Param("slug"), req.Comment.Body)
 	if err != nil {
 		log(err)
 		c.Status(http.StatusUnprocessableEntity)
@@ -54,7 +54,7 @@ func (rH RouterHandler) commentDelete(c *gin.Context) {
 		c.Status(http.StatusBadRequest)
 		return
 	}
-	if err := rH.ucHandler.CommentsDelete(rH.getUserName(c), c.Param("slug"), id); err != nil {
+	if err := rH.ucHandler.CommentsDelete(c, rH.getUserName(c), c.Param("slug"), id); err != nil {
 		log(err)
 		c.Status(http.StatusUnprocessableEntity)
 		return

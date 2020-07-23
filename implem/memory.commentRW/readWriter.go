@@ -23,7 +23,7 @@ func New() uc.CommentRW {
 
 func (rw rw) Create(comment domain.Comment) (*domain.Comment, error) {
 	if _, err := rw.GetByID(comment.ID); err == nil {
-		return nil, uc.ErrAlreadyInUse
+		return nil, uc.ErrConflict
 	}
 	comment.CreatedAt = time.Now()
 	comment.UpdatedAt = time.Now()

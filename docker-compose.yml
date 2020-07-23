@@ -1,0 +1,23 @@
+version: '2'
+
+services:
+
+  conduit:
+    build:
+      context: .
+      dockerfile: Dockerfile-bin
+    ports:
+      - 8080:8080
+    environment:
+      - POPULATE=true
+      - JAEGER_SERVICE_NAME=conduit
+      - JAEGER_AGENT_HOST=jaeger
+      - JAEGER_SAMPLER_TYPE=const
+      - JAEGER_SAMPLER_PARAM=1
+    depends_on:
+      - jaeger
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    ports:
+      - 16686:16686

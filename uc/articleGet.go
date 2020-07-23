@@ -1,9 +1,19 @@
 package uc
 
-import "github.com/err0r500/go-realworld-clean/domain"
+import (
+	"context"
 
-func (i interactor) ArticleGet(username, slug string) (*domain.User, *domain.Article, error) {
+	"github.com/opentracing/opentracing-go"
+
+	"github.com/err0r500/go-realworld-clean/domain"
+)
+
+func (i interactor) ArticleGet(ctx context.Context, username, slug string) (*domain.User, *domain.Article, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "uc:article_get")
+	defer span.Finish()
+
 	var user *domain.User
+
 	if username != "" {
 		var errGet error
 		user, errGet = i.userRW.GetByName(username)
@@ -12,9 +22,9 @@ func (i interactor) ArticleGet(username, slug string) (*domain.User, *domain.Art
 		}
 	}
 
-	article, err := i.articleRW.GetBySlug(slug)
-	if err != nil {
-		return nil, nil, err
+	article, ok := i.articleRW.GetBySlug(ctx, slug)
+	if !ok {
+		return nil, nil, errTechnical
 	}
 
 	return user, article, nil

@@ -5,7 +5,7 @@ import (
 
 	"strconv"
 
-	"github.com/err0r500/go-realworld-clean/implem/json.formatter"
+	formatter "github.com/err0r500/go-realworld-clean/implem/json.formatter"
 	"github.com/err0r500/go-realworld-clean/uc"
 	"github.com/gin-gonic/gin"
 )
@@ -28,7 +28,7 @@ func (rH RouterHandler) articlesFilteredGet(c *gin.Context) {
 		offset = defaultOffset
 	}
 
-	user, articles, count, err := rH.ucHandler.GetArticles(
+	user, articles, count, err := rH.ucHandler.GetArticles(c,
 		rH.getUserNameFromToken(c),
 		limit,
 		offset,
@@ -60,7 +60,7 @@ func (rH RouterHandler) articlesFeedGet(c *gin.Context) {
 		offset = defaultOffset
 	}
 
-	user, articles, count, err := rH.ucHandler.ArticlesFeed(rH.getUserNameFromToken(c), limit, offset)
+	user, articles, count, err := rH.ucHandler.ArticlesFeed(c, rH.getUserNameFromToken(c), limit, offset)
 	if err != nil {
 		log(err)
 		c.Status(http.StatusUnprocessableEntity)

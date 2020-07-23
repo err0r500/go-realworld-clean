@@ -1,9 +1,18 @@
 package uc
 
-import "github.com/err0r500/go-realworld-clean/domain"
+import (
+	"context"
 
-func (i interactor) ArticlePut(username string, slug string, fieldsToUpdate map[domain.ArticleUpdatableField]*string) (*domain.User, *domain.Article, error) {
-	article, err := i.getArticleAndCheckUser(username, slug)
+	"github.com/opentracing/opentracing-go"
+
+	"github.com/err0r500/go-realworld-clean/domain"
+)
+
+func (i interactor) ArticlePut(ctx context.Context, username string, slug string, fieldsToUpdate map[domain.ArticleUpdatableField]*string) (*domain.User, *domain.Article, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "uc:article_put")
+	defer span.Finish()
+
+	article, err := i.getArticleAndCheckUser(ctx, username, slug)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -13,7 +22,6 @@ func (i interactor) ArticlePut(username string, slug string, fieldsToUpdate map[
 		domain.SetArticleDescription(fieldsToUpdate[domain.Description]),
 		domain.SetArticleBody(fieldsToUpdate[domain.Body]),
 	)
-	// todo handle taglist ?
 
 	if err := i.articleValidator.BeforeUpdateCheck(article); err != nil {
 		return nil, nil, err
@@ -24,9 +32,9 @@ func (i interactor) ArticlePut(username string, slug string, fieldsToUpdate map[
 		return nil, nil, err
 	}
 
-	savedArticle, err := i.articleRW.Save(*article)
-	if err != nil {
-		return nil, nil, err
+	savedArticle, ok := i.articleRW.Save(ctx, *article)
+	if !ok {
+		return nil, nil, ErrTechnical
 	}
 
 	return user, savedArticle, nil

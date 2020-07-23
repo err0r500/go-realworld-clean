@@ -1,6 +1,10 @@
 package uc
 
 import (
+	"context"
+
+	"github.com/opentracing/opentracing-go"
+
 	"github.com/err0r500/go-realworld-clean/domain"
 )
 
@@ -19,12 +23,15 @@ func NewFilters(author, tag, favorite string) []domain.ArticleFilter {
 	return filters
 }
 
-func (i interactor) GetArticles(username string, limit, offset int, filters []domain.ArticleFilter) (*domain.User, domain.ArticleCollection, int, error) {
+func (i interactor) GetArticles(ctx context.Context, username string, limit, offset int, filters []domain.ArticleFilter) (*domain.User, domain.ArticleCollection, int, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "uc:articles_get")
+	defer span.Finish()
+
 	if limit <= 0 {
 		return nil, domain.ArticleCollection{}, 0, nil
 	}
 
-	articles, err := i.articleRW.GetRecentFiltered(filters)
+	articles, err := i.articleRW.GetRecentFiltered(ctx, filters)
 	if err != nil {
 		return nil, nil, 0, err
 	}

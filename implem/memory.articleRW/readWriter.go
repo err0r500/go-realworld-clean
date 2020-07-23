@@ -1,13 +1,15 @@
 package articleRW
 
 import (
+	"context"
 	"sync"
+
+	"github.com/opentracing/opentracing-go"
+	"github.com/opentracing/opentracing-go/log"
 
 	"errors"
 
 	"time"
-
-	"log"
 
 	"github.com/err0r500/go-realworld-clean/domain"
 	"github.com/err0r500/go-realworld-clean/uc"
@@ -22,19 +24,31 @@ func New() uc.ArticleRW {
 		store: &sync.Map{},
 	}
 }
-func (rw rw) Create(article domain.Article) (*domain.Article, error) {
-	if _, err := rw.GetBySlug(article.Slug); err == nil {
-		log.Println(err)
-		return nil, uc.ErrAlreadyInUse
+func (rw rw) Create(ctx context.Context, article domain.Article) (*domain.Article, bool) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "inmem_articlerw:create")
+	defer span.Finish()
+
+	art, ok := rw.GetBySlug(ctx, article.Slug)
+	if !ok {
+		span.LogFields(log.Error(uc.ErrTechnical))
+		return nil, false
 	}
+	if art != nil {
+		span.LogFields(log.Error(uc.ErrConflict))
+		return nil, false
+	}
+
 	article.CreatedAt = time.Now()
 	article.UpdatedAt = time.Now()
 	rw.store.Store(article.Slug, article)
 
-	return rw.GetBySlug(article.Slug)
+	return rw.GetBySlug(ctx, article.Slug)
 }
 
-func (rw rw) GetByAuthorsNameOrderedByMostRecentAsc(usernames []string) ([]domain.Article, error) {
+func (rw rw) GetByAuthorsNameOrderedByMostRecentAsc(ctx context.Context, usernames []string) ([]domain.Article, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "inmem_articlerw:get_by_author_most_recent")
+	defer span.Finish()
+
 	var toReturn []domain.Article
 
 	rw.store.Range(func(key, value interface{}) bool {
@@ -53,7 +67,10 @@ func (rw rw) GetByAuthorsNameOrderedByMostRecentAsc(usernames []string) ([]domai
 	return toReturn, nil
 }
 
-func (rw rw) GetRecentFiltered(filters []domain.ArticleFilter) ([]domain.Article, error) {
+func (rw rw) GetRecentFiltered(ctx context.Context, filters []domain.ArticleFilter) ([]domain.Article, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "inmem_articlerw:get_recent_filtered")
+	defer span.Finish()
+
 	var recentArticles []domain.Article
 
 	rw.store.Range(func(key, value interface{}) bool {
@@ -76,33 +93,49 @@ func (rw rw) GetRecentFiltered(filters []domain.ArticleFilter) ([]domain.Article
 	return recentArticles, nil
 }
 
-func (rw rw) Save(article domain.Article) (*domain.Article, error) {
-	if _, err := rw.GetBySlug(article.Slug); err != nil {
-		return nil, uc.ErrNotFound
+func (rw rw) Save(ctx context.Context, article domain.Article) (*domain.Article, bool) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "inmem_articlerw:save")
+	defer span.Finish()
+
+	art, ok := rw.GetBySlug(ctx, article.Slug)
+	if !ok {
+		span.LogFields(log.Error(uc.ErrTechnical))
+		return nil, false
+	}
+	if art == nil {
+		span.LogFields(log.Error(uc.ErrNotFound))
+		return nil, false
 	}
 
 	article.UpdatedAt = time.Now()
 	rw.store.Store(article.Slug, article)
 
-	return rw.GetBySlug(article.Slug)
+	return rw.GetBySlug(ctx, article.Slug)
 }
 
-func (rw rw) GetBySlug(slug string) (*domain.Article, error) {
+func (rw rw) GetBySlug(ctx context.Context, slug string) (*domain.Article, bool) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "inmem_articlerw:get_by_slug")
+	defer span.Finish()
+
 	value, ok := rw.store.Load(slug)
 	if !ok {
-		return nil, uc.ErrNotFound
+		return nil, true
 	}
 
 	article, ok := value.(domain.Article)
 	if !ok {
-		return nil, errors.New("not an article stored at key")
+		span.LogFields(log.Error(errors.New("not an article stored at key")))
+		return nil, false
 	}
 
-	return &article, nil
+	return &article, true
 }
 
-func (rw rw) Delete(slug string) error {
+func (rw rw) Delete(ctx context.Context, slug string) bool {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "inmem_articlerw:delete")
+	defer span.Finish()
+
 	rw.store.Delete(slug)
 
-	return nil
+	return true
 }

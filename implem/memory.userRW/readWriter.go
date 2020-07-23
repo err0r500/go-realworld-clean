@@ -35,7 +35,7 @@ func New() uc.UserRW {
 
 func (rw rw) Create(username, email, password string) (*domain.User, error) {
 	if _, err := rw.GetByName(username); err == nil {
-		return nil, uc.ErrAlreadyInUse
+		return nil, uc.ErrConflict
 	}
 
 	rw.store.Store(username, domain.User{

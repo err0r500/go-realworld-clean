@@ -1,0 +1,3 @@
+FROM gcr.io/distroless/base:nonroot
+COPY go-realworld-clean /app
+ENTRYPOINT [ "/app" ]

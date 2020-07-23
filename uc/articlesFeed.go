@@ -1,10 +1,16 @@
 package uc
 
 import (
+	"context"
+
 	"github.com/err0r500/go-realworld-clean/domain"
+	"github.com/opentracing/opentracing-go"
 )
 
-func (i interactor) ArticlesFeed(username string, limit, offset int) (*domain.User, domain.ArticleCollection, int, error) {
+func (i interactor) ArticlesFeed(ctx context.Context, username string, limit, offset int) (*domain.User, domain.ArticleCollection, int, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "uc:article_get_feed")
+	defer span.Finish()
+
 	if limit < 0 {
 		return nil, domain.ArticleCollection{}, 0, nil
 	}
@@ -17,7 +23,7 @@ func (i interactor) ArticlesFeed(username string, limit, offset int) (*domain.Us
 			return nil, nil, 0, errGet
 		}
 	}
-	articles, err := i.articleRW.GetByAuthorsNameOrderedByMostRecentAsc(user.FollowIDs)
+	articles, err := i.articleRW.GetByAuthorsNameOrderedByMostRecentAsc(ctx, user.FollowIDs)
 	if err != nil {
 		return nil, nil, 0, err
 	}
