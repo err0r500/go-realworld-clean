@@ -51,7 +51,7 @@ docker-compose up -d
 
 run a few requests
 ```
-newman run api/Conduit.postman_collection.json \
+newman run ./api_contract/Conduit.postman_collection.json \
   -e api/Conduit.postman_integration_test_environment.json \
   --global-var "EMAIL=joe@what.com" \
   --global-var "PASSWORD=password"
