@@ -16,9 +16,9 @@ func (i interactor) UserCreate(ctx context.Context, username, email, password st
 		return nil, "", ErrTechnical
 	}
 
-	token, err := i.authHandler.GenUserToken(username)
-	if err != nil {
-		return nil, "", err
+	token, ok := i.authHandler.GenUserToken(ctx, username)
+	if !ok {
+		return nil, "", ErrTechnical
 	}
 
 	return user, token, nil

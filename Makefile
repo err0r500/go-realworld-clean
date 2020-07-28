@@ -1,4 +1,4 @@
-.PHONY: all clean test docker latest init
+.PHONY: all clean test docker latest init updateb
 
 export CGO_ENABLED=0
 export GOOS=linux

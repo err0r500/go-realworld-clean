@@ -7,8 +7,10 @@ require (
 	github.com/codahale/hdrhistogram v0.0.0-20161010025455-3a0bb77429bd // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
+	github.com/gin-contrib/opengintracing v0.0.1
 	github.com/gin-gonic/gin v1.6.3
 	github.com/go-playground/validator/v10 v10.3.0 // indirect
+	github.com/golang/gddo v0.0.0-20200715224205-051695c33a3f
 	github.com/golang/mock v1.4.3
 	github.com/golang/protobuf v1.4.2 // indirect
 	github.com/gosimple/slug v1.9.0
@@ -35,7 +37,8 @@ require (
 	golang.org/x/net v0.0.0-20200707034311-ab3426394381 // indirect
 	golang.org/x/sys v0.0.0-20200722175500-76b94024e4b6 // indirect
 	golang.org/x/text v0.3.3 // indirect
-	google.golang.org/protobuf v1.25.0 // indirect
+	golang.org/x/tools v0.0.0-20191112195655-aa38f8e97acc
+	google.golang.org/protobuf v1.25.0
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 	gopkg.in/h2non/baloo.v3 v3.0.2
 	gopkg.in/h2non/gentleman.v2 v2.0.4 // indirect

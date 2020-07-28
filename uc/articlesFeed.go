@@ -17,11 +17,14 @@ func (i interactor) ArticlesFeed(ctx context.Context, username string, limit, of
 
 	var user *domain.User
 	if username != "" {
-		u, ok := i.userRW.GetByName(ctx, username)
+		mayUser, ok := i.userRW.GetByName(ctx, username)
 		if !ok {
 			return nil, nil, 0, ErrTechnical
 		}
-		user = u
+		if mayUser == nil {
+			return nil, nil, 0, ErrNotFound
+		}
+		user = mayUser
 	}
 
 	articles, ok := i.articleRW.GetByAuthorsNameOrderedByMostRecentAsc(ctx, user.FollowIDs)

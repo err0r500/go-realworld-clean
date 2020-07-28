@@ -22,9 +22,9 @@ func (i interactor) UserGet(ctx context.Context, userName string) (*domain.User,
 		return nil, "", ErrUnauthorized
 	}
 
-	token, err := i.authHandler.GenUserToken(userName)
-	if err != nil {
-		return nil, "", err
+	token, ok := i.authHandler.GenUserToken(ctx, userName)
+	if !ok {
+		return nil, "", ErrTechnical
 	}
 
 	return user, token, nil

@@ -3,8 +3,6 @@ package server
 import (
 	"net/http"
 
-	"github.com/opentracing/opentracing-go"
-
 	"strconv"
 
 	formatter "github.com/err0r500/go-realworld-clean/implem/json.formatter"
@@ -18,7 +16,8 @@ const (
 )
 
 func (rH RouterHandler) articlesFilteredGet(c *gin.Context) {
-	log := rH.log(rH.MethodAndPath(c))
+	sp, ctx := startChildSpanFromGinCtx(c, "http_handler:get_articles_filtered")
+	defer sp.Finish()
 
 	limit, err := strconv.Atoi(c.Query("limit"))
 	if err != nil {
@@ -30,7 +29,7 @@ func (rH RouterHandler) articlesFilteredGet(c *gin.Context) {
 		offset = defaultOffset
 	}
 
-	user, articles, count, err := rH.ucHandler.GetArticles(c,
+	user, articles, count, err := rH.ucHandler.GetArticles(ctx,
 		rH.getUserNameFromToken(c),
 		limit,
 		offset,
@@ -41,19 +40,17 @@ func (rH RouterHandler) articlesFilteredGet(c *gin.Context) {
 		),
 	)
 	if err != nil {
-		log(err)
-		c.Status(http.StatusUnprocessableEntity)
+		logErr(sp, err)
+		setStatus(http.StatusUnprocessableEntity, c, sp)
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"articles": formatter.NewArticlesFromDomain(user, articles...), "articlesCount": count})
+	respJSON(http.StatusOK, gin.H{"articles": formatter.NewArticlesFromDomain(user, articles...), "articlesCount": count}, c, sp)
 }
 
 func (rH RouterHandler) articlesFeedGet(c *gin.Context) {
-	log := rH.log(rH.MethodAndPath(c))
-
-	span, ctx := opentracing.StartSpanFromContext(c.Request.Context(), "http:get_articles_feed")
-	defer span.Finish()
+	sp, ctx := startChildSpanFromGinCtx(c, "http_handler:get_articles_feed")
+	defer sp.Finish()
 
 	limit, err := strconv.Atoi(c.Query("limit"))
 	if err != nil {
@@ -67,10 +64,10 @@ func (rH RouterHandler) articlesFeedGet(c *gin.Context) {
 
 	user, articles, count, err := rH.ucHandler.ArticlesFeed(ctx, rH.getUserNameFromToken(c), limit, offset)
 	if err != nil {
-		log(err)
-		c.Status(http.StatusUnprocessableEntity)
+		logErr(sp, err)
+		setStatus(http.StatusUnprocessableEntity, c, sp)
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"articles": formatter.NewArticlesFromDomain(user, articles...), "articlesCount": count})
+	respJSON(http.StatusOK, gin.H{"articles": formatter.NewArticlesFromDomain(user, articles...), "articlesCount": count}, c, sp)
 }

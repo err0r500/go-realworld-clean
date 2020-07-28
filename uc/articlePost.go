@@ -15,11 +15,14 @@ func (i interactor) ArticlePost(ctx context.Context, username string, article do
 	if !ok {
 		return nil, nil, ErrTechnical
 	}
+	if user == nil {
+		return nil, nil, ErrUnauthorized
+	}
 
 	slug := i.slugger.NewSlug(article.Title)
 	art, ok := i.articleRW.GetBySlug(ctx, slug)
 	if !ok {
-		return nil, nil, errTechnical
+		return nil, nil, ErrTechnical
 	}
 	if art != nil {
 		return nil, nil, ErrConflict
@@ -29,7 +32,7 @@ func (i interactor) ArticlePost(ctx context.Context, username string, article do
 	article.Author = *user
 
 	if err := i.articleValidator.BeforeCreationCheck(&article); err != nil {
-		return nil, nil, err
+		return nil, nil, ErrValidation
 	}
 
 	completeArticle, ok := i.articleRW.Create(ctx, article)

@@ -19,9 +19,9 @@ func (i interactor) UserLogin(ctx context.Context, email, password string) (*dom
 		return nil, "", ErrNotFound
 	}
 
-	token, err := i.authHandler.GenUserToken(mayUser.Name)
-	if err != nil {
-		return nil, "", err
+	token, ok := i.authHandler.GenUserToken(ctx, mayUser.Name)
+	if !ok {
+		return nil, "", ErrTechnical
 	}
 
 	return mayUser, token, nil

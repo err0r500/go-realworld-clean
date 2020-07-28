@@ -1,8 +1,13 @@
 package jwt
 
 import (
+	"context"
 	"errors"
 	"time"
+
+	"github.com/opentracing/opentracing-go/log"
+
+	"github.com/opentracing/opentracing-go"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/err0r500/go-realworld-clean/uc"
@@ -21,18 +26,29 @@ func New(salt string) uc.AuthHandler {
 	}
 }
 
-//GenToken (uc.Admin) : returns a signed token for an admin
-func (tH tokenHandler) GenUserToken(userName string) (string, error) {
+// GenUserToken (uc.Admin) : returns a signed token for an admin
+func (tH tokenHandler) GenUserToken(ctx context.Context, userName string) (string, bool) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "auth:gen_token")
+	defer span.Finish()
+
 	if userName == "" {
-		return "", errors.New("can't generate token for empty user")
+		return "", false
 	}
 
-	return jwt.
+	token, err := jwt.
 		NewWithClaims(jwt.SigningMethodHS256, newUserClaims(userName, tokenTimeToLive)).
 		SignedString(tH.salt)
+	if err != nil {
+		return "", false
+	}
+
+	return token, true
 }
 
-func (tH tokenHandler) GetUserName(inToken string) (userName string, err error) {
+func (tH tokenHandler) GetUserName(ctx context.Context, inToken string) (string, bool) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "auth:get_username")
+	defer span.Finish()
+
 	token, err := jwt.ParseWithClaims(
 		inToken,
 		&userClaims{},
@@ -41,14 +57,17 @@ func (tH tokenHandler) GetUserName(inToken string) (userName string, err error) 
 		},
 	)
 	if err != nil {
-		return "", err
+		span.LogFields(log.Error(errors.New("parsing failed")))
+		return "", false
 	}
 
 	if claims, ok := token.Claims.(*userClaims); ok && token.Valid {
-		return claims.Name, nil
+		return claims.Name, true
 	}
 
-	return "", errors.New("problem with jwt")
+	span.LogFields(log.Error(errors.New("not userClaims")))
+
+	return "", false
 }
 
 type userClaims struct {

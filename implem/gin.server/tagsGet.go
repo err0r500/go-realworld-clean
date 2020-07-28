@@ -3,23 +3,22 @@ package server
 import (
 	"net/http"
 
-	"github.com/opentracing/opentracing-go"
-
 	"github.com/gin-gonic/gin"
 )
 
 func (rH RouterHandler) tagsGet(c *gin.Context) {
-	span, ctx := opentracing.StartSpanFromContext(c.Request.Context(), "http:get_tag")
-	defer span.Finish()
+	sp, ctx := startChildSpanFromGinCtx(c, "http_handler:get_tags")
+	defer sp.Finish()
 
 	tags, err := rH.ucHandler.Tags(ctx)
 	if err != nil {
-		c.Status(http.StatusUnprocessableEntity)
+		logErr(sp, err)
+		setStatus(http.StatusUnprocessableEntity, c, sp)
 		return
 	}
 
 	if tags == nil {
 		tags = []string{}
 	}
-	c.JSON(http.StatusOK, gin.H{"tags": tags})
+	respJSON(http.StatusOK, gin.H{"tags": tags}, c, sp)
 }

@@ -3,8 +3,6 @@ package server
 import (
 	"net/http"
 
-	"github.com/opentracing/opentracing-go"
-
 	"github.com/err0r500/go-realworld-clean/domain"
 	formatter "github.com/err0r500/go-realworld-clean/implem/json.formatter"
 	"github.com/gin-gonic/gin"
@@ -37,75 +35,74 @@ func articleFromReq(req *ArticleReq) domain.Article {
 }
 
 func (rH RouterHandler) articlePost(c *gin.Context) {
-	log := rH.log(rH.MethodAndPath(c))
-
-	span, ctx := opentracing.StartSpanFromContext(c.Request.Context(), "http:post_article")
-	defer span.Finish()
+	sp, ctx := startChildSpanFromGinCtx(c, "http_handler:post_articles")
+	defer sp.Finish()
 
 	req := &ArticleReq{}
 	if err := c.BindJSON(req); err != nil {
-		log(err)
-		c.Status(http.StatusBadRequest)
+		logErr(sp, err)
+		setStatus(http.StatusBadRequest, c, sp)
 		return
 	}
 
 	user, article, err := rH.ucHandler.ArticlePost(ctx, rH.getUserName(c), articleFromReq(req))
 	if err != nil {
-		log(err)
-		c.Status(http.StatusUnprocessableEntity)
+		logErr(sp, err)
+		setStatus(http.StatusUnprocessableEntity, c, sp)
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"article": formatter.NewArticleFromDomain(*article, user)})
+	respJSON(http.StatusCreated, gin.H{"article": formatter.NewArticleFromDomain(*article, user)}, c, sp)
 }
 
 func (rH RouterHandler) articlePut(c *gin.Context) {
-	log := rH.log(rH.MethodAndPath(c))
-
-	span, ctx := opentracing.StartSpanFromContext(c.Request.Context(), "http:put_article")
-	defer span.Finish()
+	sp, ctx := startChildSpanFromGinCtx(c, "http_handler:put_articles")
+	defer sp.Finish()
 
 	req := &ArticleReq{}
 	if err := c.BindJSON(req); err != nil {
-		log(err)
-		c.Status(http.StatusBadRequest)
-		return
-	}
-	user, article, err := rH.ucHandler.ArticlePut(ctx, rH.getUserName(c), c.Param("slug"), req.getEditableFields())
-	if err != nil {
-		log(err)
-		c.Status(http.StatusUnprocessableEntity)
+		logErr(sp, err)
+		setStatus(http.StatusBadRequest, c, sp)
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"article": formatter.NewArticleFromDomain(*article, user)})
+	user, article, err := rH.ucHandler.ArticlePut(ctx, rH.getUserName(c), c.Param("slug"), req.getEditableFields())
+	if err != nil {
+		logErr(sp, err)
+		setStatus(http.StatusUnprocessableEntity, c, sp)
+		return
+	}
+
+	respJSON(http.StatusOK, gin.H{"article": formatter.NewArticleFromDomain(*article, user)}, c, sp)
 }
 
 func (rH RouterHandler) articleGet(c *gin.Context) {
-	log := rH.log(rH.MethodAndPath(c))
-
-	span, ctx := opentracing.StartSpanFromContext(c.Request.Context(), "http:get_article")
-	defer span.Finish()
+	sp, ctx := startChildSpanFromGinCtx(c, "http_handler:get_articles")
+	defer sp.Finish()
 
 	user, article, err := rH.ucHandler.ArticleGet(ctx, rH.getUserName(c), c.Param("slug"))
 	if err != nil {
-		log(err)
-		c.Status(http.StatusUnprocessableEntity)
+		logErr(sp, err)
+		setStatus(http.StatusUnprocessableEntity, c, sp)
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"article": formatter.NewArticleFromDomain(*article, user)})
+	if article == nil {
+		setStatus(http.StatusNotFound, c, sp)
+		return
+	}
+
+	respJSON(http.StatusOK, gin.H{"article": formatter.NewArticleFromDomain(*article, user)}, c, sp)
 }
 
 func (rH RouterHandler) articleDelete(c *gin.Context) {
-	log := rH.log(rH.MethodAndPath(c))
-
-	span, ctx := opentracing.StartSpanFromContext(c.Request.Context(), "http:delete_article")
-	defer span.Finish()
+	sp, ctx := startChildSpanFromGinCtx(c, "http_handler:delete_articles")
+	defer sp.Finish()
 
 	if err := rH.ucHandler.ArticleDelete(ctx, rH.getUserName(c), c.Param("slug")); err != nil {
-		log(err)
-		c.Status(http.StatusUnprocessableEntity)
+		logErr(sp, err)
+		setStatus(http.StatusUnprocessableEntity, c, sp)
 		return
 	}
-	c.Status(http.StatusOK)
+
+	setStatus(http.StatusOK, c, sp)
 }

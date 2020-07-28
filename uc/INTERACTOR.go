@@ -26,8 +26,8 @@ type Logger interface {
 }
 
 type AuthHandler interface {
-	GenUserToken(userName string) (token string, err error)
-	GetUserName(token string) (userName string, err error)
+	GenUserToken(ctx context.Context, userName string) (string, bool)
+	GetUserName(ctx context.Context, token string) (string, bool)
 }
 
 type UserRW interface {

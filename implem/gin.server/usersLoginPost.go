@@ -3,8 +3,6 @@ package server
 import (
 	"net/http"
 
-	"github.com/opentracing/opentracing-go"
-
 	formatter "github.com/err0r500/go-realworld-clean/implem/json.formatter"
 	"github.com/gin-gonic/gin"
 )
@@ -17,24 +15,22 @@ type userLoginPostBody struct {
 }
 
 func (rH RouterHandler) userLoginPost(c *gin.Context) {
-	log := rH.log(rH.MethodAndPath(c))
-
-	span, ctx := opentracing.StartSpanFromContext(c.Request.Context(), "http:post_user_login")
-	defer span.Finish()
+	sp, ctx := startChildSpanFromGinCtx(c, "http_handler:user_login")
+	defer sp.Finish()
 
 	body := &userLoginPostBody{}
 	if err := c.BindJSON(body); err != nil {
-		log(err)
-		c.Status(http.StatusUnprocessableEntity)
+		logErr(sp, err)
+		setStatus(http.StatusUnprocessableEntity, c, sp)
 		return
 	}
 
 	user, token, err := rH.ucHandler.UserLogin(ctx, body.User.Email, body.User.Password)
 	if err != nil {
-		log(err)
-		c.Status(http.StatusUnprocessableEntity)
+		logErr(sp, err)
+		setStatus(http.StatusUnprocessableEntity, c, sp)
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"user": formatter.NewUserResp(*user, token)})
+	respJSON(http.StatusOK, gin.H{"user": formatter.NewUserResp(*user, token)}, c, sp)
 }

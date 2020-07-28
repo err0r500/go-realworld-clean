@@ -38,9 +38,9 @@ func (i interactor) UserEdit(ctx context.Context, userName string, fieldsToUpdat
 		return nil, "", ErrTechnical
 	}
 
-	token, err := i.authHandler.GenUserToken(user.Name)
-	if err != nil {
-		return nil, "", err
+	token, ok := i.authHandler.GenUserToken(ctx, user.Name)
+	if !ok {
+		return nil, "", ErrTechnical
 	}
 
 	return user, token, nil

@@ -11,4 +11,5 @@ var (
 	errArticleNotFound = errors.New("article not found")
 	errTechnical       = errors.New("a technical error happened")
 	ErrTechnical       = errors.New("a technical error happened")
+	ErrValidation      = errors.New("a validation error happened")
 )

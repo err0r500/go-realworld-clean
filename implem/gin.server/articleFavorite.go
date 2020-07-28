@@ -8,7 +8,8 @@ import (
 )
 
 func (rH RouterHandler) updateFavorite(c *gin.Context) {
-	log := rH.log(rH.MethodAndPath(c))
+	sp, ctx := startChildSpanFromGinCtx(c, "http_handler:update_favorites")
+	defer sp.Finish()
 
 	favorite := true
 	switch c.Request.Method {
@@ -17,16 +18,16 @@ func (rH RouterHandler) updateFavorite(c *gin.Context) {
 	case "DELETE":
 		favorite = false
 	default: // should not be testable :) for regression only
-		c.Status(http.StatusBadRequest)
+		setStatus(http.StatusBadRequest, c, sp)
 		return
 	}
 
-	user, article, err := rH.ucHandler.FavoritesUpdate(c, rH.getUserName(c), c.Param("slug"), favorite)
+	user, article, err := rH.ucHandler.FavoritesUpdate(ctx, rH.getUserName(c), c.Param("slug"), favorite)
 	if err != nil {
-		log(err)
-		c.Status(http.StatusUnprocessableEntity)
+		logErr(sp, err)
+		setStatus(http.StatusUnprocessableEntity, c, sp)
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"article": formatter.NewArticleFromDomain(*article, user)})
+	respJSON(http.StatusOK, gin.H{"article": formatter.NewArticleFromDomain(*article, user)}, c, sp)
 }

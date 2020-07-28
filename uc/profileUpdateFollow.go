@@ -11,22 +11,23 @@ func (i interactor) ProfileUpdateFollow(ctx context.Context, userName, followeeN
 	span, ctx := opentracing.StartSpanFromContext(ctx, "uc:profile_update_follow")
 	defer span.Finish()
 
-	user, ok := i.userRW.GetByName(ctx, userName)
+	mayUser, ok := i.userRW.GetByName(ctx, userName)
 	if !ok {
 		return nil, ErrTechnical
 	}
-	if user.Name != userName {
-		return nil, ErrUnauthorized
-	}
-	if user == nil {
+	if mayUser == nil {
 		return nil, ErrNotFound
 	}
 
-	user.UpdateFollowees(followeeName, follow)
+	if mayUser.Name != userName {
+		return nil, ErrUnauthorized
+	}
 
-	if ok := i.userRW.Save(ctx, *user); !ok {
+	mayUser.UpdateFollowees(followeeName, follow)
+
+	if ok := i.userRW.Save(ctx, *mayUser); !ok {
 		return nil, ErrTechnical
 	}
 
-	return user, nil
+	return mayUser, nil
 }
