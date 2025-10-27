@@ -1,0 +1,59 @@
+services:
+  # Your Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      secrets:
+        - github_username
+        - github_token
+    environment:
+      - PG_URL=postgres:5432
+    ports:
+      - "8080:8080"
+    networks:
+      - backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kratos:
+        condition: service_started
+
+  postgres:
+    image: postgres:18.0
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Ory Kratos - Identity & User Management (SQLite in-memory)
+  kratos:
+    image: oryd/kratos:v1.3.0
+    ports:
+      - "4433:4433"  # Public API
+      - "4434:4434"  # Admin API
+    networks:
+      - backend
+    volumes:
+      - ./auth/_kratos_config:/etc/config/kratos
+    command: serve -c /etc/config/kratos/kratos.yml --dev --watch-courier
+
+
+networks:
+  backend:
+    driver: bridge
+
+secrets:
+  github_username:
+    environment: GITHUB_USERNAME
+  github_token:
+    environment: GITHUB_TOKEN

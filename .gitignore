@@ -4,3 +4,4 @@
 .idea
 vendor/
 go-realworld-clean
+.old

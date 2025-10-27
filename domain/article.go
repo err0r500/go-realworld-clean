@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"slices"
 	"time"
 )
 
@@ -15,14 +16,6 @@ type Article struct {
 	FavoritedBy []User
 	Author      User
 	Comments    []Comment
-}
-
-type Comment struct {
-	ID        int
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	Body      string
-	Author    User
 }
 
 type ArticleUpdatableField int
@@ -67,12 +60,7 @@ type ArticleFilter func(Article) bool
 
 func ArticleHasTag(tag string) ArticleFilter {
 	return func(article Article) bool {
-		for _, articleTag := range article.TagList {
-			if articleTag == tag {
-				return true
-			}
-		}
-		return false
+		return slices.Contains(article.TagList, tag)
 	}
 }
 
@@ -104,10 +92,7 @@ func (articles ArticleCollection) ApplyLimitAndOffset(limit, offset int) Article
 	}
 
 	articlesSize := len(articles)
-	min := offset
-	if min < 0 {
-		min = 0
-	}
+	min := max(offset, 0)
 
 	if min > articlesSize {
 		return []Article{}
