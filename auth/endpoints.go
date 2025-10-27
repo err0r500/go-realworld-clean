@@ -11,14 +11,6 @@ import (
 	ory "github.com/ory/kratos-client-go"
 )
 
-type registerReqBody struct {
-	User struct {
-		Username string `json:"username"`
-		Email    string `json:"email"`
-		Password string `json:"password"`
-	} `json:"user"`
-}
-
 type AuthHandler struct {
 	kratosClient *ory.APIClient
 }
@@ -34,10 +26,20 @@ func NewAuthHandler(kratosURL string) *AuthHandler {
 	}
 }
 
+type RegisterUser struct {
+	Username string `json:"username"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type RegisterReqBody struct {
+	User RegisterUser `json:"user"`
+}
+
 func (auth AuthHandler) RegisterUser(mux *http.ServeMux) {
 	mux.HandleFunc("POST /api/users",
 		func(w http.ResponseWriter, r *http.Request) {
-			var req registerReqBody
+			var req RegisterReqBody
 			if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 				api.WriteError(w, http.StatusBadRequest, "Invalid request body")
 				return
@@ -107,17 +109,19 @@ func (auth AuthHandler) RegisterUser(mux *http.ServeMux) {
 		})
 }
 
-type loginReqBody struct {
-	User struct {
-		Email    string `json:"email"`
-		Password string `json:"password"`
-	} `json:"user"`
+type LoginUser struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type LoginReqBody struct {
+	User LoginUser `json:"user"`
 }
 
 func (auth AuthHandler) Login(mux *http.ServeMux) {
 	mux.HandleFunc("POST /api/users/login",
 		func(w http.ResponseWriter, r *http.Request) {
-			var req loginReqBody
+			var req LoginReqBody
 			if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 				api.WriteError(w, http.StatusBadRequest, "Invalid request body")
 				return
@@ -208,20 +212,22 @@ func (auth AuthHandler) GetCurrentUser(mux *http.ServeMux) {
 		}))
 }
 
-type updateUserReqBody struct {
-	User struct {
-		Email    *string `json:"email,omitempty"`
-		Username *string `json:"username,omitempty"`
-		Password *string `json:"password,omitempty"`
-		Bio      *string `json:"bio,omitempty"`
-		Image    *string `json:"image,omitempty"`
-	} `json:"user"`
+type UpdateUserFields struct {
+	Email    *string `json:"email,omitempty"`
+	Username *string `json:"username,omitempty"`
+	Password *string `json:"password,omitempty"`
+	Bio      *string `json:"bio,omitempty"`
+	Image    *string `json:"image,omitempty"`
+}
+
+type UpdateUserReqBody struct {
+	User UpdateUserFields `json:"user"`
 }
 
 func (auth AuthHandler) UpdateUser(mux *http.ServeMux) {
 	mux.HandleFunc("PUT /api/user",
 		RequireAuth(func(w http.ResponseWriter, r *http.Request) {
-			var req updateUserReqBody
+			var req UpdateUserReqBody
 			if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 				api.WriteError(w, http.StatusBadRequest, "Invalid request body")
 				return
