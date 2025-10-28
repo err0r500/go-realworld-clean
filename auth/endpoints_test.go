@@ -17,6 +17,7 @@ import (
 	"github.com/getkin/kin-openapi/openapi3filter"
 	"github.com/getkin/kin-openapi/routers"
 	"github.com/getkin/kin-openapi/routers/gorillamux"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
@@ -55,7 +56,7 @@ func TestRegisterUser(t *testing.T) {
 			User: auth.RegisterUser{
 				Username: "testuser",
 				Email:    "test@example.com",
-				Password: "2349874389lsediosdifu",
+				Password: uuid.NewString(),
 			},
 		}
 
@@ -139,12 +140,168 @@ func TestRegisterUser(t *testing.T) {
 	})
 }
 
+func TestLogin(t *testing.T) {
+	kratosContainer := startKratosContainer(t.Context())
+	defer func() {
+		if err := kratosContainer.Terminate(t.Context()); err != nil {
+			log.Fatal("failed to stop kratos container", err)
+		}
+	}()
+
+	server := setupTestServer(t, getKratosURL(t.Context(), kratosContainer))
+	defer server.Close()
+
+	// Load OpenAPI spec for validation
+	_, router := loadOpenAPISpec(t, t.Context())
+	apiReq := APIRequest{
+		Method: "POST",
+		Path:   "/api/users/login",
+	}
+
+	password := uuid.NewString()
+	registerReq := auth.RegisterReqBody{
+		User: auth.RegisterUser{
+			Username: "loginuser",
+			Email:    "login@example.com",
+			Password: password,
+		},
+	}
+	regBody, _ := json.Marshal(registerReq)
+	regResp, err := http.Post(server.URL+"/api/users", "application/json", strings.NewReader(string(regBody)))
+	require.NoError(t, err)
+	require.Equal(t, http.StatusCreated, regResp.StatusCode)
+	regResp.Body.Close()
+
+	t.Run("valid login request", func(t *testing.T) {
+		// given - login with registered credentials
+		loginBody := auth.LoginReqBody{
+			User: auth.LoginUser{
+				Email:    registerReq.User.Email,
+				Password: registerReq.User.Password,
+			},
+		}
+
+		bodyJSON, err := json.Marshal(loginBody)
+		require.NoError(t, err)
+		apiReq.Body = string(bodyJSON)
+
+		requestRespectsSpecs(t, t.Context(), router, apiReq)
+
+		// when
+		response := sendAPIRequest(t, server.URL, apiReq)
+		defer response.Body.Close()
+
+		// then
+		assert.Equal(t, http.StatusOK, response.StatusCode)
+
+		responseBody := readBody(t, response.Body)
+		responseRespectSpecs(t, t.Context(), router, apiReq, response.StatusCode, response.Header, responseBody)
+
+		// Parse response and assert on values
+		var userResp auth.UserResponse
+		require.NoError(t, json.Unmarshal(responseBody, &userResp))
+
+		assert.Equal(t, loginBody.User.Email, userResp.User.Email)
+		assert.NotEmpty(t, userResp.User.Token, "should return a JWT token")
+		assert.Equal(t, registerReq.User.Username, userResp.User.Username)
+	})
+
+	t.Run("invalid credentials", func(t *testing.T) {
+		testCases := []struct {
+			name     string
+			email    string
+			password string
+		}{
+			{
+				name:     "non-existent user",
+				email:    "nonexistent@example.com",
+				password: registerReq.User.Password,
+			},
+			{
+				name:     "wrong password",
+				email:    registerReq.User.Email,
+				password: "wrongpassword",
+			},
+		}
+
+		for _, tc := range testCases {
+			t.Run(tc.name, func(t *testing.T) {
+				// given
+				loginBody := auth.LoginReqBody{
+					User: auth.LoginUser{
+						Email:    tc.email,
+						Password: tc.password,
+					},
+				}
+				bodyJSON, _ := json.Marshal(loginBody)
+				apiReq.Body = string(bodyJSON)
+
+				// when
+				response := sendAPIRequest(t, server.URL, apiReq)
+				defer response.Body.Close()
+
+				// then
+				assert.Equal(t, http.StatusUnauthorized, response.StatusCode)
+			})
+		}
+	})
+
+	t.Run("invalid request - missing required fields", func(t *testing.T) {
+		testCases := []struct {
+			name        string
+			requestBody string
+		}{
+			{
+				name:        "missing email",
+				requestBody: `{"user": {"password": "password123"}}`,
+			},
+			{
+				name:        "missing password",
+				requestBody: `{"user": {"email": "test@example.com"}}`,
+			},
+			{
+				name:        "empty user object",
+				requestBody: `{"user": {}}`,
+			},
+		}
+
+		for _, tc := range testCases {
+			t.Run(tc.name, func(t *testing.T) {
+				// given
+				apiReq.Body = tc.requestBody
+
+				// when
+				response := sendAPIRequest(t, server.URL, apiReq)
+				defer response.Body.Close()
+
+				// then
+				assert.Equal(t, http.StatusUnprocessableEntity, response.StatusCode)
+				responseRespectSpecs(t, t.Context(), router, apiReq, response.StatusCode, response.Header, readBody(t, response.Body))
+			})
+		}
+	})
+
+	t.Run("invalid request - malformed JSON", func(t *testing.T) {
+		// given
+		apiReq.Body = `{"user": {"email": "test@example.com"`
+
+		// when
+		response := sendAPIRequest(t, server.URL, apiReq)
+		defer response.Body.Close()
+
+		// then
+		assert.Equal(t, http.StatusBadRequest, response.StatusCode)
+	})
+
+}
+
 // setupTestServer creates a test server with all auth endpoints registered
 func setupTestServer(t *testing.T, kratosURL string) *httptest.Server {
 	t.Helper()
 	mux := http.NewServeMux()
 	handler := auth.NewAuthHandler(kratosURL)
 	handler.RegisterUser(mux)
+	handler.Login(mux)
 	return httptest.NewServer(mux)
 }
 
@@ -240,10 +397,7 @@ func requestRespectsSpecs(t *testing.T, ctx context.Context, router routers.Rout
 	}
 
 	err = openapi3filter.ValidateRequest(ctx, requestValidationInput)
-	if err != nil {
-		t.Logf("Request validation error: %v", err)
-	}
-	// Note: We don't require.NoError here because invalid requests are part of our test cases
+	require.NoError(t, err, "invalid request")
 }
 
 // responseRespectSpecs validates an HTTP response against the OpenAPI spec
@@ -275,11 +429,7 @@ func responseRespectSpecs(t *testing.T, ctx context.Context, router routers.Rout
 	responseValidationInput.SetBodyBytes(responseBody)
 
 	err = openapi3filter.ValidateResponse(ctx, responseValidationInput)
-	if err != nil {
-		t.Logf("Response validation warning: %v", err)
-		// Note: We log warnings but don't fail the test because the response might have
-		// extra fields (like Kratos-specific data) that aren't in the spec
-	}
+	require.NoError(t, err, "invalid response")
 }
 
 // sendAPIRequest sends an APIRequest to the server and returns the response
