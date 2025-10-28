@@ -39,12 +39,11 @@ func TestRegisterUser(t *testing.T) {
 		}
 	}()
 
-	server := setupTestServer(t, kratosContainer)
+	server := setupTestServer(t, getKratosURL(t.Context(), kratosContainer))
 	defer server.Close()
 
 	// Load OpenAPI spec for validation
-	ctx := context.Background()
-	doc, router := loadOpenAPISpec(t, ctx)
+	_, router := loadOpenAPISpec(t, t.Context())
 	apiReq := APIRequest{
 		Method: "POST",
 		Path:   "/api/users",
@@ -65,7 +64,7 @@ func TestRegisterUser(t *testing.T) {
 		require.NoError(t, err)
 		apiReq.Body = string(bodyJSON)
 
-		requestRespectsSpecs(t, ctx, doc, router, apiReq)
+		requestRespectsSpecs(t, t.Context(), router, apiReq)
 
 		// when
 		response := sendAPIRequest(t, server.URL, apiReq)
@@ -75,7 +74,7 @@ func TestRegisterUser(t *testing.T) {
 		assert.Equal(t, http.StatusCreated, response.StatusCode)
 
 		responseBody := readBody(t, response.Body)
-		responseRespectSpecs(t, ctx, doc, router, apiReq, response.StatusCode, response.Header, responseBody)
+		responseRespectSpecs(t, t.Context(), router, apiReq, response.StatusCode, response.Header, responseBody)
 
 		// Parse response and assert on values
 		var userResp auth.UserResponse
@@ -122,7 +121,7 @@ func TestRegisterUser(t *testing.T) {
 
 				// then
 				assert.Equal(t, http.StatusUnprocessableEntity, response.StatusCode)
-				responseRespectSpecs(t, ctx, doc, router, apiReq, response.StatusCode, response.Header, readBody(t, response.Body))
+				responseRespectSpecs(t, t.Context(), router, apiReq, response.StatusCode, response.Header, readBody(t, response.Body))
 			})
 		}
 	})
@@ -141,10 +140,10 @@ func TestRegisterUser(t *testing.T) {
 }
 
 // setupTestServer creates a test server with all auth endpoints registered
-func setupTestServer(t *testing.T, kratosContainer testcontainers.Container) *httptest.Server {
+func setupTestServer(t *testing.T, kratosURL string) *httptest.Server {
 	t.Helper()
 	mux := http.NewServeMux()
-	handler := auth.NewAuthHandler(getKratosURL(t.Context(), kratosContainer))
+	handler := auth.NewAuthHandler(kratosURL)
 	handler.RegisterUser(mux)
 	return httptest.NewServer(mux)
 }
@@ -221,7 +220,7 @@ func loadOpenAPISpec(t *testing.T, ctx context.Context) (*openapi3.T, routers.Ro
 }
 
 // requestRespectsSpecs validates an APIRequest against the OpenAPI spec
-func requestRespectsSpecs(t *testing.T, ctx context.Context, doc *openapi3.T, router routers.Router, apiReq APIRequest) {
+func requestRespectsSpecs(t *testing.T, ctx context.Context, router routers.Router, apiReq APIRequest) {
 	t.Helper()
 
 	// Create HTTP request
@@ -248,7 +247,7 @@ func requestRespectsSpecs(t *testing.T, ctx context.Context, doc *openapi3.T, ro
 }
 
 // responseRespectSpecs validates an HTTP response against the OpenAPI spec
-func responseRespectSpecs(t *testing.T, ctx context.Context, doc *openapi3.T, router routers.Router, apiReq APIRequest, statusCode int, headers http.Header, responseBody []byte) {
+func responseRespectSpecs(t *testing.T, ctx context.Context, router routers.Router, apiReq APIRequest, statusCode int, headers http.Header, responseBody []byte) {
 	t.Helper()
 
 	// Create HTTP request for context
