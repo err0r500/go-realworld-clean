@@ -30,13 +30,19 @@ type APIRequest struct {
 }
 
 // setupTestServer creates a test server with all auth endpoints registered
-func setupTestServer(t *testing.T, kratosURL string) *httptest.Server {
+func setupTestServer(t *testing.T, kratosContainer testcontainers.Container) *httptest.Server {
 	t.Helper()
+	ctx := t.Context()
+
+	kratosURL := getKratosURL(ctx, kratosContainer)
+	kratosAdminURL := getKratosAdminURL(ctx, kratosContainer)
+
 	mux := http.NewServeMux()
-	handler := auth.NewAuthHandler(kratosURL)
+	handler := auth.NewAuthHandlerWithAdmin(kratosURL, kratosAdminURL)
 	handler.RegisterUser(mux)
 	handler.Login(mux)
 	handler.GetCurrentUser(mux)
+	handler.UpdateUser(mux)
 
 	// Wrap with auth middleware to handle JWT tokens
 	return httptest.NewServer(handler.AuthMiddleware(mux))
@@ -84,6 +90,21 @@ func getKratosURL(ctx context.Context, container testcontainers.Container) strin
 	}
 
 	// External endpoint for host to access
+	return fmt.Sprintf("http://%s:%s", host, port.Port())
+}
+
+func getKratosAdminURL(ctx context.Context, container testcontainers.Container) string {
+	host, err := container.Host(ctx)
+	if err != nil {
+		log.Fatalf("Failed to get container host: %v", err)
+	}
+
+	port, err := container.MappedPort(ctx, "4434")
+	if err != nil {
+		log.Fatalf("Failed to get container admin port: %v", err)
+	}
+
+	// External endpoint for host to access admin API
 	return fmt.Sprintf("http://%s:%s", host, port.Port())
 }
 

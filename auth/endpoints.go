@@ -13,7 +13,8 @@ import (
 )
 
 type AuthHandler struct {
-	kratosClient *ory.APIClient
+	kratosClient      *ory.APIClient
+	kratosAdminClient *ory.APIClient
 }
 
 func NewAuthHandler(kratosURL string) *AuthHandler {
@@ -23,7 +24,25 @@ func NewAuthHandler(kratosURL string) *AuthHandler {
 	}
 
 	return &AuthHandler{
-		kratosClient: ory.NewAPIClient(config),
+		kratosClient:      ory.NewAPIClient(config),
+		kratosAdminClient: ory.NewAPIClient(config), // Default to same URL for backwards compatibility
+	}
+}
+
+func NewAuthHandlerWithAdmin(kratosURL, kratosAdminURL string) *AuthHandler {
+	publicConfig := ory.NewConfiguration()
+	publicConfig.Servers = ory.ServerConfigurations{
+		{URL: kratosURL},
+	}
+
+	adminConfig := ory.NewConfiguration()
+	adminConfig.Servers = ory.ServerConfigurations{
+		{URL: kratosAdminURL},
+	}
+
+	return &AuthHandler{
+		kratosClient:      ory.NewAPIClient(publicConfig),
+		kratosAdminClient: ory.NewAPIClient(adminConfig),
 	}
 }
 
@@ -231,8 +250,17 @@ func (auth AuthHandler) UpdateUser(mux *http.ServeMux) {
 
 			userInfo, _ := GetUserFromContext(r)
 
+			// Extract JWT token from Authorization header
+			token := ""
+			if authHeader := r.Header.Get("Authorization"); authHeader != "" {
+				// Format is "Token <jwt>"
+				if jwtToken, ok := strings.CutPrefix(authHeader, "Token "); ok {
+					token = jwtToken
+				}
+			}
+
 			// Fetch current identity
-			identity, _, err := auth.kratosClient.IdentityAPI.GetIdentity(r.Context(), userInfo.ID).Execute()
+			identity, _, err := auth.kratosAdminClient.IdentityAPI.GetIdentity(r.Context(), userInfo.ID).Execute()
 			if err != nil {
 				log.Printf("Failed to fetch identity: %v", err)
 				api.WriteError(w, http.StatusInternalServerError, "Failed to fetch user data")
@@ -269,7 +297,7 @@ func (auth AuthHandler) UpdateUser(mux *http.ServeMux) {
 				}
 			}
 
-			updatedIdentity, _, err := auth.kratosClient.IdentityAPI.UpdateIdentity(r.Context(), userInfo.ID).
+			updatedIdentity, _, err := auth.kratosAdminClient.IdentityAPI.UpdateIdentity(r.Context(), userInfo.ID).
 				UpdateIdentityBody(
 					ory.UpdateIdentityBody{
 						SchemaId: identity.SchemaId,
@@ -285,7 +313,7 @@ func (auth AuthHandler) UpdateUser(mux *http.ServeMux) {
 			}
 
 			// Return updated user
-			api.WriteJSON(w, http.StatusOK, UserResponse{User: IdentityToUser(updatedIdentity, "")})
+			api.WriteJSON(w, http.StatusOK, UserResponse{User: IdentityToUser(updatedIdentity, token)})
 		}))
 }
 

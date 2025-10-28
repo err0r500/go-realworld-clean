@@ -24,7 +24,7 @@ func TestGetCurrentUser(t *testing.T) {
 		}
 	}()
 
-	server := setupTestServer(t, getKratosURL(t.Context(), kratosContainer))
+	server := setupTestServer(t, kratosContainer)
 	defer server.Close()
 
 	// Load OpenAPI spec for validation
