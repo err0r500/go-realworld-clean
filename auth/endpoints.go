@@ -6,6 +6,7 @@ import (
 	"log"
 	"maps"
 	"net/http"
+	"strings"
 
 	"github.com/err0r500/go-realworld-clean/driving/api"
 	ory "github.com/ory/kratos-client-go"
@@ -196,19 +197,14 @@ func (auth AuthHandler) GetCurrentUser(mux *http.ServeMux) {
 	mux.HandleFunc("GET /api/user",
 		RequireAuth(func(w http.ResponseWriter, r *http.Request) {
 			userInfo, _ := GetUserFromContext(r)
-
-			// Fetch latest identity data from Kratos
-			identity, _, err := auth.kratosClient.IdentityAPI.GetIdentity(r.Context(), userInfo.ID).Execute()
-			if err != nil {
-				log.Printf("Failed to fetch identity: %v", err)
-				api.WriteError(w, http.StatusInternalServerError, "Failed to fetch user data")
-				return
-			}
-
-			// We don't have a session token in context when using JWT
-			// So we'll need to regenerate or use a placeholder
-			// For now, we'll return an empty token since the client already has it
-			api.WriteJSON(w, http.StatusOK, UserResponse{User: IdentityToUser(identity, "")})
+			token, _ := strings.CutPrefix(r.Header.Get("Authorization"), "Token ")
+			api.WriteJSON(w, http.StatusOK, UserResponse{User: User{
+				Email:    userInfo.Email,
+				Username: userInfo.Username,
+				Bio:      userInfo.Bio,
+				Image:    userInfo.Image,
+				Token:    token,
+			}})
 		}))
 }
 

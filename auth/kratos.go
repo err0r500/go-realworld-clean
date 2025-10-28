@@ -2,48 +2,10 @@ package auth
 
 import (
 	"context"
-	"log"
 	"os"
 
 	ory "github.com/ory/kratos-client-go"
 )
-
-var (
-	kratosClient *ory.APIClient
-	kratosURL    string
-)
-
-// InitKratos initializes the Kratos client
-func InitKratos() {
-	kratosURL = getEnvOrDefault("KRATOS_PUBLIC_URL", "http://localhost:4433")
-
-	config := ory.NewConfiguration()
-	config.Servers = ory.ServerConfigurations{
-		{URL: kratosURL},
-	}
-
-	kratosClient = ory.NewAPIClient(config)
-	log.Printf("Kratos client initialized with URL: %s", kratosURL)
-}
-
-// GetKratosClient returns the initialized Kratos client
-func GetKratosClient() *ory.APIClient {
-	if kratosClient == nil {
-		InitKratos()
-	}
-	return kratosClient
-}
-
-// validateSession validates a Kratos session and returns the session data
-func validateSession(ctx context.Context, sessionToken string) (*ory.Session, error) {
-	client := GetKratosClient()
-
-	session, _, err := client.FrontendAPI.ToSession(ctx).
-		XSessionToken(sessionToken).
-		Execute()
-
-	return session, err
-}
 
 // IdentityToUser converts a Kratos Identity to a RealWorld User
 func IdentityToUser(identity *ory.Identity, token string) User {
@@ -70,6 +32,15 @@ func IdentityToUser(identity *ory.Identity, token string) User {
 	}
 
 	return user
+}
+
+// validateSession validates a Kratos session and returns the session data
+func validateSession(ctx context.Context, sessionToken string, client *ory.APIClient) (*ory.Session, error) {
+	session, _, err := client.FrontendAPI.ToSession(ctx).
+		XSessionToken(sessionToken).
+		Execute()
+
+	return session, err
 }
 
 func getEnvOrDefault(key, defaultValue string) string {

@@ -39,10 +39,10 @@ func RequireAuth(next http.HandlerFunc) http.HandlerFunc {
 }
 
 // AuthMiddleware validates authentication via JWT Bearer token or session cookie
-func AuthMiddleware(next http.Handler) http.Handler {
+func (h *AuthHandler) AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if token, ok := strings.CutPrefix(r.Header.Get("Authorization"), "Token "); ok {
-			if user := validateJWTToken(r.Context(), token); user != nil {
+			if user := validateJWTToken(r.Context(), token, h.kratosClient); user != nil {
 				ctx := context.WithValue(r.Context(), userContextKey, user)
 				r = r.WithContext(ctx)
 				next.ServeHTTP(w, r)
@@ -56,7 +56,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 }
 
 // validateJWTToken validates a JWT token and returns user info
-func validateJWTToken(ctx context.Context, tokenString string) *UserInfo {
+func validateJWTToken(ctx context.Context, tokenString string, kratosClient *ory.APIClient) *UserInfo {
 	// Step 1: Validate JWT structure, signature, and expiry
 	claims, err := validateToken(tokenString)
 	if err != nil {
@@ -66,7 +66,7 @@ func validateJWTToken(ctx context.Context, tokenString string) *UserInfo {
 
 	// Step 2: Validate underlying Kratos session (checks for revocation)
 	// This ensures the session hasn't been revoked even if JWT is valid
-	session, err := validateSession(ctx, claims.KratosSessionToken)
+	session, err := validateSession(ctx, claims.KratosSessionToken, kratosClient)
 	if err != nil {
 		log.Printf("Kratos session validation failed: %v", err)
 		return nil
