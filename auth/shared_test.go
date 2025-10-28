@@ -1,10 +1,37 @@
+// Package auth_test provides integration tests for authentication endpoints.
+// Tests validate request/response against OpenAPI specifications and use
+// testcontainers for real Kratos integration.
+//
+// OpenAPI Validation Strategy:
+//   - All valid requests should be validated against the spec using requestRespectsSpecs
+//   - Intentionally malformed requests (invalid JSON, wrong format) may skip validation
+//     since they're designed to test error handling before reaching the spec layer
+//   - All responses should be validated using responseRespectSpecs
+//
+// Container Management:
+// Note: Each test file currently starts its own Kratos container for isolation.
+// For faster test execution, consider using TestMain to share a container:
+//
+//	func TestMain(m *testing.M) {
+//	    ctx := context.Background()
+//	    container, err := startKratosContainer(ctx)
+//	    if err != nil {
+//	        log.Fatal(err)
+//	    }
+//	    defer container.Terminate(ctx)
+//	    // Store URLs in package variables
+//	    os.Exit(m.Run())
+//	}
+//
+// Pros: 5-10x faster test execution
+// Cons: Reduced test isolation (state may leak between tests)
 package auth_test
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -16,6 +43,7 @@ import (
 	"github.com/getkin/kin-openapi/openapi3filter"
 	"github.com/getkin/kin-openapi/routers"
 	"github.com/getkin/kin-openapi/routers/gorillamux"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
@@ -34,8 +62,11 @@ func setupTestServer(t *testing.T, kratosContainer testcontainers.Container) *ht
 	t.Helper()
 	ctx := t.Context()
 
-	kratosURL := getKratosURL(ctx, kratosContainer)
-	kratosAdminURL := getKratosAdminURL(ctx, kratosContainer)
+	kratosURL, err := getKratosURL(ctx, kratosContainer)
+	require.NoError(t, err, "Failed to get Kratos URL")
+
+	kratosAdminURL, err := getKratosAdminURL(ctx, kratosContainer)
+	require.NoError(t, err, "Failed to get Kratos admin URL")
 
 	mux := http.NewServeMux()
 	handler := auth.NewAuthHandlerWithAdmin(kratosURL, kratosAdminURL)
@@ -48,7 +79,10 @@ func setupTestServer(t *testing.T, kratosContainer testcontainers.Container) *ht
 	return httptest.NewServer(handler.AuthMiddleware(mux))
 }
 
-func startKratosContainer(ctx context.Context) testcontainers.Container {
+func startKratosContainer(ctx context.Context) (testcontainers.Container, error) {
+	// Add timeout for container startup
+	ctx, cancel := context.WithTimeout(ctx, 60*time.Second)
+	defer cancel()
 	container, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
 		ContainerRequest: testcontainers.ContainerRequest{
 			Image:        "oryd/kratos:v1.3.0",
@@ -71,41 +105,40 @@ func startKratosContainer(ctx context.Context) testcontainers.Container {
 		Started: true,
 	})
 	if err != nil {
-		log.Fatal(err.Error())
+		return nil, fmt.Errorf("failed to start Kratos container: %w", err)
 	}
 
-	// External endpoint for host to access
-	return container
+	return container, nil
 }
 
-func getKratosURL(ctx context.Context, container testcontainers.Container) string {
+func getKratosURL(ctx context.Context, container testcontainers.Container) (string, error) {
 	host, err := container.Host(ctx)
 	if err != nil {
-		log.Fatalf("Failed to get container host: %v", err)
+		return "", fmt.Errorf("failed to get container host: %w", err)
 	}
 
 	port, err := container.MappedPort(ctx, "4433")
 	if err != nil {
-		log.Fatalf("Failed to get container port: %v", err)
+		return "", fmt.Errorf("failed to get container port: %w", err)
 	}
 
 	// External endpoint for host to access
-	return fmt.Sprintf("http://%s:%s", host, port.Port())
+	return fmt.Sprintf("http://%s:%s", host, port.Port()), nil
 }
 
-func getKratosAdminURL(ctx context.Context, container testcontainers.Container) string {
+func getKratosAdminURL(ctx context.Context, container testcontainers.Container) (string, error) {
 	host, err := container.Host(ctx)
 	if err != nil {
-		log.Fatalf("Failed to get container host: %v", err)
+		return "", fmt.Errorf("failed to get container host: %w", err)
 	}
 
 	port, err := container.MappedPort(ctx, "4434")
 	if err != nil {
-		log.Fatalf("Failed to get container admin port: %v", err)
+		return "", fmt.Errorf("failed to get container admin port: %w", err)
 	}
 
 	// External endpoint for host to access admin API
-	return fmt.Sprintf("http://%s:%s", host, port.Port())
+	return fmt.Sprintf("http://%s:%s", host, port.Port()), nil
 }
 
 // loadOpenAPISpec loads and validates the OpenAPI specification
@@ -250,4 +283,53 @@ func readBody(t *testing.T, body io.Reader) []byte {
 	bodyBytes, err := io.ReadAll(body)
 	require.NoError(t, err, "Failed to read response body")
 	return bodyBytes
+}
+
+// registerTestUser registers a new user and returns their token and password
+// This reduces duplication across test files that need authenticated users
+func registerTestUser(t *testing.T, baseURL, username, email string) (token string, password string) {
+	t.Helper()
+
+	password = uuid.NewString()
+	registerReq := auth.RegisterReqBody{
+		User: auth.RegisterUser{
+			Username: username,
+			Email:    email,
+			Password: password,
+		},
+	}
+
+	regBody, err := json.Marshal(registerReq)
+	require.NoError(t, err, "Failed to marshal registration request")
+
+	regResp, err := http.Post(baseURL+"/api/users", "application/json", strings.NewReader(string(regBody)))
+	require.NoError(t, err, "Failed to send registration request")
+	defer regResp.Body.Close()
+
+	require.Equal(t, http.StatusCreated, regResp.StatusCode, "Registration should succeed")
+
+	var regUserResp auth.UserResponse
+	err = json.NewDecoder(regResp.Body).Decode(&regUserResp)
+	require.NoError(t, err, "Failed to decode registration response")
+
+	return regUserResp.User.Token, password
+}
+
+// sendAuthenticatedRequest sends an authenticated HTTP request and returns response with body
+// This centralizes the pattern of sending requests with JWT tokens
+func sendAuthenticatedRequest(t *testing.T, method, url, body, token string) (*http.Response, []byte) {
+	t.Helper()
+
+	req, err := http.NewRequest(method, url, strings.NewReader(body))
+	require.NoError(t, err, "Failed to create HTTP request")
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Token "+token)
+
+	response, err := http.DefaultClient.Do(req)
+	require.NoError(t, err, "Failed to send HTTP request")
+
+	responseBody := readBody(t, response.Body)
+	response.Body.Close()
+
+	return response, responseBody
 }

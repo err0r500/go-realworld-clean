@@ -2,7 +2,6 @@ package auth_test
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 	"strings"
 	"testing"
@@ -14,10 +13,11 @@ import (
 )
 
 func TestUpdateUser(t *testing.T) {
-	kratosContainer := startKratosContainer(t.Context())
+	kratosContainer, err := startKratosContainer(t.Context())
+	require.NoError(t, err, "Failed to start Kratos container")
 	defer func() {
 		if err := kratosContainer.Terminate(t.Context()); err != nil {
-			log.Fatal("failed to stop kratos container", err)
+			t.Errorf("failed to stop kratos container: %v", err)
 		}
 	}()
 
@@ -31,51 +31,13 @@ func TestUpdateUser(t *testing.T) {
 		Path:   "/api/user",
 	}
 
-	// Register a user to get a valid token
-	registerReq := auth.RegisterReqBody{
-		User: auth.RegisterUser{
-			Username: "updateuser",
-			Email:    "update@example.com",
-			Password: uuid.NewString(),
-		},
-	}
-
-	var userToken string
-	{ // register the user and capture token
-		regBody, _ := json.Marshal(registerReq)
-		regResp, err := http.Post(server.URL+"/api/users", "application/json", strings.NewReader(string(regBody)))
-		require.NoError(t, err)
-		require.Equal(t, http.StatusCreated, regResp.StatusCode)
-
-		var regUserResp auth.UserResponse
-		require.NoError(t, json.NewDecoder(regResp.Body).Decode(&regUserResp))
-		userToken = regUserResp.User.Token
-		regResp.Body.Close()
-	}
-
-	// Helper function to send authenticated update requests
-	sendAuthenticatedUpdate := func(t *testing.T, updateBody auth.UpdateUserReqBody) (*http.Response, []byte) {
-		t.Helper()
-		bodyJSON, err := json.Marshal(updateBody)
-		require.NoError(t, err)
-
-		req, err := http.NewRequest("PUT", server.URL+"/api/user", strings.NewReader(string(bodyJSON)))
-		require.NoError(t, err)
-		req.Header.Set("Content-Type", "application/json")
-		req.Header.Set("Authorization", "Token "+userToken)
-
-		response, err := http.DefaultClient.Do(req)
-		require.NoError(t, err)
-
-		responseBody := readBody(t, response.Body)
-		response.Body.Close()
-
-		return response, responseBody
-	}
+	// Note: Not using a shared user here - each subtest creates its own user for test isolation
 
 	t.Run("update single fields", func(t *testing.T) {
 		t.Run("update email", func(t *testing.T) {
-			// given
+			// given - create dedicated user for this test
+			userToken, _ := registerTestUser(t, server.URL, "emailuser", "emailuser@example.com")
+
 			newEmail := "newemail@example.com"
 			updateBody := auth.UpdateUserReqBody{
 				User: auth.UpdateUserFields{
@@ -83,8 +45,11 @@ func TestUpdateUser(t *testing.T) {
 				},
 			}
 
+			bodyJSON, err := json.Marshal(updateBody)
+			require.NoError(t, err)
+
 			// when
-			response, responseBody := sendAuthenticatedUpdate(t, updateBody)
+			response, responseBody := sendAuthenticatedRequest(t, "PUT", server.URL+"/api/user", string(bodyJSON), userToken)
 
 			// then
 			assert.Equal(t, http.StatusOK, response.StatusCode)
@@ -94,12 +59,14 @@ func TestUpdateUser(t *testing.T) {
 			require.NoError(t, json.Unmarshal(responseBody, &userResp))
 
 			assert.Equal(t, newEmail, userResp.User.Email)
-			assert.Equal(t, registerReq.User.Username, userResp.User.Username)
+			assert.Equal(t, "emailuser", userResp.User.Username)
 			assert.Equal(t, userToken, userResp.User.Token, "Token should be returned")
 		})
 
 		t.Run("update username", func(t *testing.T) {
-			// given
+			// given - create dedicated user for this test
+			userToken, _ := registerTestUser(t, server.URL, "oldusername", "usernameuser@example.com")
+
 			newUsername := "newusername"
 			updateBody := auth.UpdateUserReqBody{
 				User: auth.UpdateUserFields{
@@ -107,8 +74,11 @@ func TestUpdateUser(t *testing.T) {
 				},
 			}
 
+			bodyJSON, err := json.Marshal(updateBody)
+			require.NoError(t, err)
+
 			// when
-			response, responseBody := sendAuthenticatedUpdate(t, updateBody)
+			response, responseBody := sendAuthenticatedRequest(t, "PUT", server.URL+"/api/user", string(bodyJSON), userToken)
 
 			// then
 			assert.Equal(t, http.StatusOK, response.StatusCode)
@@ -122,7 +92,9 @@ func TestUpdateUser(t *testing.T) {
 		})
 
 		t.Run("update bio", func(t *testing.T) {
-			// given
+			// given - create dedicated user for this test
+			userToken, _ := registerTestUser(t, server.URL, "biouser", "biouser@example.com")
+
 			newBio := "This is my new bio"
 			updateBody := auth.UpdateUserReqBody{
 				User: auth.UpdateUserFields{
@@ -130,8 +102,11 @@ func TestUpdateUser(t *testing.T) {
 				},
 			}
 
+			bodyJSON, err := json.Marshal(updateBody)
+			require.NoError(t, err)
+
 			// when
-			response, responseBody := sendAuthenticatedUpdate(t, updateBody)
+			response, responseBody := sendAuthenticatedRequest(t, "PUT", server.URL+"/api/user", string(bodyJSON), userToken)
 
 			// then
 			assert.Equal(t, http.StatusOK, response.StatusCode)
@@ -145,7 +120,9 @@ func TestUpdateUser(t *testing.T) {
 		})
 
 		t.Run("update image", func(t *testing.T) {
-			// given
+			// given - create dedicated user for this test
+			userToken, _ := registerTestUser(t, server.URL, "imageuser", "imageuser@example.com")
+
 			newImage := "https://example.com/avatar.png"
 			updateBody := auth.UpdateUserReqBody{
 				User: auth.UpdateUserFields{
@@ -153,8 +130,11 @@ func TestUpdateUser(t *testing.T) {
 				},
 			}
 
+			bodyJSON, err := json.Marshal(updateBody)
+			require.NoError(t, err)
+
 			// when
-			response, responseBody := sendAuthenticatedUpdate(t, updateBody)
+			response, responseBody := sendAuthenticatedRequest(t, "PUT", server.URL+"/api/user", string(bodyJSON), userToken)
 
 			// then
 			assert.Equal(t, http.StatusOK, response.StatusCode)
@@ -169,9 +149,11 @@ func TestUpdateUser(t *testing.T) {
 	})
 
 	t.Run("update multiple fields", func(t *testing.T) {
-		// given
+		// given - create dedicated user for this test
+		userToken, _ := registerTestUser(t, server.URL, "multiuser", "multiuser@example.com")
+
 		newEmail := "multifieldupdate@example.com"
-		newUsername := "multiuser"
+		newUsername := "updatedmultiuser"
 		newBio := "Updated bio with multiple fields"
 		newImage := "https://example.com/new-avatar.png"
 
@@ -184,8 +166,11 @@ func TestUpdateUser(t *testing.T) {
 			},
 		}
 
+		bodyJSON, err := json.Marshal(updateBody)
+		require.NoError(t, err)
+
 		// when
-		response, responseBody := sendAuthenticatedUpdate(t, updateBody)
+		response, responseBody := sendAuthenticatedRequest(t, "PUT", server.URL+"/api/user", string(bodyJSON), userToken)
 
 		// then
 		assert.Equal(t, http.StatusOK, response.StatusCode)
@@ -206,7 +191,8 @@ func TestUpdateUser(t *testing.T) {
 		updateBody := auth.UpdateUserReqBody{
 			User: auth.UpdateUserFields{},
 		}
-		bodyJSON, _ := json.Marshal(updateBody)
+		bodyJSON, err := json.Marshal(updateBody)
+		require.NoError(t, err)
 
 		// when
 		req, err := http.NewRequest("PUT", server.URL+"/api/user", strings.NewReader(string(bodyJSON)))
@@ -226,7 +212,8 @@ func TestUpdateUser(t *testing.T) {
 		updateBody := auth.UpdateUserReqBody{
 			User: auth.UpdateUserFields{},
 		}
-		bodyJSON, _ := json.Marshal(updateBody)
+		bodyJSON, err := json.Marshal(updateBody)
+		require.NoError(t, err)
 
 		// when
 		req, err := http.NewRequest("PUT", server.URL+"/api/user", strings.NewReader(string(bodyJSON)))
@@ -243,17 +230,20 @@ func TestUpdateUser(t *testing.T) {
 	})
 
 	t.Run("malformed authorization header", func(t *testing.T) {
+		// Create a user to get a real token for these tests
+		testToken, _ := registerTestUser(t, server.URL, "headeruser", "headeruser@example.com")
+
 		testCases := []struct {
 			name   string
 			header string
 		}{
 			{
 				name:   "missing Token prefix",
-				header: userToken,
+				header: testToken,
 			},
 			{
 				name:   "wrong prefix",
-				header: "Bearer " + userToken,
+				header: "Bearer " + testToken,
 			},
 		}
 
@@ -263,7 +253,8 @@ func TestUpdateUser(t *testing.T) {
 				updateBody := auth.UpdateUserReqBody{
 					User: auth.UpdateUserFields{},
 				}
-				bodyJSON, _ := json.Marshal(updateBody)
+				bodyJSON, err := json.Marshal(updateBody)
+				require.NoError(t, err)
 
 				req, err := http.NewRequest("PUT", server.URL+"/api/user", strings.NewReader(string(bodyJSON)))
 				require.NoError(t, err)
@@ -282,7 +273,10 @@ func TestUpdateUser(t *testing.T) {
 	})
 
 	t.Run("invalid request - malformed JSON", func(t *testing.T) {
-		// given
+		// given - create dedicated user for this test
+		userToken, _ := registerTestUser(t, server.URL, "jsonuser", "jsonuser@example.com")
+
+		// Intentionally malformed JSON to test error handling
 		req, err := http.NewRequest("PUT", server.URL+"/api/user", strings.NewReader(`{"user": {"email": "test@example.com"`))
 		require.NoError(t, err)
 		req.Header.Set("Content-Type", "application/json")
@@ -298,13 +292,19 @@ func TestUpdateUser(t *testing.T) {
 	})
 
 	t.Run("empty update request", func(t *testing.T) {
-		// given - no fields to update
+		// given - create dedicated user for this test
+		userToken, _ := registerTestUser(t, server.URL, "emptyuser", "emptyuser@example.com")
+
+		// No fields to update
 		updateBody := auth.UpdateUserReqBody{
 			User: auth.UpdateUserFields{},
 		}
 
+		bodyJSON, err := json.Marshal(updateBody)
+		require.NoError(t, err)
+
 		// when
-		response, responseBody := sendAuthenticatedUpdate(t, updateBody)
+		response, responseBody := sendAuthenticatedRequest(t, "PUT", server.URL+"/api/user", string(bodyJSON), userToken)
 
 		// then - should succeed with no changes
 		assert.Equal(t, http.StatusOK, response.StatusCode)
@@ -314,29 +314,9 @@ func TestUpdateUser(t *testing.T) {
 		assert.Equal(t, userToken, userResp.User.Token, "Token should be returned")
 	})
 
-	t.Run("update password and verify", func(t *testing.T) {
-		// Register a new user for this test to avoid interfering with other tests
-		newPassword := uuid.NewString()
-		testUser := auth.RegisterReqBody{
-			User: auth.RegisterUser{
-				Username: "passworduser",
-				Email:    "password@example.com",
-				Password: newPassword,
-			},
-		}
-
-		var testUserToken string
-		{ // register test user
-			regBody, _ := json.Marshal(testUser)
-			regResp, err := http.Post(server.URL+"/api/users", "application/json", strings.NewReader(string(regBody)))
-			require.NoError(t, err)
-			require.Equal(t, http.StatusCreated, regResp.StatusCode)
-
-			var regUserResp auth.UserResponse
-			require.NoError(t, json.NewDecoder(regResp.Body).Decode(&regUserResp))
-			testUserToken = regUserResp.User.Token
-			regResp.Body.Close()
-		}
+	t.Run("update password", func(t *testing.T) {
+		// given - create dedicated user for password update test
+		userToken, _ := registerTestUser(t, server.URL, "passworduser", "password@example.com")
 
 		// Update password
 		updatedPassword := uuid.NewString()
@@ -349,52 +329,96 @@ func TestUpdateUser(t *testing.T) {
 		bodyJSON, err := json.Marshal(updateBody)
 		require.NoError(t, err)
 
-		req, err := http.NewRequest("PUT", server.URL+"/api/user", strings.NewReader(string(bodyJSON)))
-		require.NoError(t, err)
-		req.Header.Set("Content-Type", "application/json")
-		req.Header.Set("Authorization", "Token "+testUserToken)
+		// when
+		response, responseBody := sendAuthenticatedRequest(t, "PUT", server.URL+"/api/user", string(bodyJSON), userToken)
 
-		response, err := http.DefaultClient.Do(req)
-		require.NoError(t, err)
+		// then
 		require.Equal(t, http.StatusOK, response.StatusCode)
-		response.Body.Close()
 
-		// Verify old password no longer works
-		t.Run("old password should not work", func(t *testing.T) {
-			loginBody := auth.LoginReqBody{
-				User: auth.LoginUser{
-					Email:    testUser.User.Email,
-					Password: newPassword, // old password
-				},
-			}
-			bodyJSON, _ := json.Marshal(loginBody)
+		var userResp auth.UserResponse
+		require.NoError(t, json.Unmarshal(responseBody, &userResp))
+		assert.Equal(t, userToken, userResp.User.Token, "Token should be returned")
 
-			resp, err := http.Post(server.URL+"/api/users/login", "application/json", strings.NewReader(string(bodyJSON)))
-			require.NoError(t, err)
-			defer resp.Body.Close()
-
-			assert.Equal(t, http.StatusUnauthorized, resp.StatusCode)
-		})
+		// Verify old password no longer works (stored in registerTestUser, but we can't retrieve it)
+		// Note: We can't test old password here because registerTestUser doesn't return it
+		// This demonstrates a limitation - consider returning password from registerTestUser if needed
 
 		// Verify new password works
-		t.Run("new password should work", func(t *testing.T) {
-			loginBody := auth.LoginReqBody{
-				User: auth.LoginUser{
-					Email:    testUser.User.Email,
-					Password: updatedPassword, // new password
-				},
-			}
-			bodyJSON, _ := json.Marshal(loginBody)
+		loginBody := auth.LoginReqBody{
+			User: auth.LoginUser{
+				Email:    "password@example.com",
+				Password: updatedPassword,
+			},
+		}
+		loginBodyJSON, err := json.Marshal(loginBody)
+		require.NoError(t, err)
 
-			resp, err := http.Post(server.URL+"/api/users/login", "application/json", strings.NewReader(string(bodyJSON)))
-			require.NoError(t, err)
-			defer resp.Body.Close()
+		loginResp, err := http.Post(server.URL+"/api/users/login", "application/json", strings.NewReader(string(loginBodyJSON)))
+		require.NoError(t, err)
+		defer loginResp.Body.Close()
 
-			assert.Equal(t, http.StatusOK, resp.StatusCode)
+		assert.Equal(t, http.StatusOK, loginResp.StatusCode, "Should be able to login with new password")
 
-			var loginResp auth.UserResponse
-			require.NoError(t, json.NewDecoder(resp.Body).Decode(&loginResp))
-			assert.NotEmpty(t, loginResp.User.Token)
-		})
+		var loginUserResp auth.UserResponse
+		require.NoError(t, json.NewDecoder(loginResp.Body).Decode(&loginUserResp))
+		assert.NotEmpty(t, loginUserResp.User.Token)
+	})
+
+	t.Run("old password fails after password update", func(t *testing.T) {
+		// given - register user with known password
+		initialPassword := uuid.NewString()
+		testEmail := "oldpasswordtest@example.com"
+
+		// Manually register to keep track of initial password
+		registerReq := auth.RegisterReqBody{
+			User: auth.RegisterUser{
+				Username: "oldpassworduser",
+				Email:    testEmail,
+				Password: initialPassword,
+			},
+		}
+
+		regBody, err := json.Marshal(registerReq)
+		require.NoError(t, err)
+
+		regResp, err := http.Post(server.URL+"/api/users", "application/json", strings.NewReader(string(regBody)))
+		require.NoError(t, err)
+		defer regResp.Body.Close()
+		require.Equal(t, http.StatusCreated, regResp.StatusCode)
+
+		var regUserResp auth.UserResponse
+		require.NoError(t, json.NewDecoder(regResp.Body).Decode(&regUserResp))
+		userToken := regUserResp.User.Token
+
+		// Update to new password
+		newPassword := uuid.NewString()
+		updateBody := auth.UpdateUserReqBody{
+			User: auth.UpdateUserFields{
+				Password: &newPassword,
+			},
+		}
+
+		updateBodyJSON, err := json.Marshal(updateBody)
+		require.NoError(t, err)
+
+		updateResp, _ := sendAuthenticatedRequest(t, "PUT", server.URL+"/api/user", string(updateBodyJSON), userToken)
+		require.Equal(t, http.StatusOK, updateResp.StatusCode)
+
+		// when - try to login with old password
+		loginBody := auth.LoginReqBody{
+			User: auth.LoginUser{
+				Email:    testEmail,
+				Password: initialPassword, // old password
+			},
+		}
+		loginBodyJSON, err := json.Marshal(loginBody)
+		require.NoError(t, err)
+
+		loginResp, err := http.Post(server.URL+"/api/users/login", "application/json", strings.NewReader(string(loginBodyJSON)))
+		require.NoError(t, err)
+		defer loginResp.Body.Close()
+
+		// then - should fail
+		assert.Equal(t, http.StatusUnauthorized, loginResp.StatusCode, "Old password should not work after update")
 	})
 }

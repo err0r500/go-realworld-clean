@@ -2,22 +2,20 @@ package auth_test
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
-	"strings"
 	"testing"
 
 	"github.com/err0r500/go-realworld-clean/auth"
-	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestLogin(t *testing.T) {
-	kratosContainer := startKratosContainer(t.Context())
+	kratosContainer, err := startKratosContainer(t.Context())
+	require.NoError(t, err, "Failed to start Kratos container")
 	defer func() {
 		if err := kratosContainer.Terminate(t.Context()); err != nil {
-			log.Fatal("failed to stop kratos container", err)
+			t.Errorf("failed to stop kratos container: %v", err)
 		}
 	}()
 
@@ -31,28 +29,16 @@ func TestLogin(t *testing.T) {
 		Path:   "/api/users/login",
 	}
 
-	registerReq := auth.RegisterReqBody{
-		User: auth.RegisterUser{
-			Username: "loginuser",
-			Email:    "login@example.com",
-			Password: uuid.NewString(),
-		},
-	}
-
-	{ // register the user
-		regBody, _ := json.Marshal(registerReq)
-		regResp, err := http.Post(server.URL+"/api/users", "application/json", strings.NewReader(string(regBody)))
-		require.NoError(t, err)
-		require.Equal(t, http.StatusCreated, regResp.StatusCode)
-		regResp.Body.Close()
-	}
+	// Register a test user for authentication tests
+	_, password := registerTestUser(t, server.URL, "loginuser", "login@example.com")
+	testEmail := "login@example.com"
 
 	t.Run("valid login request", func(t *testing.T) {
 		// given - login with registered credentials
 		loginBody := auth.LoginReqBody{
 			User: auth.LoginUser{
-				Email:    registerReq.User.Email,
-				Password: registerReq.User.Password,
+				Email:    testEmail,
+				Password: password,
 			},
 		}
 
@@ -78,7 +64,7 @@ func TestLogin(t *testing.T) {
 
 		assert.Equal(t, loginBody.User.Email, userResp.User.Email)
 		assert.NotEmpty(t, userResp.User.Token, "should return a JWT token")
-		assert.Equal(t, registerReq.User.Username, userResp.User.Username)
+		assert.Equal(t, "loginuser", userResp.User.Username)
 	})
 
 	t.Run("invalid credentials", func(t *testing.T) {
@@ -90,11 +76,11 @@ func TestLogin(t *testing.T) {
 			{
 				name:     "non-existent user",
 				email:    "nonexistent@example.com",
-				password: registerReq.User.Password,
+				password: password,
 			},
 			{
 				name:     "wrong password",
-				email:    registerReq.User.Email,
+				email:    testEmail,
 				password: "wrongpassword",
 			},
 		}
@@ -122,6 +108,7 @@ func TestLogin(t *testing.T) {
 	})
 
 	t.Run("invalid request - missing required fields", func(t *testing.T) {
+		// Note: Using raw JSON strings here to test OpenAPI validation of incomplete payloads
 		testCases := []struct {
 			name        string
 			requestBody string
@@ -151,13 +138,14 @@ func TestLogin(t *testing.T) {
 
 				// then
 				assert.Equal(t, http.StatusUnprocessableEntity, response.StatusCode)
-				responseRespectSpecs(t, t.Context(), router, apiReq, response.StatusCode, response.Header, readBody(t, response.Body))
+				responseBody := readBody(t, response.Body)
+				responseRespectSpecs(t, t.Context(), router, apiReq, response.StatusCode, response.Header, responseBody)
 			})
 		}
 	})
 
 	t.Run("invalid request - malformed JSON", func(t *testing.T) {
-		// given
+		// given - intentionally malformed JSON to test error handling
 		apiReq.Body = `{"user": {"email": "test@example.com"`
 
 		// when

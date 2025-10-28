@@ -4,23 +4,22 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
 	"testing"
 
 	"github.com/err0r500/go-realworld-clean/auth"
 	"github.com/getkin/kin-openapi/openapi3filter"
-	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestGetCurrentUser(t *testing.T) {
-	kratosContainer := startKratosContainer(t.Context())
+	kratosContainer, err := startKratosContainer(t.Context())
+	require.NoError(t, err, "Failed to start Kratos container")
 	defer func() {
 		if err := kratosContainer.Terminate(t.Context()); err != nil {
-			log.Fatal("failed to stop kratos container", err)
+			t.Errorf("failed to stop kratos container: %v", err)
 		}
 	}()
 
@@ -34,27 +33,8 @@ func TestGetCurrentUser(t *testing.T) {
 		Path:   "/api/user",
 	}
 
-	// Register a user to get a valid token
-	registerReq := auth.RegisterReqBody{
-		User: auth.RegisterUser{
-			Username: "currentuser",
-			Email:    "current@example.com",
-			Password: uuid.NewString(),
-		},
-	}
-
-	var userToken string
-	{ // register the user and capture token
-		regBody, _ := json.Marshal(registerReq)
-		regResp, err := http.Post(server.URL+"/api/users", "application/json", strings.NewReader(string(regBody)))
-		require.NoError(t, err)
-		require.Equal(t, http.StatusCreated, regResp.StatusCode)
-
-		var regUserResp auth.UserResponse
-		require.NoError(t, json.NewDecoder(regResp.Body).Decode(&regUserResp))
-		userToken = regUserResp.User.Token
-		regResp.Body.Close()
-	}
+	// Register a test user for authentication tests
+	userToken, _ := registerTestUser(t, server.URL, "currentuser", "current@example.com")
 
 	t.Run("valid request with token", func(t *testing.T) {
 		// given - validate request structure against OpenAPI spec
@@ -79,8 +59,8 @@ func TestGetCurrentUser(t *testing.T) {
 		var userResp auth.UserResponse
 		require.NoError(t, json.Unmarshal(responseBody, &userResp))
 
-		assert.Equal(t, registerReq.User.Username, userResp.User.Username)
-		assert.Equal(t, registerReq.User.Email, userResp.User.Email)
+		assert.Equal(t, "currentuser", userResp.User.Username)
+		assert.Equal(t, "current@example.com", userResp.User.Email)
 		assert.Equal(t, "", userResp.User.Bio)
 		assert.Equal(t, "", userResp.User.Image)
 		assert.Equal(t, userToken, userResp.User.Token, "Token should be returned in the response")

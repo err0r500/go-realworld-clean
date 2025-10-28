@@ -2,7 +2,6 @@ package auth_test
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 	"testing"
 
@@ -13,10 +12,11 @@ import (
 )
 
 func TestRegisterUser(t *testing.T) {
-	kratosContainer := startKratosContainer(t.Context())
+	kratosContainer, err := startKratosContainer(t.Context())
+	require.NoError(t, err, "Failed to start Kratos container")
 	defer func() {
 		if err := kratosContainer.Terminate(t.Context()); err != nil {
-			log.Fatal("failed to stop kratos container", err)
+			t.Errorf("failed to stop kratos container: %v", err)
 		}
 	}()
 
@@ -69,6 +69,7 @@ func TestRegisterUser(t *testing.T) {
 	})
 
 	t.Run("invalid request - missing required fields", func(t *testing.T) {
+		// Note: Using raw JSON strings here to test OpenAPI validation of incomplete payloads
 		testCases := []struct {
 			name        string
 			requestBody string
@@ -102,13 +103,14 @@ func TestRegisterUser(t *testing.T) {
 
 				// then
 				assert.Equal(t, http.StatusUnprocessableEntity, response.StatusCode)
-				responseRespectSpecs(t, t.Context(), router, apiReq, response.StatusCode, response.Header, readBody(t, response.Body))
+				responseBody := readBody(t, response.Body)
+				responseRespectSpecs(t, t.Context(), router, apiReq, response.StatusCode, response.Header, responseBody)
 			})
 		}
 	})
 
 	t.Run("invalid request - malformed JSON", func(t *testing.T) {
-		// given
+		// given - intentionally malformed JSON to test error handling
 		apiReq.Body = `{"user": {"username": "testuser", "email": "test@example.com"`
 
 		// when
