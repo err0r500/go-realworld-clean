@@ -158,19 +158,21 @@ func TestLogin(t *testing.T) {
 		Path:   "/api/users/login",
 	}
 
-	password := uuid.NewString()
 	registerReq := auth.RegisterReqBody{
 		User: auth.RegisterUser{
 			Username: "loginuser",
 			Email:    "login@example.com",
-			Password: password,
+			Password: uuid.NewString(),
 		},
 	}
-	regBody, _ := json.Marshal(registerReq)
-	regResp, err := http.Post(server.URL+"/api/users", "application/json", strings.NewReader(string(regBody)))
-	require.NoError(t, err)
-	require.Equal(t, http.StatusCreated, regResp.StatusCode)
-	regResp.Body.Close()
+
+	{ // register the user
+		regBody, _ := json.Marshal(registerReq)
+		regResp, err := http.Post(server.URL+"/api/users", "application/json", strings.NewReader(string(regBody)))
+		require.NoError(t, err)
+		require.Equal(t, http.StatusCreated, regResp.StatusCode)
+		regResp.Body.Close()
+	}
 
 	t.Run("valid login request", func(t *testing.T) {
 		// given - login with registered credentials
