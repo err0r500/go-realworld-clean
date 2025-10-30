@@ -2,102 +2,69 @@ package auth_test
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
 	"testing"
 
-	"github.com/err0r500/go-realworld-clean/auth"
+	"github.com/err0r500/go-realworld-clean/driving/api/testutil"
 	"github.com/getkin/kin-openapi/openapi3filter"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestGetCurrentUser(t *testing.T) {
-	kratosContainer, err := startKratosContainer(t.Context())
-	require.NoError(t, err, "Failed to start Kratos container")
-	defer func() {
-		if err := kratosContainer.Terminate(t.Context()); err != nil {
-			t.Errorf("failed to stop kratos container: %v", err)
-		}
-	}()
+	ctx := newAuthTestContext(t)
+	defer ctx.cleanup()
 
-	server := setupTestServer(t, kratosContainer)
-	defer server.Close()
-
-	// Load OpenAPI spec for validation
-	_, router := loadOpenAPISpec(t, t.Context())
-	apiReq := APIRequest{
+	apiReq := testutil.APIRequest{
 		Method: "GET",
 		Path:   "/api/user",
 	}
 
-	// Register a test user for authentication tests
-	userToken, _ := registerTestUser(t, server.URL, "currentuser", "current@example.com")
+	t.Run("valid request with token returns user", func(t *testing.T) {
+		// given
+		username := "currentuser"
+		email := "current@example.com"
+		userToken, _ := ctx.givenUserExists(username, email)
+		testutil.AuthenticatedRequestRespectsSpecs(t, t.Context(), ctx.specRouter, apiReq, userToken)
 
-	t.Run("valid request with token", func(t *testing.T) {
-		// given - validate request structure against OpenAPI spec
-		authenticatedRequestRespectsSpecs(t, t.Context(), router, apiReq, userToken)
-
-		// when - send the actual request
-		req, err := http.NewRequest(apiReq.Method, server.URL+apiReq.Path, nil)
-		require.NoError(t, err)
-		req.Header.Set("Authorization", "Token "+userToken)
-
-		response, err := http.DefaultClient.Do(req)
-		require.NoError(t, err)
+		// when
+		response := ctx.whenGettingCurrentUser(userToken)
 		defer response.Body.Close()
 
 		// then
-		assert.Equal(t, http.StatusOK, response.StatusCode)
-
-		responseBody := readBody(t, response.Body)
-		responseRespectSpecs(t, t.Context(), router, apiReq, response.StatusCode, response.Header, responseBody)
-
-		// Parse response and assert on values
-		var userResp auth.UserResponse
-		require.NoError(t, json.Unmarshal(responseBody, &userResp))
-
-		assert.Equal(t, "currentuser", userResp.User.Username)
-		assert.Equal(t, "current@example.com", userResp.User.Email)
+		userResp := assertSuccessfulGetCurrentUser(t, response)
+		assert.Equal(t, username, userResp.User.Username)
+		assert.Equal(t, email, userResp.User.Email)
 		assert.Equal(t, "", userResp.User.Bio)
 		assert.Equal(t, "", userResp.User.Image)
-		assert.Equal(t, userToken, userResp.User.Token, "Token should be returned in the response")
+		assert.Equal(t, userToken, userResp.User.Token)
+
+		ctx.ensureResponseMatchesSpec(t, apiReq, response)
 	})
 
-	t.Run("missing authorization header", func(t *testing.T) {
-		// given - request without Authorization header
-
+	t.Run("missing authorization header returns 401", func(t *testing.T) {
 		// when
-		req, err := http.NewRequest(apiReq.Method, server.URL+apiReq.Path, nil)
-		require.NoError(t, err)
-
-		response, err := http.DefaultClient.Do(req)
-		require.NoError(t, err)
+		response := ctx.whenGettingCurrentUserWithoutAuth()
 		defer response.Body.Close()
 
 		// then
-		assert.Equal(t, http.StatusUnauthorized, response.StatusCode)
+		assertUnauthorized(t, response)
 	})
 
-	t.Run("invalid token", func(t *testing.T) {
-		// given - request with invalid token
-
+	t.Run("invalid token returns 401", func(t *testing.T) {
 		// when
-		req, err := http.NewRequest(apiReq.Method, server.URL+apiReq.Path, nil)
-		require.NoError(t, err)
-		req.Header.Set("Authorization", "Token invalid-token-here")
-
-		response, err := http.DefaultClient.Do(req)
-		require.NoError(t, err)
+		response := ctx.whenGettingCurrentUserWithHeader("Token invalid-token-here")
 		defer response.Body.Close()
 
 		// then
-		assert.Equal(t, http.StatusUnauthorized, response.StatusCode)
+		assertUnauthorized(t, response)
 	})
 
-	t.Run("malformed authorization header", func(t *testing.T) {
+	t.Run("malformed authorization header returns 401", func(t *testing.T) {
+		userToken, _ := ctx.givenUserExists("headeruser", "header@example.com")
+
 		testCases := []struct {
 			name   string
 			header string
@@ -114,36 +81,25 @@ func TestGetCurrentUser(t *testing.T) {
 
 		for _, tc := range testCases {
 			t.Run(tc.name, func(t *testing.T) {
-				// given
-				req, err := http.NewRequest(apiReq.Method, server.URL+apiReq.Path, nil)
-				require.NoError(t, err)
-				req.Header.Set("Authorization", tc.header)
-
 				// when
-				response, err := http.DefaultClient.Do(req)
-				require.NoError(t, err)
+				response := ctx.whenGettingCurrentUserWithHeader(tc.header)
 				defer response.Body.Close()
 
 				// then
-				assert.Equal(t, http.StatusUnauthorized, response.StatusCode)
+				assertUnauthorized(t, response)
 			})
 		}
 	})
 
-	t.Run("openapi validation - rejects malformed auth header", func(t *testing.T) {
-		// This test demonstrates that OpenAPI validation catches malformed headers
-		// before they even reach the server
-
-		// Create request with invalid Authorization header format (missing "Token" prefix)
+	t.Run("openapi validation rejects malformed auth header", func(t *testing.T) {
+		// given - request with invalid Authorization header format
 		httpReq, err := http.NewRequest(apiReq.Method, apiReq.Path, nil)
 		require.NoError(t, err)
 		httpReq.Header.Set("Authorization", "Bearer invalid-format")
 
-		// Find matching route
-		route, pathParams, err := router.FindRoute(httpReq)
+		route, pathParams, err := ctx.specRouter.FindRoute(httpReq)
 		require.NoError(t, err)
 
-		// Configure validation options
 		options := &openapi3filter.Options{
 			AuthenticationFunc: func(ctx context.Context, input *openapi3filter.AuthenticationInput) error {
 				if input.SecuritySchemeName == "Token" {
@@ -157,7 +113,6 @@ func TestGetCurrentUser(t *testing.T) {
 			},
 		}
 
-		// Validate request - should fail
 		requestValidationInput := &openapi3filter.RequestValidationInput{
 			Request:    httpReq,
 			PathParams: pathParams,
@@ -165,7 +120,10 @@ func TestGetCurrentUser(t *testing.T) {
 			Options:    options,
 		}
 
+		// when
 		err = openapi3filter.ValidateRequest(t.Context(), requestValidationInput)
+
+		// then
 		assert.Error(t, err, "OpenAPI validation should reject malformed Authorization header")
 		assert.Contains(t, err.Error(), "invalid Authorization header format")
 	})

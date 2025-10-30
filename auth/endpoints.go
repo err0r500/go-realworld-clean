@@ -46,6 +46,11 @@ func NewAuthHandlerWithAdmin(kratosURL, kratosAdminURL string) *AuthHandler {
 	}
 }
 
+// GetKratosAdminClient returns the Kratos admin client for use in other components
+func (auth *AuthHandler) GetKratosAdminClient() *ory.APIClient {
+	return auth.kratosAdminClient
+}
+
 type RegisterUser struct {
 	Username string `json:"username"`
 	Email    string `json:"email"`

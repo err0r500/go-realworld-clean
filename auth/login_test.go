@@ -1,73 +1,51 @@
 package auth_test
 
 import (
-	"encoding/json"
-	"net/http"
 	"testing"
 
 	"github.com/err0r500/go-realworld-clean/auth"
+	"github.com/err0r500/go-realworld-clean/driving/api/testutil"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func TestLogin(t *testing.T) {
-	kratosContainer, err := startKratosContainer(t.Context())
-	require.NoError(t, err, "Failed to start Kratos container")
-	defer func() {
-		if err := kratosContainer.Terminate(t.Context()); err != nil {
-			t.Errorf("failed to stop kratos container: %v", err)
-		}
-	}()
+	ctx := newAuthTestContext(t)
+	defer ctx.cleanup()
 
-	server := setupTestServer(t, kratosContainer)
-	defer server.Close()
-
-	// Load OpenAPI spec for validation
-	_, router := loadOpenAPISpec(t, t.Context())
-	apiReq := APIRequest{
+	apiReq := testutil.APIRequest{
 		Method: "POST",
 		Path:   "/api/users/login",
 	}
 
-	// Register a test user for authentication tests
-	_, password := registerTestUser(t, server.URL, "loginuser", "login@example.com")
-	testEmail := "login@example.com"
+	t.Run("valid login returns user with token", func(t *testing.T) {
+		// given
+		username := "loginguser"
+		email := "login@example.com"
+		_, password := ctx.givenUserExists(username, email)
 
-	t.Run("valid login request", func(t *testing.T) {
-		// given - login with registered credentials
-		loginBody := auth.LoginReqBody{
+		apiReq.Body = toJSON(t, auth.LoginReqBody{
 			User: auth.LoginUser{
-				Email:    testEmail,
+				Email:    email,
 				Password: password,
 			},
-		}
-
-		bodyJSON, err := json.Marshal(loginBody)
-		require.NoError(t, err)
-		apiReq.Body = string(bodyJSON)
-
-		requestRespectsSpecs(t, t.Context(), router, apiReq)
+		})
+		ctx.ensureRequestMatchesSpec(t, apiReq)
 
 		// when
-		response := sendAPIRequest(t, server.URL, apiReq)
+		response := ctx.whenLoggingInWith(email, password)
 		defer response.Body.Close()
 
 		// then
-		assert.Equal(t, http.StatusOK, response.StatusCode)
+		userResp := assertSuccessfulLogin(t, response)
+		assert.Equal(t, email, userResp.User.Email)
+		assert.Equal(t, username, userResp.User.Username)
 
-		responseBody := readBody(t, response.Body)
-		responseRespectSpecs(t, t.Context(), router, apiReq, response.StatusCode, response.Header, responseBody)
-
-		// Parse response and assert on values
-		var userResp auth.UserResponse
-		require.NoError(t, json.Unmarshal(responseBody, &userResp))
-
-		assert.Equal(t, loginBody.User.Email, userResp.User.Email)
-		assert.NotEmpty(t, userResp.User.Token, "should return a JWT token")
-		assert.Equal(t, "loginuser", userResp.User.Username)
+		ctx.ensureResponseMatchesSpec(t, apiReq, response)
 	})
 
-	t.Run("invalid credentials", func(t *testing.T) {
+	t.Run("invalid credentials return 401", func(t *testing.T) {
+		_, password := ctx.givenUserExists("authuser", "auth@example.com")
+
 		testCases := []struct {
 			name     string
 			email    string
@@ -80,79 +58,62 @@ func TestLogin(t *testing.T) {
 			},
 			{
 				name:     "wrong password",
-				email:    testEmail,
+				email:    "auth@example.com",
 				password: "wrongpassword",
 			},
 		}
 
 		for _, tc := range testCases {
 			t.Run(tc.name, func(t *testing.T) {
-				// given
-				loginBody := auth.LoginReqBody{
-					User: auth.LoginUser{
-						Email:    tc.email,
-						Password: tc.password,
-					},
-				}
-				bodyJSON, _ := json.Marshal(loginBody)
-				apiReq.Body = string(bodyJSON)
-
 				// when
-				response := sendAPIRequest(t, server.URL, apiReq)
+				response := ctx.whenLoggingInWith(tc.email, tc.password)
 				defer response.Body.Close()
 
 				// then
-				assert.Equal(t, http.StatusUnauthorized, response.StatusCode)
+				assertUnauthorized(t, response)
 			})
 		}
 	})
 
-	t.Run("invalid request - missing required fields", func(t *testing.T) {
-		// Note: Using raw JSON strings here to test OpenAPI validation of incomplete payloads
+	t.Run("missing required fields return 422", func(t *testing.T) {
 		testCases := []struct {
-			name        string
-			requestBody string
+			name string
+			body string
 		}{
 			{
-				name:        "missing email",
-				requestBody: `{"user": {"password": "password123"}}`,
+				name: "missing email",
+				body: `{"user": {"password": "password123"}}`,
 			},
 			{
-				name:        "missing password",
-				requestBody: `{"user": {"email": "test@example.com"}}`,
+				name: "missing password",
+				body: `{"user": {"email": "test@example.com"}}`,
 			},
 			{
-				name:        "empty user object",
-				requestBody: `{"user": {}}`,
+				name: "empty user object",
+				body: `{"user": {}}`,
 			},
 		}
 
 		for _, tc := range testCases {
 			t.Run(tc.name, func(t *testing.T) {
-				// given
-				apiReq.Body = tc.requestBody
-
 				// when
-				response := sendAPIRequest(t, server.URL, apiReq)
+				response := ctx.whenLoggingInWithJSON(tc.body)
 				defer response.Body.Close()
 
 				// then
-				assert.Equal(t, http.StatusUnprocessableEntity, response.StatusCode)
-				responseBody := readBody(t, response.Body)
-				responseRespectSpecs(t, t.Context(), router, apiReq, response.StatusCode, response.Header, responseBody)
+				assertUnprocessableEntity(t, response)
+				apiReq.Body = tc.body
+				ctx.ensureResponseMatchesSpec(t, apiReq, response)
 			})
 		}
 	})
 
-	t.Run("invalid request - malformed JSON", func(t *testing.T) {
-		// given - intentionally malformed JSON to test error handling
-		apiReq.Body = `{"user": {"email": "test@example.com"`
-
+	t.Run("malformed JSON returns 400", func(t *testing.T) {
 		// when
-		response := sendAPIRequest(t, server.URL, apiReq)
+		response := ctx.whenLoggingInWithJSON(`{"user": {"email": "test@example.com"`)
 		defer response.Body.Close()
 
 		// then
-		assert.Equal(t, http.StatusBadRequest, response.StatusCode)
+		assertBadRequest(t, response)
 	})
 }

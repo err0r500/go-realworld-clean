@@ -5,3 +5,4 @@
 vendor/
 go-realworld-clean
 .old
+testdata/

@@ -117,3 +117,9 @@ func GetUserFromContext(r *http.Request) (*UserInfo, bool) {
 	}
 	return user, true
 }
+
+// SetUserInContext sets user info in context - for testing purposes only
+func SetUserInContext(r *http.Request, user *UserInfo) *http.Request {
+	ctx := context.WithValue(r.Context(), userContextKey, user)
+	return r.WithContext(ctx)
+}

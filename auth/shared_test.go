@@ -39,23 +39,13 @@ import (
 	"time"
 
 	"github.com/err0r500/go-realworld-clean/auth"
-	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/getkin/kin-openapi/openapi3filter"
+	"github.com/err0r500/go-realworld-clean/driving/api/testutil"
 	"github.com/getkin/kin-openapi/routers"
-	"github.com/getkin/kin-openapi/routers/gorillamux"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
 )
-
-// APIRequest wraps an HTTP request with its method, path, and body
-// Can be used for both OpenAPI validation and actual HTTP requests
-type APIRequest struct {
-	Method string
-	Path   string
-	Body   string // JSON string
-}
 
 // setupTestServer creates a test server with all auth endpoints registered
 func setupTestServer(t *testing.T, kratosContainer testcontainers.Container) *httptest.Server {
@@ -141,128 +131,8 @@ func getKratosAdminURL(ctx context.Context, container testcontainers.Container) 
 	return fmt.Sprintf("http://%s:%s", host, port.Port()), nil
 }
 
-// loadOpenAPISpec loads and validates the OpenAPI specification
-func loadOpenAPISpec(t *testing.T, ctx context.Context) (*openapi3.T, routers.Router) {
-	t.Helper()
-
-	// Load OpenAPI spec from file
-	loader := &openapi3.Loader{Context: ctx, IsExternalRefsAllowed: true}
-	doc, err := loader.LoadFromFile("../_specs/openapi.yml")
-	require.NoError(t, err, "Failed to load OpenAPI spec")
-
-	// Override servers to match our test implementation
-	// Our endpoints use /api prefix, so set server base path to /api
-	doc.Servers = openapi3.Servers{
-		&openapi3.Server{URL: "/api"},
-	}
-
-	// Validate the document structure
-	err = doc.Validate(ctx)
-	require.NoError(t, err, "OpenAPI document validation failed")
-
-	// Create router for matching requests to operations
-	router, err := gorillamux.NewRouter(doc)
-	require.NoError(t, err, "Failed to create OpenAPI router")
-
-	return doc, router
-}
-
-// requestRespectsSpecs validates an APIRequest against the OpenAPI spec
-func requestRespectsSpecs(t *testing.T, ctx context.Context, router routers.Router, apiReq APIRequest) {
-	t.Helper()
-
-	// Create HTTP request
-	httpReq, err := http.NewRequest(apiReq.Method, apiReq.Path, strings.NewReader(apiReq.Body))
-	require.NoError(t, err, "Failed to create HTTP request")
-	httpReq.Header.Set("Content-Type", "application/json")
-
-	validateHTTPRequest(t, ctx, router, httpReq)
-}
-
-// authenticatedRequestRespectsSpecs validates an authenticated APIRequest against the OpenAPI spec
-func authenticatedRequestRespectsSpecs(t *testing.T, ctx context.Context, router routers.Router, apiReq APIRequest, authToken string) {
-	t.Helper()
-
-	// Create HTTP request with Authorization header
-	httpReq, err := http.NewRequest(apiReq.Method, apiReq.Path, strings.NewReader(apiReq.Body))
-	require.NoError(t, err, "Failed to create HTTP request")
-	httpReq.Header.Set("Content-Type", "application/json")
-	httpReq.Header.Set("Authorization", "Token "+authToken)
-
-	validateHTTPRequest(t, ctx, router, httpReq)
-}
-
-// validateHTTPRequest validates an http.Request against the OpenAPI spec
-func validateHTTPRequest(t *testing.T, ctx context.Context, router routers.Router, httpReq *http.Request) {
-	t.Helper()
-
-	// Find matching route
-	route, pathParams, err := router.FindRoute(httpReq)
-	require.NoError(t, err, "Route not found in OpenAPI spec")
-
-	// Configure validation options with authentication handler
-	options := &openapi3filter.Options{
-		AuthenticationFunc: func(ctx context.Context, input *openapi3filter.AuthenticationInput) error {
-			// Validate Token security scheme (apiKey in Authorization header)
-			if input.SecuritySchemeName == "Token" {
-				authHeader := input.RequestValidationInput.Request.Header.Get("Authorization")
-				// Check that header has format "Token <value>"
-				if !strings.HasPrefix(authHeader, "Token ") {
-					return fmt.Errorf("invalid Authorization header format, expected 'Token <jwt>'")
-				}
-				// Structure is valid - actual token validation happens in middleware
-				return nil
-			}
-			return fmt.Errorf("unknown security scheme: %s", input.SecuritySchemeName)
-		},
-	}
-
-	// Validate request
-	requestValidationInput := &openapi3filter.RequestValidationInput{
-		Request:    httpReq,
-		PathParams: pathParams,
-		Route:      route,
-		Options:    options,
-	}
-
-	err = openapi3filter.ValidateRequest(ctx, requestValidationInput)
-	require.NoError(t, err, "invalid request")
-}
-
-// responseRespectSpecs validates an HTTP response against the OpenAPI spec
-func responseRespectSpecs(t *testing.T, ctx context.Context, router routers.Router, apiReq APIRequest, statusCode int, headers http.Header, responseBody []byte) {
-	t.Helper()
-
-	// Create HTTP request for context
-	httpReq, err := http.NewRequest(apiReq.Method, apiReq.Path, strings.NewReader(apiReq.Body))
-	require.NoError(t, err, "Failed to create HTTP request")
-	httpReq.Header.Set("Content-Type", "application/json")
-
-	// Find matching route
-	route, pathParams, err := router.FindRoute(httpReq)
-	require.NoError(t, err, "Route not found in OpenAPI spec")
-
-	// Create request validation input
-	requestValidationInput := &openapi3filter.RequestValidationInput{
-		Request:    httpReq,
-		PathParams: pathParams,
-		Route:      route,
-	}
-
-	// Validate response
-	responseValidationInput := &openapi3filter.ResponseValidationInput{
-		RequestValidationInput: requestValidationInput,
-		Status:                 statusCode,
-		Header:                 headers,
-	}
-	responseValidationInput.SetBodyBytes(responseBody)
-
-	err = openapi3filter.ValidateResponse(ctx, responseValidationInput)
-	require.NoError(t, err, "invalid response")
-}
-
 // sendAPIRequest sends an APIRequest to the server and returns the response
-func sendAPIRequest(t *testing.T, baseURL string, apiReq APIRequest) *http.Response {
+func sendAPIRequest(t *testing.T, baseURL string, apiReq testutil.APIRequest) *http.Response {
 	t.Helper()
 
 	// Create and send request
@@ -331,5 +201,362 @@ func sendAuthenticatedRequest(t *testing.T, method, url, body, token string) (*h
 	responseBody := readBody(t, response.Body)
 	response.Body.Close()
 
+	// Restore the body so it can be read again (e.g., for validation)
+	response.Body = io.NopCloser(strings.NewReader(string(responseBody)))
+
 	return response, responseBody
+}
+
+func toJSON(t *testing.T, any any) string {
+	bodyJSON, err := json.Marshal(any)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return string(bodyJSON)
+}
+
+// authTestContext manages test server, container, and OpenAPI validation
+type authTestContext struct {
+	t          *testing.T
+	server     *httptest.Server
+	container  testcontainers.Container
+	specRouter routers.Router
+}
+
+// newAuthTestContext creates a new test context with Kratos container and server
+func newAuthTestContext(t *testing.T) *authTestContext {
+	t.Helper()
+
+	kratosContainer, err := startKratosContainer(t.Context())
+	require.NoError(t, err, "Failed to start Kratos container")
+
+	server := setupTestServer(t, kratosContainer)
+	_, specRouter := testutil.LoadOpenAPISpec(t, t.Context(), "../_specs/openapi.yml")
+
+	return &authTestContext{
+		t:          t,
+		server:     server,
+		container:  kratosContainer,
+		specRouter: specRouter,
+	}
+}
+
+// cleanup closes server and terminates container
+func (ctx *authTestContext) cleanup() {
+	ctx.server.Close()
+	if err := ctx.container.Terminate(ctx.t.Context()); err != nil {
+		ctx.t.Errorf("failed to stop kratos container: %v", err)
+	}
+}
+
+// givenUserExists registers a user and returns their token and password
+func (ctx *authTestContext) givenUserExists(username, email string) (token, password string) {
+	ctx.t.Helper()
+	return registerTestUser(ctx.t, ctx.server.URL, username, email)
+}
+
+// whenGettingCurrentUser sends GET /api/user request
+func (ctx *authTestContext) whenGettingCurrentUser(token string) *http.Response {
+	ctx.t.Helper()
+
+	req, err := http.NewRequest("GET", ctx.server.URL+"/api/user", nil)
+	require.NoError(ctx.t, err)
+	req.Header.Set("Authorization", "Token "+token)
+
+	response, err := http.DefaultClient.Do(req)
+	require.NoError(ctx.t, err)
+
+	return response
+}
+
+// whenGettingCurrentUserWithoutAuth sends GET /api/user without auth header
+func (ctx *authTestContext) whenGettingCurrentUserWithoutAuth() *http.Response {
+	ctx.t.Helper()
+
+	req, err := http.NewRequest("GET", ctx.server.URL+"/api/user", nil)
+	require.NoError(ctx.t, err)
+
+	response, err := http.DefaultClient.Do(req)
+	require.NoError(ctx.t, err)
+
+	return response
+}
+
+// whenGettingCurrentUserWithHeader sends GET /api/user with custom auth header
+func (ctx *authTestContext) whenGettingCurrentUserWithHeader(authHeader string) *http.Response {
+	ctx.t.Helper()
+
+	req, err := http.NewRequest("GET", ctx.server.URL+"/api/user", nil)
+	require.NoError(ctx.t, err)
+	req.Header.Set("Authorization", authHeader)
+
+	response, err := http.DefaultClient.Do(req)
+	require.NoError(ctx.t, err)
+
+	return response
+}
+
+// whenLoggingInWith sends POST /api/users/login request
+func (ctx *authTestContext) whenLoggingInWith(email, password string) *http.Response {
+	ctx.t.Helper()
+
+	loginBody := auth.LoginReqBody{
+		User: auth.LoginUser{
+			Email:    email,
+			Password: password,
+		},
+	}
+
+	bodyJSON, err := json.Marshal(loginBody)
+	require.NoError(ctx.t, err)
+
+	response, err := http.Post(ctx.server.URL+"/api/users/login", "application/json", strings.NewReader(string(bodyJSON)))
+	require.NoError(ctx.t, err)
+
+	return response
+}
+
+// whenLoggingInWithJSON sends POST /api/users/login with raw JSON
+func (ctx *authTestContext) whenLoggingInWithJSON(jsonBody string) *http.Response {
+	ctx.t.Helper()
+
+	response, err := http.Post(ctx.server.URL+"/api/users/login", "application/json", strings.NewReader(jsonBody))
+	require.NoError(ctx.t, err)
+
+	return response
+}
+
+// whenRegisteringWith sends POST /api/users request
+func (ctx *authTestContext) whenRegisteringWith(username, email, password string) *http.Response {
+	ctx.t.Helper()
+
+	reqBody := auth.RegisterReqBody{
+		User: auth.RegisterUser{
+			Username: username,
+			Email:    email,
+			Password: password,
+		},
+	}
+
+	bodyJSON, err := json.Marshal(reqBody)
+	require.NoError(ctx.t, err)
+
+	response, err := http.Post(ctx.server.URL+"/api/users", "application/json", strings.NewReader(string(bodyJSON)))
+	require.NoError(ctx.t, err)
+
+	return response
+}
+
+// whenRegisteringWithJSON sends POST /api/users with raw JSON
+func (ctx *authTestContext) whenRegisteringWithJSON(jsonBody string) *http.Response {
+	ctx.t.Helper()
+
+	response, err := http.Post(ctx.server.URL+"/api/users", "application/json", strings.NewReader(jsonBody))
+	require.NoError(ctx.t, err)
+
+	return response
+}
+
+// updateUserBuilder builds update user requests fluently
+type updateUserBuilder struct {
+	ctx    *authTestContext
+	token  string
+	fields auth.UpdateUserFields
+}
+
+// whenUpdatingUser starts building an update user request
+func (ctx *authTestContext) whenUpdatingUser(token string) *updateUserBuilder {
+	return &updateUserBuilder{
+		ctx:   ctx,
+		token: token,
+	}
+}
+
+func (b *updateUserBuilder) withEmail(email string) *updateUserBuilder {
+	b.fields.Email = &email
+	return b
+}
+
+func (b *updateUserBuilder) withUsername(username string) *updateUserBuilder {
+	b.fields.Username = &username
+	return b
+}
+
+func (b *updateUserBuilder) withBio(bio string) *updateUserBuilder {
+	b.fields.Bio = &bio
+	return b
+}
+
+func (b *updateUserBuilder) withImage(image string) *updateUserBuilder {
+	b.fields.Image = &image
+	return b
+}
+
+func (b *updateUserBuilder) withPassword(password string) *updateUserBuilder {
+	b.fields.Password = &password
+	return b
+}
+
+func (b *updateUserBuilder) send() *http.Response {
+	b.ctx.t.Helper()
+
+	updateBody := auth.UpdateUserReqBody{User: b.fields}
+	bodyJSON, err := json.Marshal(updateBody)
+	require.NoError(b.ctx.t, err)
+
+	req, err := http.NewRequest("PUT", b.ctx.server.URL+"/api/user", strings.NewReader(string(bodyJSON)))
+	require.NoError(b.ctx.t, err)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Token "+b.token)
+
+	response, err := http.DefaultClient.Do(req)
+	require.NoError(b.ctx.t, err)
+
+	return response
+}
+
+// whenUpdatingUserWithoutAuth sends PUT /api/user without auth
+func (ctx *authTestContext) whenUpdatingUserWithoutAuth(fields auth.UpdateUserFields) *http.Response {
+	ctx.t.Helper()
+
+	updateBody := auth.UpdateUserReqBody{User: fields}
+	bodyJSON, err := json.Marshal(updateBody)
+	require.NoError(ctx.t, err)
+
+	req, err := http.NewRequest("PUT", ctx.server.URL+"/api/user", strings.NewReader(string(bodyJSON)))
+	require.NoError(ctx.t, err)
+	req.Header.Set("Content-Type", "application/json")
+
+	response, err := http.DefaultClient.Do(req)
+	require.NoError(ctx.t, err)
+
+	return response
+}
+
+// whenUpdatingUserWithHeader sends PUT /api/user with custom auth header
+func (ctx *authTestContext) whenUpdatingUserWithHeader(authHeader string, fields auth.UpdateUserFields) *http.Response {
+	ctx.t.Helper()
+
+	updateBody := auth.UpdateUserReqBody{User: fields}
+	bodyJSON, err := json.Marshal(updateBody)
+	require.NoError(ctx.t, err)
+
+	req, err := http.NewRequest("PUT", ctx.server.URL+"/api/user", strings.NewReader(string(bodyJSON)))
+	require.NoError(ctx.t, err)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", authHeader)
+
+	response, err := http.DefaultClient.Do(req)
+	require.NoError(ctx.t, err)
+
+	return response
+}
+
+// whenUpdatingUserWithJSON sends PUT /api/user with raw JSON
+func (ctx *authTestContext) whenUpdatingUserWithJSON(token, jsonBody string) *http.Response {
+	ctx.t.Helper()
+
+	req, err := http.NewRequest("PUT", ctx.server.URL+"/api/user", strings.NewReader(jsonBody))
+	require.NoError(ctx.t, err)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Token "+token)
+
+	response, err := http.DefaultClient.Do(req)
+	require.NoError(ctx.t, err)
+
+	return response
+}
+
+// Assertion helpers
+
+func assertSuccessfulLogin(t *testing.T, resp *http.Response) auth.UserResponse {
+	t.Helper()
+	require.Equal(t, http.StatusOK, resp.StatusCode)
+
+	bodyBytes := readBody(t, resp.Body)
+	var userResp auth.UserResponse
+	err := json.Unmarshal(bodyBytes, &userResp)
+	require.NoError(t, err)
+	require.NotEmpty(t, userResp.User.Token)
+
+	// Restore body for later reads
+	resp.Body = io.NopCloser(strings.NewReader(string(bodyBytes)))
+
+	return userResp
+}
+
+func assertSuccessfulRegistration(t *testing.T, resp *http.Response) auth.UserResponse {
+	t.Helper()
+	require.Equal(t, http.StatusCreated, resp.StatusCode)
+
+	bodyBytes := readBody(t, resp.Body)
+	var userResp auth.UserResponse
+	err := json.Unmarshal(bodyBytes, &userResp)
+	require.NoError(t, err)
+	require.NotEmpty(t, userResp.User.Token)
+
+	// Restore body for later reads
+	resp.Body = io.NopCloser(strings.NewReader(string(bodyBytes)))
+
+	return userResp
+}
+
+func assertSuccessfulUpdate(t *testing.T, resp *http.Response) auth.UserResponse {
+	t.Helper()
+	require.Equal(t, http.StatusOK, resp.StatusCode)
+
+	bodyBytes := readBody(t, resp.Body)
+	var userResp auth.UserResponse
+	err := json.Unmarshal(bodyBytes, &userResp)
+	require.NoError(t, err)
+	require.NotEmpty(t, userResp.User.Token)
+
+	// Restore body for later reads
+	resp.Body = io.NopCloser(strings.NewReader(string(bodyBytes)))
+
+	return userResp
+}
+
+func assertSuccessfulGetCurrentUser(t *testing.T, resp *http.Response) auth.UserResponse {
+	t.Helper()
+	require.Equal(t, http.StatusOK, resp.StatusCode)
+
+	bodyBytes := readBody(t, resp.Body)
+	var userResp auth.UserResponse
+	err := json.Unmarshal(bodyBytes, &userResp)
+	require.NoError(t, err)
+	require.NotEmpty(t, userResp.User.Token)
+
+	// Restore body for later reads
+	resp.Body = io.NopCloser(strings.NewReader(string(bodyBytes)))
+
+	return userResp
+}
+
+func assertUnauthorized(t *testing.T, resp *http.Response) {
+	t.Helper()
+	require.Equal(t, http.StatusUnauthorized, resp.StatusCode)
+}
+
+func assertBadRequest(t *testing.T, resp *http.Response) {
+	t.Helper()
+	require.Equal(t, http.StatusBadRequest, resp.StatusCode)
+}
+
+func assertUnprocessableEntity(t *testing.T, resp *http.Response) {
+	t.Helper()
+	require.Equal(t, http.StatusUnprocessableEntity, resp.StatusCode)
+}
+
+// ensureResponseMatchesSpec validates response against OpenAPI spec
+func (ctx *authTestContext) ensureResponseMatchesSpec(t *testing.T, apiReq testutil.APIRequest, resp *http.Response) {
+	t.Helper()
+	cloned := testutil.CloneResponse(t, resp)
+	testutil.EnsureRespMatchesSpecs(t, t.Context(), ctx.specRouter, apiReq, cloned)
+}
+
+// ensureRequestMatchesSpec validates request against OpenAPI spec
+func (ctx *authTestContext) ensureRequestMatchesSpec(t *testing.T, apiReq testutil.APIRequest) {
+	t.Helper()
+	testutil.EnsureReqMatchesSpecs(t, t.Context(), ctx.specRouter, apiReq)
 }
