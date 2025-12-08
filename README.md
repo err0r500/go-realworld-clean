@@ -1,7 +1,18 @@
-# ![RealWorld Example App](https://github.com/gothinkster/realworld-starter-kit/raw/master/logo.png)
+\# start_shameless_plug
 
-> ### Golang clean-architecture codebase containing real world examples (CRUD, auth, advanced patterns, etc) that adheres to the [RealWorld](https://github.com/gothinkster/realworld) spec and API.
+<p align="center">
+  <img src="https://yolocorp.dev/images/logo-68f0450b27f557f6f4ec8db77f833603.png?vsn=d$0" width="120" />
+</p>
 
+[YOLO Corp](https://yolocorp.dev) is a developer challenge platform where you design backends your way through multi-episode projects with persistent data, drifting requirements, and a corporate fever-dream storyline.
+
+Think LeetCode × real-world production × text adventure × The Office.
+
+\# end_shameless_plug
+
+---
+
+# Golang clean-architecture codebase containing real world examples (CRUD, auth, advanced patterns, etc) that adheres to the [RealWorld](https://github.com/gothinkster/realworld) spec and API.
 
 ### [Demo](https://github.com/gothinkster/realworld)&nbsp;&nbsp;&nbsp;&nbsp;[RealWorld](https://github.com/gothinkster/realworld)
 
