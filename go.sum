@@ -102,8 +102,8 @@ gopkg.in/go-playground/assert.v1 v1.2.1 h1:xoYuJVE7KT85PYWrN730RguIQO0ePzVRfFMXa
 gopkg.in/go-playground/assert.v1 v1.2.1/go.mod h1:9RXL0bg/zibRAgZUYszZSwO/z8Y/a8bDuhia5mkpMnE=
 gopkg.in/go-playground/validator.v8 v8.18.1 h1:F8SLY5Vqesjs1nI1EL4qmF1PQZ1sitsmq0rPYXLyfGU=
 gopkg.in/go-playground/validator.v8 v8.18.1/go.mod h1:RX2a/7Ha8BgOhfk7j780h4/u/RRjR0eouCJSH80/M2Y=
-gopkg.in/h2non/baloo.v3 v3.0.0 h1:Vn8PzGNgtGe5/OOcu+UMfn9PxMi5bdK/nr/t4c7uSoM=
-gopkg.in/h2non/baloo.v3 v3.0.0/go.mod h1:1NAP2GLsXL5zrP+vpx48D+is9nc7zl5fBpMqPp/JEzA=
+gopkg.in/h2non/baloo.v3 v3.1.0 h1:mYB3I+Vc5+KLFba1KXJgRzv1hNH2RGQZ8V9t3z8+f8Y=
+gopkg.in/h2non/baloo.v3 v3.1.0/go.mod h1:1NAP2GLsXL5zrP+vpx48D+is9nc7zl5fBpMqPp/JEzA=
 gopkg.in/h2non/gentleman.v2 v2.0.3 h1:exsUPKJDFwNjJykboVj8+BKPWMNOxR/AmPL3f7Hutwo=
 gopkg.in/h2non/gentleman.v2 v2.0.3/go.mod h1:A1c7zwrTgAyyf6AbpvVksYtBayTB4STBUGmdkEtlHeA=
 gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7 h1:uRGJdciOHaEIrze2W8Q3AKkepLTh2hOroT7a+7czfdQ=

@@ -43,6 +43,6 @@ require (
 	gopkg.in/gemnasium/logrus-airbrake-hook.v2 v2.1.2 // indirect
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 	gopkg.in/go-playground/validator.v8 v8.18.1 // indirect
-	gopkg.in/h2non/baloo.v3 v3.0.0
+	gopkg.in/h2non/baloo.v3 v3.1.0
 	gopkg.in/h2non/gentleman.v2 v2.0.3 // indirect
 )
